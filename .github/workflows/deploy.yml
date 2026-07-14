@@ -1,4 +1,4 @@
-name: Deploy Shambua Sante
+name: Deploy Shambua Sante Backend
 
 on:
   push:
@@ -20,20 +20,16 @@ jobs:
           script: |
             cd /home/github-deployer/apps/gestion-hopital
             
-            # Initialiser le dépôt s'il n'est pas là, sinon tirer les changements
+            # Initialiser le dépôt du backend s'il n'est pas là, sinon tirer les changements
             if [ ! -d ".git" ]; then
               git clone https://github.com/${{ github.repository }}.git .
             else
               git fetch --all
               git reset --hard origin/main
             fi
-            
-            # Recréer le fichier .env de production (Étape 4)
-            cp .env.production .env 2>/dev/null || true
 
-            # Lancer l'application
-            docker compose down
+            # Lancer les conteneurs du Backend (MySQL, Rabbit, Redis, SpringBoot)
             docker compose up -d --build
             
-            # Nettoyer les anciennes images pour ne pas remplir le disque du VPS
+            # Nettoyer les anciennes images
             docker image prune -f
