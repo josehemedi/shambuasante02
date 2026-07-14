@@ -1,0 +1,519 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports"
+              xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+              xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd"
+              name="Ordonnance"
+              pageWidth="595"
+              pageHeight="842"
+              columnWidth="555"
+              leftMargin="20"
+              rightMargin="20"
+              topMargin="18"
+              bottomMargin="18"
+              uuid="c3000001-ord1-4a01-9f01-ordonnancepro01">
+
+    <parameter name="NOM_HOPITAL" class="java.lang.String"/>
+    <parameter name="LOGO_HOPITAL" class="java.io.InputStream"/>
+    <parameter name="ID_TENANT" class="java.lang.String">
+        <defaultValueExpression><![CDATA["—"]]></defaultValueExpression>
+    </parameter>
+    <parameter name="SOUS_DOMAINE" class="java.lang.String">
+        <defaultValueExpression><![CDATA["—"]]></defaultValueExpression>
+    </parameter>
+    <parameter name="INFOS_ETABLISSEMENT" class="java.lang.String">
+        <defaultValueExpression><![CDATA["—"]]></defaultValueExpression>
+    </parameter>
+    <parameter name="TELEPHONE_HOPITAL" class="java.lang.String">
+        <defaultValueExpression><![CDATA["—"]]></defaultValueExpression>
+    </parameter>
+    <parameter name="EMAIL_HOPITAL" class="java.lang.String">
+        <defaultValueExpression><![CDATA["—"]]></defaultValueExpression>
+    </parameter>
+    <parameter name="NOM_PATIENT" class="java.lang.String"/>
+    <parameter name="AGE_PATIENT" class="java.lang.String">
+        <defaultValueExpression><![CDATA["—"]]></defaultValueExpression>
+    </parameter>
+    <parameter name="SEXE_PATIENT" class="java.lang.String">
+        <defaultValueExpression><![CDATA["—"]]></defaultValueExpression>
+    </parameter>
+    <parameter name="CODE_PATIENT" class="java.lang.String">
+        <defaultValueExpression><![CDATA["—"]]></defaultValueExpression>
+    </parameter>
+    <parameter name="NOM_MEDECIN" class="java.lang.String"/>
+    <parameter name="SPECIALITE_MEDECIN" class="java.lang.String">
+        <defaultValueExpression><![CDATA["—"]]></defaultValueExpression>
+    </parameter>
+    <parameter name="NUMERO_ORDRE_MEDECIN" class="java.lang.String">
+        <defaultValueExpression><![CDATA["—"]]></defaultValueExpression>
+    </parameter>
+    <parameter name="TELEPHONE_MEDECIN" class="java.lang.String">
+        <defaultValueExpression><![CDATA["—"]]></defaultValueExpression>
+    </parameter>
+    <parameter name="DATE_PRESCRIPTION" class="java.util.Date"/>
+    <parameter name="DATE_PRESCRIPTION_TEXTE" class="java.lang.String">
+        <defaultValueExpression><![CDATA["—"]]></defaultValueExpression>
+    </parameter>
+    <parameter name="REF_ORDONNANCE" class="java.lang.String"/>
+    <parameter name="STATUT_ORDONNANCE" class="java.lang.String">
+        <defaultValueExpression><![CDATA["ACTIVE"]]></defaultValueExpression>
+    </parameter>
+    <parameter name="DIAGNOSTIC" class="java.lang.String">
+        <defaultValueExpression><![CDATA["—"]]></defaultValueExpression>
+    </parameter>
+    <parameter name="contenuOrdonnance" class="java.lang.String"/>
+    <parameter name="OBSERVATIONS" class="java.lang.String">
+        <defaultValueExpression><![CDATA["—"]]></defaultValueExpression>
+    </parameter>
+    <parameter name="DATE_EXPIRATION" class="java.lang.String">
+        <defaultValueExpression><![CDATA["—"]]></defaultValueExpression>
+    </parameter>
+    <parameter name="QR_CODE_IMAGE" class="java.awt.image.BufferedImage"/>
+    <parameter name="QR_CODE_TEXTE" class="java.lang.String">
+        <defaultValueExpression><![CDATA["—"]]></defaultValueExpression>
+    </parameter>
+    <parameter name="MENTIONS_LEGALES" class="java.lang.String">
+        <defaultValueExpression><![CDATA["Document médical confidentiel. Usage réservé au patient nommé et au professionnel de santé destinataire. Falsification interdite."]]></defaultValueExpression>
+    </parameter>
+
+    <!-- ========== EN-TÊTE ÉTABLISSEMENT ========== -->
+    <title>
+        <band height="148" splitType="Stretch">
+            <!-- Bandeau supérieur teal -->
+            <rectangle>
+                <reportElement mode="Opaque" x="0" y="0" width="555" height="6" backcolor="#0F766E" forecolor="#0F766E" uuid="c3000002-0002-4002-8002-000000000002"/>
+                <graphicElement>
+                    <pen lineWidth="0.0"/>
+                </graphicElement>
+            </rectangle>
+
+            <image onErrorType="Blank" hAlign="Center" vAlign="Middle">
+                <reportElement x="8" y="16" width="56" height="56" uuid="c3000003-0003-4003-8003-000000000003"/>
+                <box>
+                    <pen lineWidth="0.5" lineColor="#CCFBF1"/>
+                </box>
+                <imageExpression><![CDATA[$P{LOGO_HOPITAL}]]></imageExpression>
+            </image>
+
+            <textField>
+                <reportElement x="74" y="14" width="320" height="22" forecolor="#0F766E" uuid="c3000004-0004-4004-8004-000000000004"/>
+                <textElement verticalAlignment="Middle">
+                    <font size="16" isBold="true"/>
+                </textElement>
+                <textFieldExpression><![CDATA[$P{NOM_HOPITAL} != null ? $P{NOM_HOPITAL} : "Shambua Santé"]]></textFieldExpression>
+            </textField>
+
+            <textField>
+                <reportElement x="74" y="36" width="320" height="12" forecolor="#64748B" uuid="c3000005-0005-4005-8005-000000000005"/>
+                <textElement>
+                    <font size="8"/>
+                </textElement>
+                <textFieldExpression><![CDATA[$P{INFOS_ETABLISSEMENT} != null ? $P{INFOS_ETABLISSEMENT} : "—"]]></textFieldExpression>
+            </textField>
+
+            <textField>
+                <reportElement x="74" y="50" width="320" height="12" forecolor="#64748B" uuid="c3000006-0006-4006-8006-000000000006"/>
+                <textElement>
+                    <font size="8"/>
+                </textElement>
+                <textFieldExpression><![CDATA["Tél. " + ($P{TELEPHONE_HOPITAL} != null ? $P{TELEPHONE_HOPITAL} : "—") + "  ·  " + ($P{EMAIL_HOPITAL} != null ? $P{EMAIL_HOPITAL} : "—")]]></textFieldExpression>
+            </textField>
+
+            <textField>
+                <reportElement x="74" y="64" width="320" height="11" forecolor="#94A3B8" uuid="c3000007-0007-4007-8007-000000000007"/>
+                <textElement>
+                    <font size="7" isItalic="true"/>
+                </textElement>
+                <textFieldExpression><![CDATA["Établissement SaaS · Tenant #" + ($P{ID_TENANT} != null ? $P{ID_TENANT} : "—") + " · " + ($P{SOUS_DOMAINE} != null ? $P{SOUS_DOMAINE} : "—")]]></textFieldExpression>
+            </textField>
+
+            <!-- Bloc QR en-tête -->
+            <rectangle>
+                <reportElement mode="Opaque" x="408" y="12" width="147" height="68" backcolor="#F0FDFA" forecolor="#99F6E4" uuid="c3000008-0008-4008-8008-000000000008"/>
+                <graphicElement>
+                    <pen lineWidth="0.75" lineColor="#5EEAD4"/>
+                </graphicElement>
+            </rectangle>
+            <image onErrorType="Blank" hAlign="Center" vAlign="Middle">
+                <reportElement x="438" y="16" width="88" height="48" uuid="c3000009-0009-4009-8009-000000000009"/>
+                <imageExpression><![CDATA[$P{QR_CODE_IMAGE}]]></imageExpression>
+            </image>
+            <staticText>
+                <reportElement x="408" y="66" width="147" height="12" forecolor="#0F766E" uuid="c3000010-0010-4010-8010-000000000010"/>
+                <textElement textAlignment="Center" verticalAlignment="Middle">
+                    <font size="6" isBold="true"/>
+                </textElement>
+                <text><![CDATA[Authentification numérique]]></text>
+            </staticText>
+
+            <!-- Titre document -->
+            <rectangle>
+                <reportElement mode="Opaque" x="0" y="92" width="555" height="42" backcolor="#0F766E" forecolor="#0F766E" uuid="c3000011-0011-4011-8011-000000000011"/>
+                <graphicElement>
+                    <pen lineWidth="0.0"/>
+                </graphicElement>
+            </rectangle>
+            <staticText>
+                <reportElement x="12" y="96" width="380" height="18" forecolor="#FFFFFF" uuid="c3000012-0012-4012-8012-000000000012"/>
+                <textElement verticalAlignment="Middle">
+                    <font size="13" isBold="true"/>
+                </textElement>
+                <text><![CDATA[ORDONNANCE MÉDICALE OFFICIELLE]]></text>
+            </staticText>
+            <textField>
+                <reportElement x="12" y="114" width="380" height="14" forecolor="#CCFBF1" uuid="c3000013-0013-4013-8013-000000000013"/>
+                <textElement>
+                    <font size="8"/>
+                </textElement>
+                <textFieldExpression><![CDATA["Référence " + ($P{REF_ORDONNANCE} != null ? $P{REF_ORDONNANCE} : "—") + "  ·  Statut " + ($P{STATUT_ORDONNANCE} != null ? $P{STATUT_ORDONNANCE} : "ACTIVE") + "  ·  Émise le " + ($P{DATE_PRESCRIPTION_TEXTE} != null ? $P{DATE_PRESCRIPTION_TEXTE} : "—")]]></textFieldExpression>
+            </textField>
+            <staticText>
+                <reportElement x="400" y="100" width="143" height="26" forecolor="#FFFFFF" uuid="c3000014-0014-4014-8014-000000000014"/>
+                <textElement textAlignment="Right" verticalAlignment="Middle">
+                    <font size="8" isBold="true"/>
+                </textElement>
+                <text><![CDATA[Document original]]></text>
+            </staticText>
+        </band>
+    </title>
+
+    <!-- ========== PATIENT / MÉDECIN ========== -->
+    <pageHeader>
+        <band height="112" splitType="Stretch">
+            <!-- Patient -->
+            <rectangle>
+                <reportElement mode="Transparent" x="0" y="4" width="270" height="100" uuid="c3000015-0015-4015-8015-000000000015"/>
+                <graphicElement>
+                    <pen lineWidth="0.6" lineColor="#CBD5E1"/>
+                </graphicElement>
+            </rectangle>
+            <rectangle>
+                <reportElement mode="Opaque" x="0" y="4" width="5" height="100" backcolor="#0F766E" forecolor="#0F766E" uuid="c3000016-0016-4016-8016-000000000016"/>
+                <graphicElement>
+                    <pen lineWidth="0.0"/>
+                </graphicElement>
+            </rectangle>
+            <staticText>
+                <reportElement mode="Opaque" x="5" y="4" width="265" height="18" backcolor="#F8FAFC" forecolor="#0F766E" uuid="c3000017-0017-4017-8017-000000000017"/>
+                <box leftPadding="8"/>
+                <textElement verticalAlignment="Middle">
+                    <font size="8" isBold="true"/>
+                </textElement>
+                <text><![CDATA[IDENTITÉ DU PATIENT]]></text>
+            </staticText>
+
+            <staticText>
+                <reportElement x="14" y="28" width="70" height="12" forecolor="#64748B" uuid="c3000018-0018-4018-8018-000000000018"/>
+                <textElement><font size="7" isBold="true"/></textElement>
+                <text><![CDATA[Nom complet]]></text>
+            </staticText>
+            <textField>
+                <reportElement x="84" y="28" width="174" height="12" forecolor="#0F172A" uuid="c3000019-0019-4019-8019-000000000019"/>
+                <textElement><font size="9" isBold="true"/></textElement>
+                <textFieldExpression><![CDATA[$P{NOM_PATIENT}]]></textFieldExpression>
+            </textField>
+
+            <staticText>
+                <reportElement x="14" y="46" width="70" height="12" forecolor="#64748B" uuid="c3000020-0020-4020-8020-000000000020"/>
+                <textElement><font size="7" isBold="true"/></textElement>
+                <text><![CDATA[Âge / sexe]]></text>
+            </staticText>
+            <textField>
+                <reportElement x="84" y="46" width="174" height="12" uuid="c3000021-0021-4021-8021-000000000021"/>
+                <textElement><font size="8"/></textElement>
+                <textFieldExpression><![CDATA[($P{AGE_PATIENT} != null ? $P{AGE_PATIENT} : "—") + "  ·  " + ($P{SEXE_PATIENT} != null ? $P{SEXE_PATIENT} : "—")]]></textFieldExpression>
+            </textField>
+
+            <staticText>
+                <reportElement x="14" y="64" width="70" height="12" forecolor="#64748B" uuid="c3000022-0022-4022-8022-000000000022"/>
+                <textElement><font size="7" isBold="true"/></textElement>
+                <text><![CDATA[Code patient]]></text>
+            </staticText>
+            <textField>
+                <reportElement x="84" y="64" width="174" height="12" uuid="c3000023-0023-4023-8023-000000000023"/>
+                <textElement><font size="8"/></textElement>
+                <textFieldExpression><![CDATA[$P{CODE_PATIENT}]]></textFieldExpression>
+            </textField>
+
+            <staticText>
+                <reportElement x="14" y="82" width="70" height="12" forecolor="#64748B" uuid="c3000024-0024-4024-8024-000000000024"/>
+                <textElement><font size="7" isBold="true"/></textElement>
+                <text><![CDATA[Validité]]></text>
+            </staticText>
+            <textField>
+                <reportElement x="84" y="82" width="174" height="12" uuid="c3000025-0025-4025-8025-000000000025"/>
+                <textElement><font size="8"/></textElement>
+                <textFieldExpression><![CDATA[$P{DATE_EXPIRATION}]]></textFieldExpression>
+            </textField>
+
+            <!-- Médecin -->
+            <rectangle>
+                <reportElement mode="Transparent" x="285" y="4" width="270" height="100" uuid="c3000026-0026-4026-8026-000000000026"/>
+                <graphicElement>
+                    <pen lineWidth="0.6" lineColor="#CBD5E1"/>
+                </graphicElement>
+            </rectangle>
+            <rectangle>
+                <reportElement mode="Opaque" x="285" y="4" width="5" height="100" backcolor="#0E7490" forecolor="#0E7490" uuid="c3000027-0027-4027-8027-000000000027"/>
+                <graphicElement>
+                    <pen lineWidth="0.0"/>
+                </graphicElement>
+            </rectangle>
+            <staticText>
+                <reportElement mode="Opaque" x="290" y="4" width="265" height="18" backcolor="#F8FAFC" forecolor="#0E7490" uuid="c3000028-0028-4028-8028-000000000028"/>
+                <box leftPadding="8"/>
+                <textElement verticalAlignment="Middle">
+                    <font size="8" isBold="true"/>
+                </textElement>
+                <text><![CDATA[MÉDECIN PRESCRIPTEUR]]></text>
+            </staticText>
+
+            <staticText>
+                <reportElement x="299" y="28" width="70" height="12" forecolor="#64748B" uuid="c3000029-0029-4029-8029-000000000029"/>
+                <textElement><font size="7" isBold="true"/></textElement>
+                <text><![CDATA[Prescripteur]]></text>
+            </staticText>
+            <textField>
+                <reportElement x="369" y="28" width="174" height="12" forecolor="#0F172A" uuid="c3000030-0030-4030-8030-000000000030"/>
+                <textElement><font size="9" isBold="true"/></textElement>
+                <textFieldExpression><![CDATA[$P{NOM_MEDECIN}]]></textFieldExpression>
+            </textField>
+
+            <staticText>
+                <reportElement x="299" y="46" width="70" height="12" forecolor="#64748B" uuid="c3000031-0031-4031-8031-000000000031"/>
+                <textElement><font size="7" isBold="true"/></textElement>
+                <text><![CDATA[Spécialité]]></text>
+            </staticText>
+            <textField>
+                <reportElement x="369" y="46" width="174" height="12" uuid="c3000032-0032-4032-8032-000000000032"/>
+                <textElement><font size="8"/></textElement>
+                <textFieldExpression><![CDATA[$P{SPECIALITE_MEDECIN}]]></textFieldExpression>
+            </textField>
+
+            <staticText>
+                <reportElement x="299" y="64" width="70" height="12" forecolor="#64748B" uuid="c3000033-0033-4033-8033-000000000033"/>
+                <textElement><font size="7" isBold="true"/></textElement>
+                <text><![CDATA[N° d'ordre]]></text>
+            </staticText>
+            <textField>
+                <reportElement x="369" y="64" width="174" height="12" uuid="c3000034-0034-4034-8034-000000000034"/>
+                <textElement><font size="8"/></textElement>
+                <textFieldExpression><![CDATA[$P{NUMERO_ORDRE_MEDECIN}]]></textFieldExpression>
+            </textField>
+
+            <staticText>
+                <reportElement x="299" y="82" width="70" height="12" forecolor="#64748B" uuid="c3000035-0035-4035-8035-000000000035"/>
+                <textElement><font size="7" isBold="true"/></textElement>
+                <text><![CDATA[Contact]]></text>
+            </staticText>
+            <textField>
+                <reportElement x="369" y="82" width="174" height="12" uuid="c3000036-0036-4036-8036-000000000036"/>
+                <textElement><font size="8"/></textElement>
+                <textFieldExpression><![CDATA[$P{TELEPHONE_MEDECIN}]]></textFieldExpression>
+            </textField>
+        </band>
+    </pageHeader>
+
+    <!-- ========== CORPS : DIAGNOSTIC + Rp. ========== -->
+    <detail>
+        <band height="320" splitType="Stretch">
+            <!-- Diagnostic -->
+            <staticText>
+                <reportElement x="0" y="4" width="555" height="14" forecolor="#0F766E" uuid="c3000037-0037-4037-8037-000000000037"/>
+                <textElement verticalAlignment="Middle">
+                    <font size="9" isBold="true"/>
+                </textElement>
+                <text><![CDATA[DIAGNOSTIC / INDICATION CLINIQUE]]></text>
+            </staticText>
+            <textField textAdjust="StretchHeight">
+                <reportElement stretchType="RelativeToTallestObject" x="0" y="20" width="555" height="36" uuid="c3000038-0038-4038-8038-000000000038" positionType="Float"/>
+                <box padding="8" leftPadding="10" rightPadding="10">
+                    <pen lineWidth="0.5" lineColor="#E2E8F0"/>
+                    <leftPen lineWidth="3.0" lineColor="#0F766E"/>
+                </box>
+                <textElement>
+                    <font size="9"/>
+                </textElement>
+                <textFieldExpression><![CDATA[$P{DIAGNOSTIC} != null && $P{DIAGNOSTIC}.trim().length() > 0 ? $P{DIAGNOSTIC} : "—"]]></textFieldExpression>
+            </textField>
+
+            <!-- Prescription -->
+            <staticText>
+                <reportElement x="0" y="66" width="420" height="16" forecolor="#0F766E" uuid="c3000039-0039-4039-8039-000000000039" positionType="Float"/>
+                <textElement verticalAlignment="Middle">
+                    <font size="9" isBold="true"/>
+                </textElement>
+                <text><![CDATA[PRESCRIPTION MÉDICAMENTEUSE]]></text>
+            </staticText>
+            <staticText>
+                <reportElement x="470" y="58" width="85" height="28" forecolor="#0F766E" uuid="c3000040-0040-4040-8040-000000000040" positionType="Float"/>
+                <textElement textAlignment="Right" verticalAlignment="Middle">
+                    <font size="22" isBold="true" isItalic="true"/>
+                </textElement>
+                <text><![CDATA[Rp.]]></text>
+            </staticText>
+
+            <rectangle>
+                <reportElement mode="Transparent" x="0" y="88" width="555" height="150" uuid="c3000041-0041-4041-8041-000000000041" positionType="Float"/>
+                <graphicElement>
+                    <pen lineWidth="0.75" lineColor="#94A3B8"/>
+                </graphicElement>
+            </rectangle>
+            <rectangle>
+                <reportElement mode="Opaque" x="0" y="88" width="555" height="18" backcolor="#F1F5F9" forecolor="#F1F5F9" uuid="c3000042-0042-4042-8042-000000000042" positionType="Float"/>
+                <graphicElement>
+                    <pen lineWidth="0.0"/>
+                </graphicElement>
+            </rectangle>
+            <staticText>
+                <reportElement x="10" y="90" width="535" height="14" forecolor="#475569" uuid="c3000043-0043-4043-8043-000000000043" positionType="Float"/>
+                <textElement verticalAlignment="Middle">
+                    <font size="7" isBold="true"/>
+                </textElement>
+                <text><![CDATA[Médicament  —  Posologie  —  Fréquence / durée]]></text>
+            </staticText>
+
+            <textField textAdjust="StretchHeight" isBlankWhenNull="true">
+                <reportElement x="12" y="112" width="531" height="118" uuid="c3000044-0044-4044-8044-000000000044" positionType="Float"/>
+                <textElement markup="none">
+                    <font size="10"/>
+                    <paragraph lineSpacing="OneAndHalf"/>
+                </textElement>
+                <textFieldExpression><![CDATA[$P{contenuOrdonnance} != null && $P{contenuOrdonnance}.trim().length() > 0 ? $P{contenuOrdonnance} : "Aucune prescription renseignée."]]></textFieldExpression>
+            </textField>
+
+            <!-- Observations -->
+            <staticText>
+                <reportElement x="0" y="250" width="555" height="14" forecolor="#0F766E" uuid="c3000045-0045-4045-8045-000000000045" positionType="Float"/>
+                <textElement verticalAlignment="Middle">
+                    <font size="9" isBold="true"/>
+                </textElement>
+                <text><![CDATA[OBSERVATIONS / CONSEILS AU PATIENT]]></text>
+            </staticText>
+            <textField textAdjust="StretchHeight">
+                <reportElement x="0" y="266" width="555" height="42" uuid="c3000046-0046-4046-8046-000000000046" positionType="Float"/>
+                <box padding="8">
+                    <pen lineWidth="0.5" lineColor="#E2E8F0"/>
+                </box>
+                <textElement>
+                    <font size="8"/>
+                </textElement>
+                <textFieldExpression><![CDATA[$P{OBSERVATIONS} != null && $P{OBSERVATIONS}.trim().length() > 0 ? $P{OBSERVATIONS} : "—"]]></textFieldExpression>
+            </textField>
+        </band>
+    </detail>
+
+    <!-- ========== SIGNATURE + QR + MENTIONS ========== -->
+    <summary>
+        <band height="210" splitType="Stretch">
+            <line>
+                <reportElement x="0" y="4" width="555" height="1" forecolor="#CBD5E1" uuid="c3000047-0047-4047-8047-000000000047"/>
+            </line>
+
+            <!-- Signature -->
+            <staticText>
+                <reportElement x="300" y="14" width="255" height="12" forecolor="#334155" uuid="c3000048-0048-4048-8048-000000000048"/>
+                <textElement textAlignment="Center">
+                    <font size="8" isBold="true"/>
+                </textElement>
+                <text><![CDATA[Signature et cachet du médecin]]></text>
+            </staticText>
+            <rectangle>
+                <reportElement mode="Transparent" x="320" y="30" width="215" height="70" uuid="c3000049-0049-4049-8049-000000000049"/>
+                <graphicElement>
+                    <pen lineWidth="0.5" lineColor="#CBD5E1" lineStyle="Dashed"/>
+                </graphicElement>
+            </rectangle>
+            <textField>
+                <reportElement x="300" y="104" width="255" height="12" forecolor="#0F172A" uuid="c3000050-0050-4050-8050-000000000050"/>
+                <textElement textAlignment="Center">
+                    <font size="8" isBold="true"/>
+                </textElement>
+                <textFieldExpression><![CDATA[$P{NOM_MEDECIN}]]></textFieldExpression>
+            </textField>
+            <textField>
+                <reportElement x="300" y="116" width="255" height="11" forecolor="#64748B" uuid="c3000051-0051-4051-8051-000000000051"/>
+                <textElement textAlignment="Center">
+                    <font size="7"/>
+                </textElement>
+                <textFieldExpression><![CDATA[($P{SPECIALITE_MEDECIN} != null ? $P{SPECIALITE_MEDECIN} : "") + (($P{NUMERO_ORDRE_MEDECIN} != null && !$P{NUMERO_ORDRE_MEDECIN}.equals("—")) ? (" · N° " + $P{NUMERO_ORDRE_MEDECIN}) : "")]]></textFieldExpression>
+            </textField>
+
+            <!-- QR bas gauche -->
+            <rectangle>
+                <reportElement mode="Opaque" x="0" y="14" width="270" height="116" backcolor="#F8FAFC" forecolor="#E2E8F0" uuid="c3000052-0052-4052-8052-000000000052"/>
+                <graphicElement>
+                    <pen lineWidth="0.5" lineColor="#CBD5E1"/>
+                </graphicElement>
+            </rectangle>
+            <staticText>
+                <reportElement x="10" y="20" width="160" height="12" forecolor="#0F766E" uuid="c3000053-0053-4053-8053-000000000053"/>
+                <textElement>
+                    <font size="8" isBold="true"/>
+                </textElement>
+                <text><![CDATA[Vérification d'authenticité]]></text>
+            </staticText>
+            <image onErrorType="Blank" hAlign="Center" vAlign="Middle">
+                <reportElement x="14" y="36" width="78" height="78" uuid="c3000054-0054-4054-8054-000000000054"/>
+                <imageExpression><![CDATA[$P{QR_CODE_IMAGE}]]></imageExpression>
+            </image>
+            <textField>
+                <reportElement x="100" y="40" width="160" height="60" forecolor="#64748B" uuid="c3000055-0055-4055-8055-000000000055"/>
+                <textElement>
+                    <font size="7"/>
+                </textElement>
+                <textFieldExpression><![CDATA["Scannez le code QR pour vérifier cette ordonnance.\n\nRéf. sécurisée :\n" + ($P{QR_CODE_TEXTE} != null ? $P{QR_CODE_TEXTE} : "—")]]></textFieldExpression>
+            </textField>
+
+            <!-- Mentions légales -->
+            <rectangle>
+                <reportElement mode="Opaque" x="0" y="142" width="555" height="52" backcolor="#F1F5F9" forecolor="#F1F5F9" uuid="c3000056-0056-4056-8056-000000000056"/>
+                <graphicElement>
+                    <pen lineWidth="0.0"/>
+                </graphicElement>
+            </rectangle>
+            <textField>
+                <reportElement x="10" y="148" width="535" height="28" forecolor="#475569" uuid="c3000057-0057-4057-8057-000000000057"/>
+                <textElement>
+                    <font size="7"/>
+                </textElement>
+                <textFieldExpression><![CDATA[$P{MENTIONS_LEGALES}]]></textFieldExpression>
+            </textField>
+            <textField>
+                <reportElement x="10" y="176" width="535" height="12" forecolor="#94A3B8" uuid="c3000058-0058-4058-8058-000000000058"/>
+                <textElement>
+                    <font size="6" isItalic="true"/>
+                </textElement>
+                <textFieldExpression><![CDATA["Shambua Santé — ordonnance multi-tenant #" + ($P{ID_TENANT} != null ? $P{ID_TENANT} : "—") + " — générée le " + new java.text.SimpleDateFormat("dd/MM/yyyy HH:mm").format(new java.util.Date()) + " — page " + $V{PAGE_NUMBER}]]></textFieldExpression>
+            </textField>
+        </band>
+    </summary>
+
+    <pageFooter>
+        <band height="18">
+            <line>
+                <reportElement x="0" y="2" width="555" height="1" forecolor="#0F766E" uuid="c3000059-0059-4059-8059-000000000059"/>
+            </line>
+            <textField>
+                <reportElement x="0" y="6" width="400" height="10" forecolor="#94A3B8" uuid="c3000060-0060-4060-8060-000000000060"/>
+                <textElement>
+                    <font size="6"/>
+                </textElement>
+                <textFieldExpression><![CDATA[($P{NOM_HOPITAL} != null ? $P{NOM_HOPITAL} : "Shambua Santé") + "  ·  " + ($P{REF_ORDONNANCE} != null ? $P{REF_ORDONNANCE} : "")]]></textFieldExpression>
+            </textField>
+            <textField>
+                <reportElement x="400" y="6" width="80" height="10" forecolor="#94A3B8" uuid="c3000061-0061-4061-8061-000000000061"/>
+                <textElement textAlignment="Right">
+                    <font size="6"/>
+                </textElement>
+                <textFieldExpression><![CDATA["Page " + $V{PAGE_NUMBER} + " /"]]></textFieldExpression>
+            </textField>
+            <textField evaluationTime="Report">
+                <reportElement x="480" y="6" width="75" height="10" forecolor="#94A3B8" uuid="c3000062-0062-4062-8062-000000000062"/>
+                <textElement>
+                    <font size="6"/>
+                </textElement>
+                <textFieldExpression><![CDATA[" " + $V{PAGE_NUMBER}]]></textFieldExpression>
+            </textField>
+        </band>
+    </pageFooter>
+</jasperReport>

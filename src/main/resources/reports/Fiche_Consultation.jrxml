@@ -1,0 +1,390 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports"
+              xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+              xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd"
+              name="Fiche_Consultation"
+              pageWidth="595"
+              pageHeight="842"
+              columnWidth="555"
+              leftMargin="20"
+              rightMargin="20"
+              topMargin="20"
+              bottomMargin="20"
+              uuid="f1c2a3b4-5678-90ab-cdef-1234567890ab">
+
+    <property name="com.jaspersoft.studio.unit." value="pixel"/>
+
+    <parameter name="NOM_HOPITAL" class="java.lang.String"/>
+    <parameter name="LOGO_HOPITAL" class="java.io.InputStream"/>
+    <parameter name="NOM_PATIENT" class="java.lang.String"/>
+    <parameter name="AGE_PATIENT" class="java.lang.String"/>
+    <parameter name="NOM_MEDECIN" class="java.lang.String"/>
+    <parameter name="DATE_CONSULTATION" class="java.util.Date"/>
+    <parameter name="ID_RDV" class="java.lang.String"/>
+    <parameter name="MOTIF_VISITE" class="java.lang.String"/>
+    <parameter name="POIDS" class="java.lang.String"/>
+    <parameter name="TAILLE" class="java.lang.String"/>
+    <parameter name="TENSION_ARTERIELLE" class="java.lang.String"/>
+    <parameter name="TEMPERATURE" class="java.lang.String"/>
+    <parameter name="FREQUENCE_CARDIAQUE" class="java.lang.String"/>
+    <parameter name="OBSERVATIONS" class="java.lang.String"/>
+    <parameter name="DIAGNOSTIC" class="java.lang.String"/>
+    <parameter name="ANALYSES_TEXTE" class="java.lang.String"/>
+    <parameter name="QR_CODE_IMAGE" class="java.awt.image.BufferedImage"/>
+    <parameter name="REF_CONSULTATION" class="java.lang.String"/>
+    <parameter name="ID_TENANT" class="java.lang.String">
+        <defaultValueExpression><![CDATA["—"]]></defaultValueExpression>
+    </parameter>
+    <parameter name="SOUS_DOMAINE" class="java.lang.String">
+        <defaultValueExpression><![CDATA["—"]]></defaultValueExpression>
+    </parameter>
+    <parameter name="INFOS_ETABLISSEMENT" class="java.lang.String">
+        <defaultValueExpression><![CDATA["—"]]></defaultValueExpression>
+    </parameter>
+    <parameter name="DOCUMENT_SIGNE" class="java.lang.Boolean">
+        <defaultValueExpression><![CDATA[Boolean.FALSE]]></defaultValueExpression>
+    </parameter>
+    <parameter name="DATE_SIGNATURE_TEXTE" class="java.lang.String">
+        <defaultValueExpression><![CDATA["—"]]></defaultValueExpression>
+    </parameter>
+    <parameter name="REFERENCE_SIGNATURE" class="java.lang.String">
+        <defaultValueExpression><![CDATA["—"]]></defaultValueExpression>
+    </parameter>
+    <parameter name="NUMERO_ORDRE_MEDECIN" class="java.lang.String">
+        <defaultValueExpression><![CDATA["—"]]></defaultValueExpression>
+    </parameter>
+    <parameter name="HASH_ABREGE" class="java.lang.String">
+        <defaultValueExpression><![CDATA["—"]]></defaultValueExpression>
+    </parameter>
+
+    <title>
+        <band height="132" splitType="Stretch">
+            <rectangle>
+                <reportElement x="0" y="0" width="555" height="1" forecolor="#374151" uuid="e1000001-0001-4001-8001-000000000001"/>
+            </rectangle>
+            <image onErrorType="Blank">
+                <reportElement x="0" y="10" width="58" height="58" uuid="a1111111-1111-1111-1111-111111111111"/>
+                <imageExpression><![CDATA[$P{LOGO_HOPITAL}]]></imageExpression>
+            </image>
+            <textField>
+                <reportElement x="68" y="10" width="487" height="26" forecolor="#111827" uuid="a2222222-2222-2222-2222-222222222222"/>
+                <textElement verticalAlignment="Middle">
+                    <font size="15" isBold="true"/>
+                </textElement>
+                <textFieldExpression><![CDATA[$P{NOM_HOPITAL} != null ? $P{NOM_HOPITAL} : "Shambua Santé"]]></textFieldExpression>
+            </textField>
+            <staticText>
+                <reportElement x="68" y="38" width="487" height="20" forecolor="#111827" uuid="a3333333-3333-3333-3333-333333333333"/>
+                <textElement>
+                    <font size="12" isBold="true"/>
+                </textElement>
+                <text><![CDATA[FICHE DE CONSULTATION PROFESSIONNELLE]]></text>
+            </staticText>
+            <textField>
+                <reportElement x="68" y="62" width="320" height="12" forecolor="#6B7280" uuid="f6a7b8c9-d012-3456-ef01-456789012345"/>
+                <textElement>
+                    <font size="8" isItalic="true"/>
+                </textElement>
+                <textFieldExpression><![CDATA["Tenant #" + ($P{ID_TENANT} != null ? $P{ID_TENANT} : "—") + " · " + ($P{SOUS_DOMAINE} != null ? $P{SOUS_DOMAINE} : "—")]]></textFieldExpression>
+            </textField>
+            <textField>
+                <reportElement x="68" y="76" width="320" height="12" forecolor="#9CA3AF" uuid="a7b8c9d0-e123-4567-f012-567890123456"/>
+                <textElement>
+                    <font size="7"/>
+                </textElement>
+                <textFieldExpression><![CDATA[$P{INFOS_ETABLISSEMENT} != null ? $P{INFOS_ETABLISSEMENT} : "—"]]></textFieldExpression>
+            </textField>
+            <textField>
+                <reportElement x="68" y="90" width="320" height="14" forecolor="#374151" uuid="a4444444-4444-4444-4444-444444444444"/>
+                <textElement>
+                    <font size="9" isBold="true"/>
+                </textElement>
+                <textFieldExpression><![CDATA["Réf. " + ($P{REF_CONSULTATION} != null ? $P{REF_CONSULTATION} : "—")]]></textFieldExpression>
+            </textField>
+            <rectangle>
+                <reportElement mode="Transparent" x="400" y="58" width="155" height="52" uuid="e1000002-0002-4002-8002-000000000002"/>
+                <graphicElement>
+                    <pen lineWidth="0.75" lineColor="#D1D5DB"/>
+                </graphicElement>
+            </rectangle>
+            <image onErrorType="Blank" hAlign="Center" vAlign="Middle">
+                <reportElement x="440" y="64" width="68" height="52" uuid="e1000003-0003-4003-8003-000000000003"/>
+                <imageExpression><![CDATA[$P{QR_CODE_IMAGE}]]></imageExpression>
+            </image>
+            <staticText>
+                <reportElement x="400" y="118" width="155" height="12" forecolor="#374151" uuid="e1000004-0004-4004-8004-000000000004"/>
+                <textElement textAlignment="Center">
+                    <font size="7" isBold="true"/>
+                </textElement>
+                <text><![CDATA[Code QR de vérification]]></text>
+            </staticText>
+            <line>
+                <reportElement x="0" y="128" width="555" height="1" forecolor="#374151" uuid="a5555555-5555-5555-5555-555555555555"/>
+            </line>
+        </band>
+    </title>
+
+    <pageHeader>
+        <band height="78" splitType="Stretch">
+            <rectangle>
+                <reportElement mode="Transparent" x="0" y="0" width="555" height="72" uuid="e1000005-0005-4005-8005-000000000005"/>
+                <graphicElement>
+                    <pen lineWidth="0.5" lineColor="#E5E7EB"/>
+                </graphicElement>
+            </rectangle>
+            <staticText>
+                <reportElement x="8" y="8" width="110" height="14" forecolor="#374151" uuid="b1111111-1111-1111-1111-111111111111"/>
+                <textElement><font size="8" isBold="true"/></textElement>
+                <text><![CDATA[Date de consultation]]></text>
+            </staticText>
+            <textField pattern="dd/MM/yyyy HH:mm">
+                <reportElement x="118" y="8" width="180" height="14" uuid="b2222222-2222-2222-2222-222222222222"/>
+                <textElement><font size="9" isBold="true"/></textElement>
+                <textFieldExpression><![CDATA[$P{DATE_CONSULTATION}]]></textFieldExpression>
+            </textField>
+            <staticText>
+                <reportElement x="310" y="8" width="80" height="14" forecolor="#374151" uuid="b3333333-3333-3333-3333-333333333333"/>
+                <textElement><font size="8" isBold="true"/></textElement>
+                <text><![CDATA[Rendez-vous]]></text>
+            </staticText>
+            <textField>
+                <reportElement x="390" y="8" width="157" height="14" uuid="b4444444-4444-4444-4444-444444444444"/>
+                <textElement><font size="9" isBold="true"/></textElement>
+                <textFieldExpression><![CDATA[$P{ID_RDV} != null ? $P{ID_RDV} : "—"]]></textFieldExpression>
+            </textField>
+
+            <staticText>
+                <reportElement x="8" y="28" width="110" height="14" forecolor="#374151" uuid="b5555555-5555-5555-5555-555555555555"/>
+                <textElement><font size="8" isBold="true"/></textElement>
+                <text><![CDATA[Patient]]></text>
+            </staticText>
+            <textField>
+                <reportElement x="118" y="28" width="180" height="14" uuid="b6666666-6666-6666-6666-666666666666"/>
+                <textElement><font size="10" isBold="true"/></textElement>
+                <textFieldExpression><![CDATA[$P{NOM_PATIENT} != null ? $P{NOM_PATIENT} : "—"]]></textFieldExpression>
+            </textField>
+            <staticText>
+                <reportElement x="310" y="28" width="80" height="14" forecolor="#374151" uuid="b7777777-7777-7777-7777-777777777777"/>
+                <textElement><font size="8" isBold="true"/></textElement>
+                <text><![CDATA[Âge]]></text>
+            </staticText>
+            <textField>
+                <reportElement x="390" y="28" width="157" height="14" uuid="b8888888-8888-8888-8888-888888888888"/>
+                <textElement><font size="9"/></textElement>
+                <textFieldExpression><![CDATA[$P{AGE_PATIENT} != null ? $P{AGE_PATIENT} : "—"]]></textFieldExpression>
+            </textField>
+
+            <staticText>
+                <reportElement x="8" y="48" width="110" height="14" forecolor="#374151" uuid="b9999999-9999-9999-9999-999999999999"/>
+                <textElement><font size="8" isBold="true"/></textElement>
+                <text><![CDATA[Médecin traitant]]></text>
+            </staticText>
+            <textField>
+                <reportElement x="118" y="48" width="429" height="14" uuid="baaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa"/>
+                <textElement><font size="9" isBold="true"/></textElement>
+                <textFieldExpression><![CDATA[$P{NOM_MEDECIN} != null ? $P{NOM_MEDECIN} : "—"]]></textFieldExpression>
+            </textField>
+        </band>
+    </pageHeader>
+
+    <detail>
+        <band height="395" splitType="Stretch">
+            <staticText>
+                <reportElement x="0" y="0" width="555" height="18" forecolor="#111827" uuid="c1111111-1111-1111-1111-111111111111"/>
+                <textElement verticalAlignment="Middle">
+                    <font size="10" isBold="true"/>
+                </textElement>
+                <text><![CDATA[  Motif de visite]]></text>
+            </staticText>
+            <textField isStretchWithOverflow="true">
+                <reportElement x="0" y="20" width="555" height="34" uuid="c2222222-2222-2222-2222-222222222222"/>
+                <box padding="6">
+                    <pen lineWidth="0.5" lineColor="#E5E7EB"/>
+                    <topPen lineWidth="0.5" lineColor="#E5E7EB"/>
+                    <leftPen lineWidth="0.5" lineColor="#E5E7EB"/>
+                    <bottomPen lineWidth="0.5" lineColor="#E5E7EB"/>
+                    <rightPen lineWidth="0.5" lineColor="#E5E7EB"/>
+                </box>
+                <textElement><font size="9"/></textElement>
+                <textFieldExpression><![CDATA[$P{MOTIF_VISITE} != null ? $P{MOTIF_VISITE} : "—"]]></textFieldExpression>
+            </textField>
+
+            <staticText>
+                <reportElement x="0" y="62" width="555" height="18" forecolor="#111827" uuid="c3333333-3333-3333-3333-333333333333"/>
+                <textElement verticalAlignment="Middle">
+                    <font size="10" isBold="true"/>
+                </textElement>
+                <text><![CDATA[  Constantes vitales]]></text>
+            </staticText>
+            <rectangle>
+                <reportElement mode="Transparent" x="0" y="82" width="555" height="44" uuid="e1000006-0006-4006-8006-000000000006"/>
+                <graphicElement>
+                    <pen lineWidth="0.5" lineColor="#D1D5DB"/>
+                </graphicElement>
+            </rectangle>
+            <staticText>
+                <reportElement x="8" y="88" width="90" height="14" forecolor="#374151" uuid="c4444444-4444-4444-4444-444444444444"/>
+                <textElement><font size="8" isBold="true"/></textElement>
+                <text><![CDATA[Poids]]></text>
+            </staticText>
+            <textField>
+                <reportElement x="8" y="102" width="90" height="14" uuid="c5555555-5555-5555-5555-555555555555"/>
+                <textElement><font size="9" isBold="true"/></textElement>
+                <textFieldExpression><![CDATA[$P{POIDS}]]></textFieldExpression>
+            </textField>
+            <staticText>
+                <reportElement x="118" y="88" width="90" height="14" forecolor="#374151" uuid="c6666666-6666-6666-6666-666666666666"/>
+                <textElement><font size="8" isBold="true"/></textElement>
+                <text><![CDATA[Taille]]></text>
+            </staticText>
+            <textField>
+                <reportElement x="118" y="102" width="90" height="14" uuid="c7777777-7777-7777-7777-777777777777"/>
+                <textElement><font size="9" isBold="true"/></textElement>
+                <textFieldExpression><![CDATA[$P{TAILLE}]]></textFieldExpression>
+            </textField>
+            <staticText>
+                <reportElement x="228" y="88" width="90" height="14" forecolor="#374151" uuid="c8888888-8888-8888-8888-888888888888"/>
+                <textElement><font size="8" isBold="true"/></textElement>
+                <text><![CDATA[Tension]]></text>
+            </staticText>
+            <textField>
+                <reportElement x="228" y="102" width="90" height="14" uuid="c9999999-9999-9999-9999-999999999999"/>
+                <textElement><font size="9" isBold="true"/></textElement>
+                <textFieldExpression><![CDATA[$P{TENSION_ARTERIELLE}]]></textFieldExpression>
+            </textField>
+            <staticText>
+                <reportElement x="338" y="88" width="90" height="14" forecolor="#374151" uuid="caaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa"/>
+                <textElement><font size="8" isBold="true"/></textElement>
+                <text><![CDATA[Température]]></text>
+            </staticText>
+            <textField>
+                <reportElement x="338" y="102" width="90" height="14" uuid="cbaaaaaa-bbbb-bbbb-bbbb-bbbbbbbbbbbb"/>
+                <textElement><font size="9" isBold="true"/></textElement>
+                <textFieldExpression><![CDATA[$P{TEMPERATURE}]]></textFieldExpression>
+            </textField>
+            <staticText>
+                <reportElement x="448" y="88" width="100" height="14" forecolor="#374151" uuid="cbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb"/>
+                <textElement><font size="8" isBold="true"/></textElement>
+                <text><![CDATA[Fréq. cardiaque]]></text>
+            </staticText>
+            <textField>
+                <reportElement x="448" y="102" width="100" height="14" uuid="cccccccc-cccc-cccc-cccc-cccccccccccc"/>
+                <textElement><font size="9" isBold="true"/></textElement>
+                <textFieldExpression><![CDATA[$P{FREQUENCE_CARDIAQUE}]]></textFieldExpression>
+            </textField>
+
+            <staticText>
+                <reportElement x="0" y="136" width="555" height="18" forecolor="#111827" uuid="cddddddd-dddd-dddd-dddd-dddddddddddd"/>
+                <textElement verticalAlignment="Middle">
+                    <font size="10" isBold="true"/>
+                </textElement>
+                <text><![CDATA[  Diagnostic]]></text>
+            </staticText>
+            <textField isStretchWithOverflow="true">
+                <reportElement x="0" y="156" width="555" height="48" uuid="ceeeeeee-eeee-eeee-eeee-eeeeeeeeeeee"/>
+                <box padding="6">
+                    <pen lineWidth="0.5" lineColor="#E5E7EB"/>
+                </box>
+                <textElement><font size="9"/></textElement>
+                <textFieldExpression><![CDATA[$P{DIAGNOSTIC} != null ? $P{DIAGNOSTIC} : "—"]]></textFieldExpression>
+            </textField>
+
+            <staticText>
+                <reportElement x="0" y="212" width="555" height="18" forecolor="#111827" uuid="cfffffff-ffff-ffff-ffff-ffffffffffff"/>
+                <textElement verticalAlignment="Middle">
+                    <font size="10" isBold="true"/>
+                </textElement>
+                <text><![CDATA[  Observations cliniques]]></text>
+            </staticText>
+            <textField isStretchWithOverflow="true">
+                <reportElement x="0" y="232" width="555" height="58" uuid="c0000000-0000-0000-0000-000000000001"/>
+                <box padding="6">
+                    <pen lineWidth="0.5" lineColor="#E5E7EB"/>
+                </box>
+                <textElement><font size="9"/></textElement>
+                <textFieldExpression><![CDATA[$P{OBSERVATIONS} != null ? $P{OBSERVATIONS} : "—"]]></textFieldExpression>
+            </textField>
+
+            <staticText>
+                <reportElement x="0" y="298" width="555" height="18" forecolor="#111827" uuid="c0000000-0000-0000-0000-000000000002"/>
+                <textElement verticalAlignment="Middle">
+                    <font size="10" isBold="true"/>
+                </textElement>
+                <text><![CDATA[  Examens et analyses]]></text>
+            </staticText>
+            <textField isStretchWithOverflow="true">
+                <reportElement x="0" y="318" width="555" height="72" uuid="c0000000-0000-0000-0000-000000000003"/>
+                <box padding="6">
+                    <pen lineWidth="0.5" lineColor="#E5E7EB"/>
+                </box>
+                <textElement><font size="9"/></textElement>
+                <textFieldExpression><![CDATA[$P{ANALYSES_TEXTE} != null ? $P{ANALYSES_TEXTE} : "—"]]></textFieldExpression>
+            </textField>
+        </band>
+    </detail>
+
+    <pageFooter>
+        <band height="88" splitType="Stretch">
+            <rectangle>
+                <reportElement mode="Transparent" x="0" y="0" width="555" height="58" uuid="e2000001-0001-4001-8001-000000000001">
+                    <printWhenExpression><![CDATA[Boolean.TRUE.equals($P{DOCUMENT_SIGNE})]]></printWhenExpression>
+                </reportElement>
+                <graphicElement>
+                    <pen lineWidth="0.75" lineColor="#D1D5DB"/>
+                </graphicElement>
+            </rectangle>
+            <staticText>
+                <reportElement x="10" y="6" width="535" height="14" forecolor="#374151" uuid="e2000002-0002-4002-8002-000000000002">
+                    <printWhenExpression><![CDATA[Boolean.TRUE.equals($P{DOCUMENT_SIGNE})]]></printWhenExpression>
+                </reportElement>
+                <textElement><font size="10" isBold="true"/></textElement>
+                <text><![CDATA[Document signé électroniquement]]></text>
+            </staticText>
+            <textField>
+                <reportElement x="10" y="22" width="535" height="12" uuid="e2000003-0003-4003-8003-000000000003">
+                    <printWhenExpression><![CDATA[Boolean.TRUE.equals($P{DOCUMENT_SIGNE})]]></printWhenExpression>
+                </reportElement>
+                <textElement><font size="8"/></textElement>
+                <textFieldExpression><![CDATA["Médecin : " + ($P{NOM_MEDECIN} != null ? $P{NOM_MEDECIN} : "—") + "  ·  N° pro : " + ($P{NUMERO_ORDRE_MEDECIN} != null ? $P{NUMERO_ORDRE_MEDECIN} : "—")]]></textFieldExpression>
+            </textField>
+            <textField>
+                <reportElement x="10" y="36" width="535" height="12" uuid="e2000004-0004-4004-8004-000000000004">
+                    <printWhenExpression><![CDATA[Boolean.TRUE.equals($P{DOCUMENT_SIGNE})]]></printWhenExpression>
+                </reportElement>
+                <textElement><font size="8"/></textElement>
+                <textFieldExpression><![CDATA["Date de signature : " + ($P{DATE_SIGNATURE_TEXTE} != null ? $P{DATE_SIGNATURE_TEXTE} : "—") + "  ·  Référence : " + ($P{REFERENCE_SIGNATURE} != null ? $P{REFERENCE_SIGNATURE} : "—")]]></textFieldExpression>
+            </textField>
+            <textField>
+                <reportElement x="10" y="50" width="535" height="12" forecolor="#9CA3AF" uuid="e2000005-0005-4005-8005-000000000005">
+                    <printWhenExpression><![CDATA[Boolean.TRUE.equals($P{DOCUMENT_SIGNE})]]></printWhenExpression>
+                </reportElement>
+                <textElement><font size="7" isItalic="true"/></textElement>
+                <textFieldExpression><![CDATA["Empreinte du document : " + ($P{HASH_ABREGE} != null ? $P{HASH_ABREGE} : "—")]]></textFieldExpression>
+            </textField>
+            <line>
+                <reportElement x="0" y="66" width="555" height="1" forecolor="#374151" uuid="e2000006-0006-4006-8006-000000000006">
+                    <printWhenExpression><![CDATA[Boolean.TRUE.equals($P{DOCUMENT_SIGNE})]]></printWhenExpression>
+                </reportElement>
+            </line>
+            <line>
+                <reportElement x="0" y="4" width="555" height="1" forecolor="#374151" uuid="e100000c-000c-400c-800c-00000000000c">
+                    <printWhenExpression><![CDATA[!Boolean.TRUE.equals($P{DOCUMENT_SIGNE})]]></printWhenExpression>
+                </reportElement>
+            </line>
+            <textField>
+                <reportElement x="0" y="70" width="555" height="14" forecolor="#9CA3AF" uuid="d1111111-1111-1111-1111-111111111111">
+                    <printWhenExpression><![CDATA[Boolean.TRUE.equals($P{DOCUMENT_SIGNE})]]></printWhenExpression>
+                </reportElement>
+                <textElement textAlignment="Center"><font size="8" isItalic="true"/></textElement>
+                <textFieldExpression><![CDATA["Document confidentiel — " + ($P{NOM_HOPITAL} != null ? $P{NOM_HOPITAL} : "Shambua Santé") + " (tenant #" + ($P{ID_TENANT} != null ? $P{ID_TENANT} : "—") + ") — " + new java.text.SimpleDateFormat("dd/MM/yyyy HH:mm").format(new java.util.Date())]]></textFieldExpression>
+            </textField>
+            <textField>
+                <reportElement x="0" y="10" width="555" height="14" forecolor="#9CA3AF" uuid="d1111111-1111-1111-1111-111111111112">
+                    <printWhenExpression><![CDATA[!Boolean.TRUE.equals($P{DOCUMENT_SIGNE})]]></printWhenExpression>
+                </reportElement>
+                <textElement textAlignment="Center"><font size="8" isItalic="true"/></textElement>
+                <textFieldExpression><![CDATA["Document confidentiel — " + ($P{NOM_HOPITAL} != null ? $P{NOM_HOPITAL} : "Shambua Santé") + " (tenant #" + ($P{ID_TENANT} != null ? $P{ID_TENANT} : "—") + ") — " + new java.text.SimpleDateFormat("dd/MM/yyyy HH:mm").format(new java.util.Date())]]></textFieldExpression>
+            </textField>
+        </band>
+    </pageFooter>
+</jasperReport>

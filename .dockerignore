@@ -1,0 +1,17 @@
+# Build context
+target/
+.git/
+.idea/
+.vscode/
+*.iml
+*.md
+!README.Docker.md
+src/test/
+.mvn/wrapper/maven-wrapper.jar
+*.log
+*.tmp
+.env
+.env.*
+!.env.example
+docker-compose.override.yml
+**/node_modules/

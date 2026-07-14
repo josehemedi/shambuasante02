@@ -1,0 +1,7 @@
+{
+    "doctorToken":  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJBUElHdnoySERTYWFxbUQiLCJleHAiOjE3ODM4MTg2NjYsInN1YiI6Im1lZGVjaW4tMSIsIm5hbWUiOiJNw6lkZWNpbiIsInZpZGVvIjp7InJvb21Kb2luIjp0cnVlLCJyb29tIjoidGVuYW50LTEtdGVsZWNvbnN1bHRhdGlvbi0xNiIsImNhblB1Ymxpc2giOnRydWUsImNhblN1YnNjcmliZSI6dHJ1ZX0sInNpcCI6e319.SjqH0BAZuuBmRQT7X1PC-_bj1l1L-ucDPHeP2l2WqzA",
+    "rdvId":  16,
+    "patientToken":  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJBUElHdnoySERTYWFxbUQiLCJleHAiOjE3ODM4MTg2NjcsInN1YiI6InBhdGllbnQtMSIsIm5hbWUiOiJQYXRpZW50IiwidmlkZW8iOnsicm9vbUpvaW4iOnRydWUsInJvb20iOiJ0ZW5hbnQtMS10ZWxlY29uc3VsdGF0aW9uLTE2IiwiY2FuUHVibGlzaCI6dHJ1ZSwiY2FuU3Vic2NyaWJlIjp0cnVlfSwic2lwIjp7fX0.AW2ucXuh6iZbNKaSoZ3PUgqnulmpM8Y4UGF0p6Bw6iQ",
+    "serverUrl":  "wss://hospicloud-nz8gfvan.livekit.cloud",
+    "roomName":  "tenant-1-teleconsultation-16"
+}

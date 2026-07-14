@@ -1,0 +1,360 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports"
+              xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+              xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd"
+              name="Facture_Patient"
+              pageWidth="595"
+              pageHeight="842"
+              columnWidth="555"
+              leftMargin="20"
+              rightMargin="20"
+              topMargin="20"
+              bottomMargin="20"
+              uuid="a1000001-0001-4001-8001-000000000001">
+
+    <parameter name="NOM_HOPITAL" class="java.lang.String"/>
+    <parameter name="LOGO_HOPITAL" class="java.io.InputStream"/>
+    <parameter name="ID_TENANT" class="java.lang.String"/>
+    <parameter name="SOUS_DOMAINE" class="java.lang.String"/>
+    <parameter name="INFOS_ETABLISSEMENT" class="java.lang.String"/>
+    <parameter name="NUMERO_FACTURE" class="java.lang.String"/>
+    <parameter name="DATE_FACTURE" class="java.lang.String"/>
+    <parameter name="REFERENCE_FACTURE" class="java.lang.String"/>
+    <parameter name="DATE_GENERATION" class="java.util.Date"/>
+    <parameter name="GENERE_PAR" class="java.lang.String"/>
+    <parameter name="NOM_PATIENT" class="java.lang.String"/>
+    <parameter name="CODE_PATIENT" class="java.lang.String"/>
+    <parameter name="TELEPHONE_PATIENT" class="java.lang.String"/>
+    <parameter name="SEXE_PATIENT" class="java.lang.String"/>
+    <parameter name="AGE_PATIENT" class="java.lang.String"/>
+    <parameter name="MONTANT_HT" class="java.lang.String"/>
+    <parameter name="TVA" class="java.lang.String"/>
+    <parameter name="MONTANT_TTC" class="java.lang.String"/>
+    <parameter name="MONTANT_PAYE" class="java.lang.String"/>
+    <parameter name="SOLDE" class="java.lang.String"/>
+    <parameter name="STATUT_PAIEMENT" class="java.lang.String"/>
+    <parameter name="QR_CODE_IMAGE" class="java.awt.image.BufferedImage"/>
+    <parameter name="QR_CODE_TEXTE" class="java.lang.String"/>
+
+    <field name="numero" class="java.lang.String"/>
+    <field name="designation" class="java.lang.String"/>
+    <field name="quantite" class="java.lang.String"/>
+    <field name="prixUnitaire" class="java.lang.String"/>
+    <field name="sousTotal" class="java.lang.String"/>
+    <field name="categorie" class="java.lang.String"/>
+
+    <title>
+        <band height="108" splitType="Stretch">
+            <rectangle>
+                <reportElement x="0" y="0" width="555" height="1" forecolor="#374151" uuid="a1000002-0002-4002-8002-000000000002"/>
+            </rectangle>
+            <image onErrorType="Blank">
+                <reportElement x="0" y="10" width="52" height="52" uuid="a1000003-0003-4003-8003-000000000003"/>
+                <imageExpression><![CDATA[$P{LOGO_HOPITAL}]]></imageExpression>
+            </image>
+            <textField>
+                <reportElement x="60" y="10" width="495" height="24" forecolor="#111827" uuid="a1000004-0004-4004-8004-000000000004"/>
+                <textElement verticalAlignment="Middle"><font size="14" isBold="true"/></textElement>
+                <textFieldExpression><![CDATA[$P{NOM_HOPITAL}]]></textFieldExpression>
+            </textField>
+            <staticText>
+                <reportElement x="60" y="36" width="495" height="18" forecolor="#111827" uuid="a1000005-0005-4005-8005-000000000005"/>
+                <textElement><font size="12" isBold="true"/></textElement>
+                <text><![CDATA[FACTURE PATIENT — DOCUMENT OFFICIEL DE FACTURATION]]></text>
+            </staticText>
+            <textField>
+                <reportElement x="60" y="58" width="495" height="12" uuid="a1000006-0006-4006-8006-000000000006"/>
+                <textElement><font size="7" isItalic="true"/></textElement>
+                <textFieldExpression><![CDATA["Tenant #" + ($P{ID_TENANT} != null ? $P{ID_TENANT} : "—") + " · " + ($P{SOUS_DOMAINE} != null ? $P{SOUS_DOMAINE} : "—")]]></textFieldExpression>
+            </textField>
+            <textField>
+                <reportElement x="60" y="72" width="495" height="12" uuid="a1000007-0007-4007-8007-000000000007"/>
+                <textElement><font size="7"/></textElement>
+                <textFieldExpression><![CDATA[$P{INFOS_ETABLISSEMENT} != null ? $P{INFOS_ETABLISSEMENT} : "—"]]></textFieldExpression>
+            </textField>
+            <textField>
+                <reportElement x="60" y="86" width="495" height="12" uuid="a1000008-0008-4008-8008-000000000008"/>
+                <textElement><font size="7" isItalic="true"/></textElement>
+                <textFieldExpression><![CDATA["Réf. " + $P{REFERENCE_FACTURE} + " · Émis le " + new java.text.SimpleDateFormat("dd/MM/yyyy HH:mm").format($P{DATE_GENERATION}) + " · Par " + $P{GENERE_PAR}]]></textFieldExpression>
+            </textField>
+        </band>
+    </title>
+
+    <pageHeader>
+        <band height="92" splitType="Stretch">
+            <staticText>
+                <reportElement mode="Opaque" x="0" y="0" width="270" height="16" backcolor="#F9FAFB" forecolor="#374151" uuid="a1000009-0009-4009-8009-000000000009"/>
+                <box leftPadding="6"><pen lineWidth="0.25" lineColor="#D1D5DB"/></box>
+                <textElement verticalAlignment="Middle"><font size="9" isBold="true"/></textElement>
+                <text><![CDATA[  Informations patient]]></text>
+            </staticText>
+            <staticText>
+                <reportElement mode="Opaque" x="285" y="0" width="270" height="16" backcolor="#F9FAFB" forecolor="#374151" uuid="a1000010-0010-4010-8010-000000000010"/>
+                <box leftPadding="6"><pen lineWidth="0.25" lineColor="#D1D5DB"/></box>
+                <textElement verticalAlignment="Middle"><font size="9" isBold="true"/></textElement>
+                <text><![CDATA[  Détails facture]]></text>
+            </staticText>
+
+            <staticText>
+                <reportElement x="8" y="22" width="70" height="12" uuid="a1000011-0011-4011-8011-000000000011"/>
+                <textElement><font size="8" isBold="true"/></textElement>
+                <text><![CDATA[Patient]]></text>
+            </staticText>
+            <textField>
+                <reportElement x="78" y="22" width="192" height="12" uuid="a1000012-0012-4012-8012-000000000012"/>
+                <textElement><font size="8"/></textElement>
+                <textFieldExpression><![CDATA[$P{NOM_PATIENT}]]></textFieldExpression>
+            </textField>
+            <staticText>
+                <reportElement x="293" y="22" width="70" height="12" uuid="a1000013-0013-4013-8013-000000000013"/>
+                <textElement><font size="8" isBold="true"/></textElement>
+                <text><![CDATA[N° facture]]></text>
+            </staticText>
+            <textField>
+                <reportElement x="363" y="22" width="192" height="12" uuid="a1000014-0014-4014-8014-000000000014"/>
+                <textElement><font size="8" isBold="true"/></textElement>
+                <textFieldExpression><![CDATA[$P{NUMERO_FACTURE}]]></textFieldExpression>
+            </textField>
+
+            <staticText>
+                <reportElement x="8" y="36" width="70" height="12" uuid="a1000015-0015-4015-8015-000000000015"/>
+                <textElement><font size="8" isBold="true"/></textElement>
+                <text><![CDATA[Code]]></text>
+            </staticText>
+            <textField>
+                <reportElement x="78" y="36" width="192" height="12" uuid="a1000016-0016-4016-8016-000000000016"/>
+                <textElement><font size="8"/></textElement>
+                <textFieldExpression><![CDATA[$P{CODE_PATIENT}]]></textFieldExpression>
+            </textField>
+            <staticText>
+                <reportElement x="293" y="36" width="70" height="12" uuid="a1000017-0017-4017-8017-000000000017"/>
+                <textElement><font size="8" isBold="true"/></textElement>
+                <text><![CDATA[Date]]></text>
+            </staticText>
+            <textField>
+                <reportElement x="363" y="36" width="192" height="12" uuid="a1000018-0018-4018-8018-000000000018"/>
+                <textElement><font size="8"/></textElement>
+                <textFieldExpression><![CDATA[$P{DATE_FACTURE}]]></textFieldExpression>
+            </textField>
+
+            <staticText>
+                <reportElement x="8" y="50" width="70" height="12" uuid="a1000019-0019-4019-8019-000000000019"/>
+                <textElement><font size="8" isBold="true"/></textElement>
+                <text><![CDATA[Téléphone]]></text>
+            </staticText>
+            <textField>
+                <reportElement x="78" y="50" width="192" height="12" uuid="a1000020-0020-4020-8020-000000000020"/>
+                <textElement><font size="8"/></textElement>
+                <textFieldExpression><![CDATA[$P{TELEPHONE_PATIENT}]]></textFieldExpression>
+            </textField>
+            <staticText>
+                <reportElement x="293" y="50" width="70" height="12" uuid="a1000021-0021-4021-8021-000000000021"/>
+                <textElement><font size="8" isBold="true"/></textElement>
+                <text><![CDATA[Statut]]></text>
+            </staticText>
+            <textField>
+                <reportElement x="363" y="50" width="192" height="12" uuid="a1000022-0022-4022-8022-000000000022"/>
+                <textElement><font size="8" isBold="true"/></textElement>
+                <textFieldExpression><![CDATA[$P{STATUT_PAIEMENT}]]></textFieldExpression>
+            </textField>
+
+            <staticText>
+                <reportElement x="8" y="64" width="70" height="12" uuid="a1000023-0023-4023-8023-000000000023"/>
+                <textElement><font size="8" isBold="true"/></textElement>
+                <text><![CDATA[Sexe / Âge]]></text>
+            </staticText>
+            <textField>
+                <reportElement x="78" y="64" width="192" height="12" uuid="a1000024-0024-4024-8024-000000000024"/>
+                <textElement><font size="8"/></textElement>
+                <textFieldExpression><![CDATA[$P{SEXE_PATIENT} + " · " + $P{AGE_PATIENT}]]></textFieldExpression>
+            </textField>
+            <staticText>
+                <reportElement x="293" y="64" width="70" height="12" uuid="a1000025-0025-4025-8025-000000000025"/>
+                <textElement><font size="8" isBold="true"/></textElement>
+                <text><![CDATA[Solde dû]]></text>
+            </staticText>
+            <textField>
+                <reportElement x="363" y="64" width="192" height="12" uuid="a1000026-0026-4026-8026-000000000026"/>
+                <textElement><font size="8" isBold="true"/></textElement>
+                <textFieldExpression><![CDATA[$P{SOLDE}]]></textFieldExpression>
+            </textField>
+        </band>
+    </pageHeader>
+
+    <columnHeader>
+        <band height="32">
+            <staticText>
+                <reportElement x="0" y="0" width="555" height="16" forecolor="#111827" uuid="a1000027-0027-4027-8027-000000000027"/>
+                <box leftPadding="6"><pen lineWidth="0.5" lineColor="#D1D5DB"/></box>
+                <textElement verticalAlignment="Middle"><font size="9" isBold="true"/></textElement>
+                <text><![CDATA[  DÉTAIL DES PRESTATIONS FACTURÉES]]></text>
+            </staticText>
+            <staticText>
+                <reportElement mode="Opaque" x="0" y="16" width="24" height="14" backcolor="#F9FAFB" forecolor="#374151" uuid="a1000028-0028-4028-8028-000000000028"/>
+                <box><pen lineWidth="0.5" lineColor="#D1D5DB"/></box>
+                <textElement textAlignment="Center" verticalAlignment="Middle"><font size="7" isBold="true"/></textElement>
+                <text><![CDATA[#]]></text>
+            </staticText>
+            <staticText>
+                <reportElement mode="Opaque" x="24" y="16" width="190" height="14" backcolor="#F9FAFB" forecolor="#374151" uuid="a1000029-0029-4029-8029-000000000029"/>
+                <box><pen lineWidth="0.5" lineColor="#D1D5DB"/></box>
+                <textElement verticalAlignment="Middle"><font size="7" isBold="true"/></textElement>
+                <text><![CDATA[ Désignation]]></text>
+            </staticText>
+            <staticText>
+                <reportElement mode="Opaque" x="214" y="16" width="62" height="14" backcolor="#F9FAFB" forecolor="#374151" uuid="a1000030-0030-4030-8030-000000000030"/>
+                <box><pen lineWidth="0.5" lineColor="#D1D5DB"/></box>
+                <textElement verticalAlignment="Middle"><font size="7" isBold="true"/></textElement>
+                <text><![CDATA[ Catégorie]]></text>
+            </staticText>
+            <staticText>
+                <reportElement mode="Opaque" x="276" y="16" width="40" height="14" backcolor="#F9FAFB" forecolor="#374151" uuid="a1000031-0031-4031-8031-000000000031"/>
+                <box><pen lineWidth="0.5" lineColor="#D1D5DB"/></box>
+                <textElement textAlignment="Center" verticalAlignment="Middle"><font size="7" isBold="true"/></textElement>
+                <text><![CDATA[ Qté]]></text>
+            </staticText>
+            <staticText>
+                <reportElement mode="Opaque" x="316" y="16" width="95" height="14" backcolor="#F9FAFB" forecolor="#374151" uuid="a1000032-0032-4032-8032-000000000032"/>
+                <box><pen lineWidth="0.5" lineColor="#D1D5DB"/></box>
+                <textElement verticalAlignment="Middle"><font size="7" isBold="true"/></textElement>
+                <text><![CDATA[ P.U.]]></text>
+            </staticText>
+            <staticText>
+                <reportElement mode="Opaque" x="411" y="16" width="144" height="14" backcolor="#F9FAFB" forecolor="#374151" uuid="a1000033-0033-4033-8033-000000000033"/>
+                <box><pen lineWidth="0.5" lineColor="#D1D5DB"/></box>
+                <textElement verticalAlignment="Middle"><font size="7" isBold="true"/></textElement>
+                <text><![CDATA[ Sous-total]]></text>
+            </staticText>
+        </band>
+    </columnHeader>
+
+    <detail>
+        <band height="16" splitType="Stretch">
+            <textField>
+                <reportElement x="0" y="0" width="24" height="14" uuid="a1000034-0034-4034-8034-000000000034"/>
+                <box leftPadding="2"><pen lineWidth="0.25" lineColor="#E5E7EB"/></box>
+                <textElement textAlignment="Center" verticalAlignment="Top"><font size="7"/></textElement>
+                <textFieldExpression><![CDATA[$F{numero}]]></textFieldExpression>
+            </textField>
+            <textField textAdjust="StretchHeight">
+                <reportElement x="24" y="0" width="190" height="14" uuid="a1000035-0035-4035-8035-000000000035"/>
+                <box leftPadding="3"><pen lineWidth="0.25" lineColor="#E5E7EB"/></box>
+                <textElement verticalAlignment="Top"><font size="7"/></textElement>
+                <textFieldExpression><![CDATA[$F{designation}]]></textFieldExpression>
+            </textField>
+            <textField textAdjust="StretchHeight">
+                <reportElement x="214" y="0" width="62" height="14" uuid="a1000036-0036-4036-8036-000000000036"/>
+                <box leftPadding="3"><pen lineWidth="0.25" lineColor="#E5E7EB"/></box>
+                <textElement verticalAlignment="Top"><font size="7"/></textElement>
+                <textFieldExpression><![CDATA[$F{categorie}]]></textFieldExpression>
+            </textField>
+            <textField>
+                <reportElement x="276" y="0" width="40" height="14" uuid="a1000037-0037-4037-8037-000000000037"/>
+                <box leftPadding="2"><pen lineWidth="0.25" lineColor="#E5E7EB"/></box>
+                <textElement textAlignment="Center" verticalAlignment="Top"><font size="7"/></textElement>
+                <textFieldExpression><![CDATA[$F{quantite}]]></textFieldExpression>
+            </textField>
+            <textField textAdjust="StretchHeight">
+                <reportElement x="316" y="0" width="95" height="14" uuid="a1000038-0038-4038-8038-000000000038"/>
+                <box leftPadding="3"><pen lineWidth="0.25" lineColor="#E5E7EB"/></box>
+                <textElement verticalAlignment="Top"><font size="7"/></textElement>
+                <textFieldExpression><![CDATA[$F{prixUnitaire}]]></textFieldExpression>
+            </textField>
+            <textField textAdjust="StretchHeight">
+                <reportElement x="411" y="0" width="144" height="14" uuid="a1000039-0039-4039-8039-000000000039"/>
+                <box leftPadding="3"><pen lineWidth="0.25" lineColor="#E5E7EB"/></box>
+                <textElement verticalAlignment="Top"><font size="7" isBold="true"/></textElement>
+                <textFieldExpression><![CDATA[$F{sousTotal}]]></textFieldExpression>
+            </textField>
+        </band>
+    </detail>
+
+    <pageFooter>
+        <band height="18">
+            <textField>
+                <reportElement x="0" y="2" width="555" height="14" uuid="a1000040-0040-4040-8040-000000000040"/>
+                <textElement textAlignment="Center"><font size="8"/></textElement>
+                <textFieldExpression><![CDATA["Page " + $V{PAGE_NUMBER} + " / " + $V{PAGE_COUNT} + " · " + $P{NOM_HOPITAL}]]></textFieldExpression>
+            </textField>
+        </band>
+    </pageFooter>
+
+    <summary>
+        <band height="250" splitType="Stretch">
+            <rectangle>
+                <reportElement mode="Transparent" x="285" y="8" width="270" height="88" uuid="a1000041-0041-4041-8041-000000000041"/>
+                <graphicElement><pen lineWidth="0.75" lineColor="#D1D5DB"/></graphicElement>
+            </rectangle>
+            <staticText>
+                <reportElement x="295" y="14" width="120" height="12" forecolor="#374151" uuid="a1000042-0042-4042-8042-000000000042"/>
+                <textElement><font size="8" isBold="true"/></textElement>
+                <text><![CDATA[Montant HT]]></text>
+            </staticText>
+            <textField>
+                <reportElement x="420" y="14" width="125" height="12" uuid="a1000043-0043-4043-8043-000000000043"/>
+                <textElement textAlignment="Right"><font size="8"/></textElement>
+                <textFieldExpression><![CDATA[$P{MONTANT_HT}]]></textFieldExpression>
+            </textField>
+            <staticText>
+                <reportElement x="295" y="28" width="120" height="12" forecolor="#374151" uuid="a1000044-0044-4044-8044-000000000044"/>
+                <textElement><font size="8" isBold="true"/></textElement>
+                <text><![CDATA[TVA]]></text>
+            </staticText>
+            <textField>
+                <reportElement x="420" y="28" width="125" height="12" uuid="a1000045-0045-4045-8045-000000000045"/>
+                <textElement textAlignment="Right"><font size="8"/></textElement>
+                <textFieldExpression><![CDATA[$P{TVA}]]></textFieldExpression>
+            </textField>
+            <staticText>
+                <reportElement x="295" y="44" width="120" height="14" forecolor="#111827" uuid="a1000046-0046-4046-8046-000000000046"/>
+                <textElement><font size="9" isBold="true"/></textElement>
+                <text><![CDATA[Total TTC]]></text>
+            </staticText>
+            <textField>
+                <reportElement x="420" y="44" width="125" height="14" uuid="a1000047-0047-4047-8047-000000000047"/>
+                <textElement textAlignment="Right"><font size="9" isBold="true"/></textElement>
+                <textFieldExpression><![CDATA[$P{MONTANT_TTC}]]></textFieldExpression>
+            </textField>
+            <staticText>
+                <reportElement x="295" y="62" width="120" height="12" forecolor="#374151" uuid="a1000048-0048-4048-8048-000000000048"/>
+                <textElement><font size="8" isBold="true"/></textElement>
+                <text><![CDATA[Déjà payé]]></text>
+            </staticText>
+            <textField>
+                <reportElement x="420" y="62" width="125" height="12" uuid="a1000049-0049-4049-8049-000000000049"/>
+                <textElement textAlignment="Right"><font size="8"/></textElement>
+                <textFieldExpression><![CDATA[$P{MONTANT_PAYE}]]></textFieldExpression>
+            </textField>
+            <staticText>
+                <reportElement x="295" y="78" width="120" height="14" forecolor="#374151" uuid="a1000050-0050-4050-8050-000000000050"/>
+                <textElement><font size="9" isBold="true"/></textElement>
+                <text><![CDATA[Reste à payer]]></text>
+            </staticText>
+            <textField>
+                <reportElement x="420" y="78" width="125" height="14" uuid="a1000051-0051-4051-8051-000000000051"/>
+                <textElement textAlignment="Right"><font size="9" isBold="true"/></textElement>
+                <textFieldExpression><![CDATA[$P{SOLDE}]]></textFieldExpression>
+            </textField>
+
+            <staticText>
+                <reportElement x="0" y="108" width="555" height="14" forecolor="#374151" uuid="a1000052-0052-4052-8052-000000000052"/>
+                <textElement textAlignment="Center"><font size="9" isBold="true"/></textElement>
+                <text><![CDATA[Vérification document — Code QR]]></text>
+            </staticText>
+            <image onErrorType="Blank" hAlign="Center">
+                <reportElement x="68" y="124" width="120" height="120" uuid="a1000053-0053-4053-8053-000000000053"/>
+                <imageExpression><![CDATA[$P{QR_CODE_IMAGE}]]></imageExpression>
+            </image>
+            <textField>
+                <reportElement x="200" y="130" width="355" height="40" forecolor="#6B7280" uuid="a1000054-0054-4054-8054-000000000054"/>
+                <textElement><font size="7" isItalic="true"/></textElement>
+                <textFieldExpression><![CDATA["Scannez le code QR pour vérifier l'authenticité de cette facture.\nRéférence : " + $P{QR_CODE_TEXTE} + "\n\nDocument confidentiel — établissement de santé Shambua Santé."]]></textFieldExpression>
+            </textField>
+            <staticText>
+                <reportElement x="0" y="200" width="555" height="16" forecolor="#9CA3AF" uuid="a1000055-0055-4055-8055-000000000055"/>
+                <textElement textAlignment="Center"><font size="7" isItalic="true"/></textElement>
+                <text><![CDATA[Merci de votre confiance. Conservez ce document pour vos démarches administratives et remboursements.]]></text>
+            </staticText>
+        </band>
+    </summary>
+</jasperReport>

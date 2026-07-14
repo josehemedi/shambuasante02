@@ -1,0 +1,495 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports"
+              xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+              xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd"
+              name="Liste_Patients"
+              pageWidth="842"
+              pageHeight="595"
+              orientation="Landscape"
+              columnWidth="802"
+              leftMargin="20"
+              rightMargin="20"
+              topMargin="20"
+              bottomMargin="20"
+              uuid="a1b2c3d4-e5f6-7890-abcd-ef1234567890">
+
+    <subDataset name="ChartDataset" uuid="b2c3d4e5-f6a7-8901-bcde-f12345678901">
+        <field name="label" class="java.lang.String"/>
+        <field name="value" class="java.lang.Long"/>
+    </subDataset>
+
+    <parameter name="NOM_HOPITAL" class="java.lang.String"/>
+    <parameter name="LOGO_HOPITAL" class="java.io.InputStream"/>
+    <parameter name="ID_TENANT" class="java.lang.String"/>
+    <parameter name="SOUS_DOMAINE" class="java.lang.String"/>
+    <parameter name="INFOS_ETABLISSEMENT" class="java.lang.String"/>
+    <parameter name="DATE_GENERATION" class="java.util.Date"/>
+    <parameter name="DATE_RAPPORT" class="java.lang.String"/>
+    <parameter name="REFERENCE_RAPPORT" class="java.lang.String"/>
+    <parameter name="GENERE_PAR" class="java.lang.String"/>
+    <parameter name="PERIMETRE_RAPPORT" class="java.lang.String"/>
+    <parameter name="KPI_TOTAL" class="java.lang.String"/>
+    <parameter name="KPI_ACTIFS" class="java.lang.String"/>
+    <parameter name="KPI_ADMIS" class="java.lang.String"/>
+    <parameter name="KPI_AMBULATOIRES" class="java.lang.String"/>
+    <parameter name="KPI_COLUMN_DS" class="net.sf.jasperreports.engine.JRDataSource"/>
+    <parameter name="STATUT_CLINIQUE_DS" class="net.sf.jasperreports.engine.JRDataSource"/>
+    <parameter name="ACTIF_DS" class="net.sf.jasperreports.engine.JRDataSource"/>
+    <parameter name="SEXE_DS" class="net.sf.jasperreports.engine.JRDataSource"/>
+    <parameter name="BARCODE_IMAGE" class="java.awt.image.BufferedImage"/>
+    <parameter name="CODE_BARRE_TEXTE" class="java.lang.String"/>
+
+    <field name="numero" class="java.lang.String"/>
+    <field name="codePatient" class="java.lang.String"/>
+    <field name="nomComplet" class="java.lang.String"/>
+    <field name="sexe" class="java.lang.String"/>
+    <field name="dateNaissance" class="java.lang.String"/>
+    <field name="age" class="java.lang.String"/>
+    <field name="telephone" class="java.lang.String"/>
+    <field name="email" class="java.lang.String"/>
+    <field name="groupeSanguin" class="java.lang.String"/>
+    <field name="estActif" class="java.lang.String"/>
+    <field name="statutClinique" class="java.lang.String"/>
+    <field name="dateEnregistrement" class="java.lang.String"/>
+    <field name="profession" class="java.lang.String"/>
+    <field name="numeroMatricule" class="java.lang.String"/>
+
+    <title>
+        <band height="100" splitType="Stretch">
+            <image onErrorType="Blank">
+                <reportElement x="0" y="0" width="50" height="50" uuid="c1d2e3f4-a5b6-7890-cdef-123456789abc"/>
+                <imageExpression><![CDATA[$P{LOGO_HOPITAL}]]></imageExpression>
+            </image>
+            <textField>
+                <reportElement x="58" y="0" width="744" height="22" forecolor="#111827" uuid="c2d3e4f5-a6b7-8901-cdef-123456789bcd"/>
+                <textElement verticalAlignment="Middle"><font size="14" isBold="true"/></textElement>
+                <textFieldExpression><![CDATA[$P{NOM_HOPITAL}]]></textFieldExpression>
+            </textField>
+            <staticText>
+                <reportElement x="58" y="24" width="744" height="18" forecolor="#111827" uuid="c3d4e5f6-a7b8-9012-cdef-123456789cde"/>
+                <textElement><font size="11" isBold="true"/></textElement>
+                <text><![CDATA[RAPPORT DE GESTION DES PATIENTS — REGISTRE ÉTABLISSEMENT]]></text>
+            </staticText>
+            <textField>
+                <reportElement x="58" y="46" width="744" height="12" uuid="c4d5e6f7-a8b9-0123-def0-234567890def"/>
+                <textElement><font size="7" isItalic="true"/></textElement>
+                <textFieldExpression><![CDATA["Tenant #" + ($P{ID_TENANT} != null ? $P{ID_TENANT} : "—") + " · " + ($P{SOUS_DOMAINE} != null ? $P{SOUS_DOMAINE} : "—")]]></textFieldExpression>
+            </textField>
+            <textField>
+                <reportElement x="58" y="58" width="744" height="12" uuid="c5d6e7f8-a9b0-1234-ef01-345678901ef0"/>
+                <textElement><font size="7"/></textElement>
+                <textFieldExpression><![CDATA[$P{INFOS_ETABLISSEMENT} != null ? $P{INFOS_ETABLISSEMENT} : "—"]]></textFieldExpression>
+            </textField>
+            <textField>
+                <reportElement x="58" y="72" width="744" height="12" uuid="c6d7e8f9-a0b1-2345-f012-456789012f01"/>
+                <textElement><font size="7" isItalic="true"/></textElement>
+                <textFieldExpression><![CDATA["Réf. " + $P{REFERENCE_RAPPORT} + " · Généré le " + new java.text.SimpleDateFormat("dd/MM/yyyy HH:mm").format($P{DATE_GENERATION}) + " · Par " + $P{GENERE_PAR}]]></textFieldExpression>
+            </textField>
+            <line>
+                <reportElement x="0" y="90" width="802" height="1" forecolor="#374151" uuid="c7d8e9f0-a1b2-3456-0123-567890123012"/>
+            </line>
+        </band>
+    </title>
+
+    <pageHeader>
+        <band height="72" splitType="Stretch">
+            <rectangle>
+                <reportElement mode="Transparent" x="0" y="0" width="190" height="32" uuid="d1e2f3a4-b5c6-7890-def1-234567890abc"/>
+                <graphicElement><pen lineWidth="0.5" lineColor="#D1D5DB"/></graphicElement>
+            </rectangle>
+            <staticText>
+                <reportElement x="8" y="4" width="174" height="10" forecolor="#374151" uuid="d2e3f4a5-b6c7-8901-ef12-345678901bcd"/>
+                <textElement><font size="7" isBold="true"/></textElement>
+                <text><![CDATA[Total patients]]></text>
+            </staticText>
+            <textField>
+                <reportElement x="8" y="14" width="174" height="16" forecolor="#111827" uuid="d3e4f5a6-b7c8-9012-f012-456789012cde"/>
+                <textElement textAlignment="Center"><font size="13" isBold="true"/></textElement>
+                <textFieldExpression><![CDATA[$P{KPI_TOTAL}]]></textFieldExpression>
+            </textField>
+
+            <rectangle>
+                <reportElement mode="Transparent" x="200" y="0" width="190" height="32" uuid="d4e5f6a7-b8c9-0123-0123-567890123def"/>
+                <graphicElement><pen lineWidth="0.5" lineColor="#D1D5DB"/></graphicElement>
+            </rectangle>
+            <staticText>
+                <reportElement x="208" y="4" width="174" height="10" forecolor="#374151" uuid="d5e6f7a8-b9c0-1234-1234-678901234ef0"/>
+                <textElement><font size="7" isBold="true"/></textElement>
+                <text><![CDATA[Patients actifs]]></text>
+            </staticText>
+            <textField>
+                <reportElement x="208" y="14" width="174" height="16" forecolor="#111827" uuid="d6e7f8a9-b0c1-2345-2345-789012345678"/>
+                <textElement textAlignment="Center"><font size="13" isBold="true"/></textElement>
+                <textFieldExpression><![CDATA[$P{KPI_ACTIFS}]]></textFieldExpression>
+            </textField>
+
+            <rectangle>
+                <reportElement mode="Transparent" x="400" y="0" width="190" height="32" uuid="d7e8f9a0-b1c2-3456-3456-890123456789"/>
+                <graphicElement><pen lineWidth="0.5" lineColor="#D1D5DB"/></graphicElement>
+            </rectangle>
+            <staticText>
+                <reportElement x="408" y="4" width="174" height="10" forecolor="#111827" uuid="d8e9f0a1-b2c3-4567-4567-901234567890"/>
+                <textElement><font size="7" isBold="true"/></textElement>
+                <text><![CDATA[Admis]]></text>
+            </staticText>
+            <textField>
+                <reportElement x="408" y="14" width="174" height="16" forecolor="#111827" uuid="d9f0a1b2-c3d4-5678-5678-012345678901"/>
+                <textElement textAlignment="Center"><font size="13" isBold="true"/></textElement>
+                <textFieldExpression><![CDATA[$P{KPI_ADMIS}]]></textFieldExpression>
+            </textField>
+
+            <rectangle>
+                <reportElement mode="Transparent" x="600" y="0" width="202" height="32" uuid="e0a1b2c3-d4e5-6789-6789-123456789012"/>
+                <graphicElement><pen lineWidth="0.5" lineColor="#D1D5DB"/></graphicElement>
+            </rectangle>
+            <staticText>
+                <reportElement x="608" y="4" width="186" height="10" forecolor="#111827" uuid="e1b2c3d4-e5f6-7890-abcd-ef1234567890"/>
+                <textElement><font size="7" isBold="true"/></textElement>
+                <text><![CDATA[Ambulatoires]]></text>
+            </staticText>
+            <textField>
+                <reportElement x="608" y="14" width="186" height="16" forecolor="#111827" uuid="e2b3c4d5-f6a7-8901-bcde-f12345678901"/>
+                <textElement textAlignment="Center"><font size="13" isBold="true"/></textElement>
+                <textFieldExpression><![CDATA[$P{KPI_AMBULATOIRES}]]></textFieldExpression>
+            </textField>
+
+            <textField>
+                <reportElement mode="Opaque" x="0" y="38" width="802" height="14" backcolor="#F9FAFB" forecolor="#374151" uuid="e3b4c5d6-f7a8-9012-cdef-123456789012"/>
+                <box leftPadding="6"><pen lineWidth="0.25" lineColor="#D1D5DB"/></box>
+                <textElement verticalAlignment="Middle"><font size="8" isBold="true"/></textElement>
+                <textFieldExpression><![CDATA["Périmètre : " + $P{PERIMETRE_RAPPORT} + " · Date du rapport : " + $P{DATE_RAPPORT}]]></textFieldExpression>
+            </textField>
+
+            <staticText>
+                <reportElement x="0" y="56" width="802" height="14" forecolor="#111827" uuid="e4b5c6d7-f8a9-0123-def0-234567890123"/>
+                <textElement verticalAlignment="Middle"><font size="9" isBold="true"/></textElement>
+                <text><![CDATA[  Registre détaillé des patients]]></text>
+            </staticText>
+        </band>
+    </pageHeader>
+
+    <columnHeader>
+        <band height="16">
+            <staticText>
+                <reportElement x="0" y="0" width="22" height="14" forecolor="#111827" uuid="f1a2b3c4-d5e6-7890-abcd-ef1234567890"/>
+                <box><pen lineWidth="0.5" lineColor="#D1D5DB"/></box>
+                <textElement textAlignment="Center" verticalAlignment="Middle"><font size="6" isBold="true"/></textElement>
+                <text><![CDATA[#]]></text>
+            </staticText>
+            <staticText>
+                <reportElement x="22" y="0" width="58" height="14" forecolor="#111827" uuid="f2a3b4c5-d6e7-8901-bcde-f12345678901"/>
+                <box><pen lineWidth="0.5" lineColor="#D1D5DB"/></box>
+                <textElement verticalAlignment="Middle"><font size="6" isBold="true"/></textElement>
+                <text><![CDATA[ Code]]></text>
+            </staticText>
+            <staticText>
+                <reportElement x="80" y="0" width="88" height="14" forecolor="#111827" uuid="f3a4b5c6-d7e8-9012-cdef-123456789012"/>
+                <box><pen lineWidth="0.5" lineColor="#D1D5DB"/></box>
+                <textElement verticalAlignment="Middle"><font size="6" isBold="true"/></textElement>
+                <text><![CDATA[ Patient]]></text>
+            </staticText>
+            <staticText>
+                <reportElement x="168" y="0" width="38" height="14" forecolor="#111827" uuid="f4a5b6c7-d8e9-0123-def0-234567890123"/>
+                <box><pen lineWidth="0.5" lineColor="#D1D5DB"/></box>
+                <textElement verticalAlignment="Middle"><font size="6" isBold="true"/></textElement>
+                <text><![CDATA[ Sexe]]></text>
+            </staticText>
+            <staticText>
+                <reportElement x="206" y="0" width="52" height="14" forecolor="#111827" uuid="f5a6b7c8-d9e0-1234-ef01-345678901234"/>
+                <box><pen lineWidth="0.5" lineColor="#D1D5DB"/></box>
+                <textElement verticalAlignment="Middle"><font size="6" isBold="true"/></textElement>
+                <text><![CDATA[ Naissance]]></text>
+            </staticText>
+            <staticText>
+                <reportElement x="258" y="0" width="32" height="14" forecolor="#111827" uuid="f6a7b8c9-d0e1-2345-f012-456789012345"/>
+                <box><pen lineWidth="0.5" lineColor="#D1D5DB"/></box>
+                <textElement verticalAlignment="Middle"><font size="6" isBold="true"/></textElement>
+                <text><![CDATA[ Âge]]></text>
+            </staticText>
+            <staticText>
+                <reportElement x="290" y="0" width="68" height="14" forecolor="#111827" uuid="f7a8b9c0-e1f2-3456-0123-567890123456"/>
+                <box><pen lineWidth="0.5" lineColor="#D1D5DB"/></box>
+                <textElement verticalAlignment="Middle"><font size="6" isBold="true"/></textElement>
+                <text><![CDATA[ Téléphone]]></text>
+            </staticText>
+            <staticText>
+                <reportElement x="358" y="0" width="92" height="14" forecolor="#111827" uuid="f8a9b0c1-f2a3-4567-1234-678901234567"/>
+                <box><pen lineWidth="0.5" lineColor="#D1D5DB"/></box>
+                <textElement verticalAlignment="Middle"><font size="6" isBold="true"/></textElement>
+                <text><![CDATA[ E-mail]]></text>
+            </staticText>
+            <staticText>
+                <reportElement x="450" y="0" width="34" height="14" forecolor="#111827" uuid="f9a0b1c2-f3a4-5678-2345-789012345678"/>
+                <box><pen lineWidth="0.5" lineColor="#D1D5DB"/></box>
+                <textElement verticalAlignment="Middle"><font size="6" isBold="true"/></textElement>
+                <text><![CDATA[ GS]]></text>
+            </staticText>
+            <staticText>
+                <reportElement x="484" y="0" width="38" height="14" forecolor="#111827" uuid="a0b1c2d3-f4a5-6789-3456-890123456789"/>
+                <box><pen lineWidth="0.5" lineColor="#D1D5DB"/></box>
+                <textElement verticalAlignment="Middle"><font size="6" isBold="true"/></textElement>
+                <text><![CDATA[ Actif]]></text>
+            </staticText>
+            <staticText>
+                <reportElement x="522" y="0" width="62" height="14" forecolor="#111827" uuid="a1b2c3d4-e5f6-7890-abcd-ef1234567890"/>
+                <box><pen lineWidth="0.5" lineColor="#D1D5DB"/></box>
+                <textElement verticalAlignment="Middle"><font size="6" isBold="true"/></textElement>
+                <text><![CDATA[ Statut clin.]]></text>
+            </staticText>
+            <staticText>
+                <reportElement x="584" y="0" width="68" height="14" forecolor="#111827" uuid="a2b3c4d5-f6a7-8901-bcde-f12345678901"/>
+                <box><pen lineWidth="0.5" lineColor="#D1D5DB"/></box>
+                <textElement verticalAlignment="Middle"><font size="6" isBold="true"/></textElement>
+                <text><![CDATA[ Enregistré]]></text>
+            </staticText>
+            <staticText>
+                <reportElement x="652" y="0" width="72" height="14" forecolor="#111827" uuid="a3b4c5d6-f7a8-9012-cdef-123456789012"/>
+                <box><pen lineWidth="0.5" lineColor="#D1D5DB"/></box>
+                <textElement verticalAlignment="Middle"><font size="6" isBold="true"/></textElement>
+                <text><![CDATA[ Profession]]></text>
+            </staticText>
+            <staticText>
+                <reportElement x="724" y="0" width="78" height="14" forecolor="#111827" uuid="a4b5c6d7-f8a9-0123-def0-234567890123"/>
+                <box><pen lineWidth="0.5" lineColor="#D1D5DB"/></box>
+                <textElement verticalAlignment="Middle"><font size="6" isBold="true"/></textElement>
+                <text><![CDATA[ Matricule]]></text>
+            </staticText>
+        </band>
+    </columnHeader>
+
+    <detail>
+        <band height="14" splitType="Stretch">
+            <textField textAdjust="StretchHeight">
+                <reportElement x="0" y="0" width="22" height="12" uuid="b1c2d3e4-f5a6-7890-abcd-ef1234567890"/>
+                <box leftPadding="2"><pen lineWidth="0.25" lineColor="#E5E7EB"/></box>
+                <textElement textAlignment="Center" verticalAlignment="Top"><font size="6"/></textElement>
+                <textFieldExpression><![CDATA[$F{numero}]]></textFieldExpression>
+            </textField>
+            <textField textAdjust="StretchHeight">
+                <reportElement x="22" y="0" width="58" height="12" uuid="b2c3d4e5-f6a7-8901-bcde-f12345678901"/>
+                <box leftPadding="2"><pen lineWidth="0.25" lineColor="#E5E7EB"/></box>
+                <textElement verticalAlignment="Top"><font size="6" isBold="true"/></textElement>
+                <textFieldExpression><![CDATA[$F{codePatient}]]></textFieldExpression>
+            </textField>
+            <textField textAdjust="StretchHeight">
+                <reportElement x="80" y="0" width="88" height="12" uuid="b3c4d5e6-f7a8-9012-cdef-123456789012"/>
+                <box leftPadding="2"><pen lineWidth="0.25" lineColor="#E5E7EB"/></box>
+                <textElement verticalAlignment="Top"><font size="6"/></textElement>
+                <textFieldExpression><![CDATA[$F{nomComplet}]]></textFieldExpression>
+            </textField>
+            <textField textAdjust="StretchHeight">
+                <reportElement x="168" y="0" width="38" height="12" uuid="b4c5d6e7-f8a9-0123-def0-234567890123"/>
+                <box leftPadding="2"><pen lineWidth="0.25" lineColor="#E5E7EB"/></box>
+                <textElement verticalAlignment="Top"><font size="6"/></textElement>
+                <textFieldExpression><![CDATA[$F{sexe}]]></textFieldExpression>
+            </textField>
+            <textField textAdjust="StretchHeight">
+                <reportElement x="206" y="0" width="52" height="12" uuid="b5c6d7e8-f9a0-1234-ef01-345678901234"/>
+                <box leftPadding="2"><pen lineWidth="0.25" lineColor="#E5E7EB"/></box>
+                <textElement verticalAlignment="Top"><font size="6"/></textElement>
+                <textFieldExpression><![CDATA[$F{dateNaissance}]]></textFieldExpression>
+            </textField>
+            <textField textAdjust="StretchHeight">
+                <reportElement x="258" y="0" width="32" height="12" uuid="b6c7d8e9-f0a1-2345-f012-456789012345"/>
+                <box leftPadding="2"><pen lineWidth="0.25" lineColor="#E5E7EB"/></box>
+                <textElement verticalAlignment="Top"><font size="6"/></textElement>
+                <textFieldExpression><![CDATA[$F{age}]]></textFieldExpression>
+            </textField>
+            <textField textAdjust="StretchHeight">
+                <reportElement x="290" y="0" width="68" height="12" uuid="b7c8d9e0-a1b2-3456-0123-567890123456"/>
+                <box leftPadding="2"><pen lineWidth="0.25" lineColor="#E5E7EB"/></box>
+                <textElement verticalAlignment="Top"><font size="6"/></textElement>
+                <textFieldExpression><![CDATA[$F{telephone}]]></textFieldExpression>
+            </textField>
+            <textField textAdjust="StretchHeight">
+                <reportElement x="358" y="0" width="92" height="12" uuid="b8c9d0e1-b2c3-4567-1234-678901234567"/>
+                <box leftPadding="2"><pen lineWidth="0.25" lineColor="#E5E7EB"/></box>
+                <textElement verticalAlignment="Top"><font size="6"/></textElement>
+                <textFieldExpression><![CDATA[$F{email}]]></textFieldExpression>
+            </textField>
+            <textField textAdjust="StretchHeight">
+                <reportElement x="450" y="0" width="34" height="12" uuid="b9d0e1f2-c3d4-5678-2345-789012345678"/>
+                <box leftPadding="2"><pen lineWidth="0.25" lineColor="#E5E7EB"/></box>
+                <textElement verticalAlignment="Top"><font size="6"/></textElement>
+                <textFieldExpression><![CDATA[$F{groupeSanguin}]]></textFieldExpression>
+            </textField>
+            <textField textAdjust="StretchHeight">
+                <reportElement x="484" y="0" width="38" height="12" uuid="c0e1f2a3-d4e5-6789-3456-890123456789"/>
+                <box leftPadding="2"><pen lineWidth="0.25" lineColor="#E5E7EB"/></box>
+                <textElement verticalAlignment="Top"><font size="6"/></textElement>
+                <textFieldExpression><![CDATA[$F{estActif}]]></textFieldExpression>
+            </textField>
+            <textField textAdjust="StretchHeight">
+                <reportElement x="522" y="0" width="62" height="12" uuid="c1f2a3b4-e5f6-7890-abcd-ef1234567890"/>
+                <box leftPadding="2"><pen lineWidth="0.25" lineColor="#E5E7EB"/></box>
+                <textElement verticalAlignment="Top"><font size="6"/></textElement>
+                <textFieldExpression><![CDATA[$F{statutClinique}]]></textFieldExpression>
+            </textField>
+            <textField textAdjust="StretchHeight">
+                <reportElement x="584" y="0" width="68" height="12" uuid="c2a3b4c5-f6a7-8901-bcde-f12345678901"/>
+                <box leftPadding="2"><pen lineWidth="0.25" lineColor="#E5E7EB"/></box>
+                <textElement verticalAlignment="Top"><font size="6"/></textElement>
+                <textFieldExpression><![CDATA[$F{dateEnregistrement}]]></textFieldExpression>
+            </textField>
+            <textField textAdjust="StretchHeight">
+                <reportElement x="652" y="0" width="72" height="12" uuid="c3b4c5d6-f7a8-9012-cdef-123456789012"/>
+                <box leftPadding="2"><pen lineWidth="0.25" lineColor="#E5E7EB"/></box>
+                <textElement verticalAlignment="Top"><font size="6"/></textElement>
+                <textFieldExpression><![CDATA[$F{profession}]]></textFieldExpression>
+            </textField>
+            <textField textAdjust="StretchHeight">
+                <reportElement x="724" y="0" width="78" height="12" uuid="c4c5d6e7-f8a9-0123-def0-234567890123"/>
+                <box leftPadding="2"><pen lineWidth="0.25" lineColor="#E5E7EB"/></box>
+                <textElement verticalAlignment="Top"><font size="6"/></textElement>
+                <textFieldExpression><![CDATA[$F{numeroMatricule}]]></textFieldExpression>
+            </textField>
+        </band>
+    </detail>
+
+    <pageFooter>
+        <band height="18">
+            <textField>
+                <reportElement x="0" y="2" width="802" height="12" uuid="d1e2f3a4-b5c6-7890-def1-234567890abc"/>
+                <textElement textAlignment="Center"><font size="7"/></textElement>
+                <textFieldExpression><![CDATA["Page " + $V{PAGE_NUMBER} + " / " + $V{PAGE_COUNT} + " · " + $P{NOM_HOPITAL} + " (tenant #" + $P{ID_TENANT} + ")"]]></textFieldExpression>
+            </textField>
+        </band>
+    </pageFooter>
+
+    <summary>
+        <band height="420" splitType="Stretch">
+            <break>
+                <reportElement x="0" y="0" width="802" height="1" uuid="e1f2a3b4-c5d6-7890-cdef-123456789abc"/>
+            </break>
+            <rectangle>
+                <reportElement mode="Transparent" x="0" y="8" width="802" height="400" uuid="e2f3a4b5-c6d7-8901-ef12-345678901bcd"/>
+                <graphicElement><pen lineWidth="0.75" lineColor="#D1D5DB"/></graphicElement>
+            </rectangle>
+            <staticText>
+                <reportElement x="0" y="14" width="802" height="18" forecolor="#374151" uuid="e3f4a5b6-c7d8-9012-f012-456789012cde"/>
+                <textElement textAlignment="Center"><font size="11" isBold="true"/></textElement>
+                <text><![CDATA[Synthèse graphique — répartition des patients]]></text>
+            </staticText>
+
+            <staticText>
+                <reportElement mode="Opaque" x="8" y="38" width="260" height="14" backcolor="#F9FAFB" forecolor="#374151" uuid="e4f5a6b7-d8e9-0123-0123-567890123def"/>
+                <textElement textAlignment="Center"><font size="8" isBold="true"/></textElement>
+                <text><![CDATA[Indicateurs clés (histogramme)]]></text>
+            </staticText>
+            <barChart>
+                <chart evaluationTime="Report" theme="default">
+                    <reportElement x="10" y="54" width="248" height="150" uuid="e5f6a7b8-c9d0-1234-1234-678901234ef0"/>
+                </chart>
+                <categoryDataset>
+                    <dataset resetType="Report">
+                        <datasetRun subDataset="ChartDataset">
+                            <dataSourceExpression><![CDATA[$P{KPI_COLUMN_DS}]]></dataSourceExpression>
+                        </datasetRun>
+                    </dataset>
+                    <categorySeries>
+                        <seriesExpression><![CDATA["Patients"]]></seriesExpression>
+                        <categoryExpression><![CDATA[$F{label}]]></categoryExpression>
+                        <valueExpression><![CDATA[$F{value}]]></valueExpression>
+                    </categorySeries>
+                </categoryDataset>
+                <barPlot isShowLabels="true">
+                    <plot orientation="Vertical"/>
+                </barPlot>
+            </barChart>
+
+            <staticText>
+                <reportElement mode="Opaque" x="278" y="38" width="260" height="14" backcolor="#F9FAFB" forecolor="#374151" uuid="e6a7b8c9-d0e1-2345-2345-789012345678"/>
+                <textElement textAlignment="Center"><font size="8" isBold="true"/></textElement>
+                <text><![CDATA[Statut clinique (camembert)]]></text>
+            </staticText>
+            <pieChart>
+                <chart evaluationTime="Report" theme="default">
+                    <reportElement x="285" y="54" width="248" height="150" uuid="e7b8c9d0-e1f2-3456-3456-890123456789"/>
+                </chart>
+                <pieDataset>
+                    <dataset resetType="Report">
+                        <datasetRun subDataset="ChartDataset">
+                            <dataSourceExpression><![CDATA[$P{STATUT_CLINIQUE_DS}]]></dataSourceExpression>
+                        </datasetRun>
+                    </dataset>
+                    <keyExpression><![CDATA[$F{label}]]></keyExpression>
+                    <valueExpression><![CDATA[$F{value}]]></valueExpression>
+                </pieDataset>
+                <piePlot>
+                    <plot/>
+                </piePlot>
+            </pieChart>
+
+            <staticText>
+                <reportElement mode="Opaque" x="546" y="38" width="248" height="14" backcolor="#F9FAFB" forecolor="#374151" uuid="e8c9d0e1-f2a3-4567-4567-901234567890"/>
+                <textElement textAlignment="Center"><font size="8" isBold="true"/></textElement>
+                <text><![CDATA[Répartition par sexe (camembert)]]></text>
+            </staticText>
+            <pieChart>
+                <chart evaluationTime="Report" theme="default">
+                    <reportElement x="553" y="54" width="240" height="150" uuid="e9d0e1f2-a3b4-5678-5678-012345678901"/>
+                </chart>
+                <pieDataset>
+                    <dataset resetType="Report">
+                        <datasetRun subDataset="ChartDataset">
+                            <dataSourceExpression><![CDATA[$P{SEXE_DS}]]></dataSourceExpression>
+                        </datasetRun>
+                    </dataset>
+                    <keyExpression><![CDATA[$F{label}]]></keyExpression>
+                    <valueExpression><![CDATA[$F{value}]]></valueExpression>
+                </pieDataset>
+                <piePlot>
+                    <plot/>
+                </piePlot>
+            </pieChart>
+
+            <staticText>
+                <reportElement x="8" y="214" width="260" height="14" forecolor="#111827" uuid="f0e1f2a3-b4c5-6789-6789-123456789012"/>
+                <textElement textAlignment="Center"><font size="8" isBold="true"/></textElement>
+                <text><![CDATA[Actifs vs inactifs (barres)]]></text>
+            </staticText>
+            <barChart>
+                <chart evaluationTime="Report" theme="default">
+                    <reportElement x="10" y="230" width="248" height="130" uuid="f1f2a3b4-c5d6-7890-abcd-ef1234567890"/>
+                </chart>
+                <categoryDataset>
+                    <dataset resetType="Report">
+                        <datasetRun subDataset="ChartDataset">
+                            <dataSourceExpression><![CDATA[$P{ACTIF_DS}]]></dataSourceExpression>
+                        </datasetRun>
+                    </dataset>
+                    <categorySeries>
+                        <seriesExpression><![CDATA["Statut"]]></seriesExpression>
+                        <categoryExpression><![CDATA[$F{label}]]></categoryExpression>
+                        <valueExpression><![CDATA[$F{value}]]></valueExpression>
+                    </categorySeries>
+                </categoryDataset>
+                <barPlot isShowLabels="true">
+                    <plot orientation="Horizontal"/>
+                </barPlot>
+            </barChart>
+
+            <image onErrorType="Blank">
+                <reportElement x="285" y="230" width="240" height="48" uuid="f2a3b4c5-d6e7-8901-bcde-f12345678901"/>
+                <imageExpression><![CDATA[$P{BARCODE_IMAGE}]]></imageExpression>
+            </image>
+            <textField>
+                <reportElement x="285" y="282" width="240" height="12" uuid="f3a4b5c6-d7e8-9012-cdef-123456789012"/>
+                <textElement textAlignment="Center"><font size="7"/></textElement>
+                <textFieldExpression><![CDATA[$P{CODE_BARRE_TEXTE}]]></textFieldExpression>
+            </textField>
+
+            <textField>
+                <reportElement x="0" y="330" width="802" height="14" forecolor="#374151" uuid="f4a5b6c7-d8e9-0123-def0-234567890123"/>
+                <textElement textAlignment="Center"><font size="8" isBold="true"/></textElement>
+                <textFieldExpression><![CDATA["Document confidentiel — " + $P{NOM_HOPITAL} + " (tenant #" + $P{ID_TENANT} + ")"]]></textFieldExpression>
+            </textField>
+            <staticText>
+                <reportElement x="8" y="348" width="786" height="28" forecolor="#6B7280" uuid="f5a6b7c8-d9e0-1234-ef01-345678901234"/>
+                <textElement textAlignment="Center"><font size="7" isItalic="true"/></textElement>
+                <text><![CDATA[Registre généré automatiquement depuis la gestion des patients ShambuaSanté.
+Données isolées par établissement (multi-tenant SaaS). Ne pas diffuser sans autorisation.]]></text>
+            </staticText>
+        </band>
+    </summary>
+</jasperReport>

@@ -1,0 +1,273 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports"
+              xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+              xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd"
+              name="Abonnements_Paiements"
+              pageWidth="595"
+              pageHeight="842"
+              columnWidth="555"
+              leftMargin="20"
+              rightMargin="20"
+              topMargin="20"
+              bottomMargin="20"
+              uuid="b2000001-0001-4001-8001-000000000001">
+
+    <parameter name="NOM_HOPITAL" class="java.lang.String"/>
+    <parameter name="LOGO_HOPITAL" class="java.io.InputStream"/>
+    <parameter name="ID_TENANT" class="java.lang.String"/>
+    <parameter name="SOUS_DOMAINE" class="java.lang.String"/>
+    <parameter name="INFOS_ETABLISSEMENT" class="java.lang.String"/>
+    <parameter name="DATE_GENERATION" class="java.util.Date"/>
+    <parameter name="REFERENCE_RAPPORT" class="java.lang.String"/>
+    <parameter name="GENERE_PAR" class="java.lang.String"/>
+    <parameter name="PLAN_ACTUEL" class="java.lang.String"/>
+    <parameter name="NB_PAIEMENTS" class="java.lang.String"/>
+    <parameter name="TOTAL_PAYE" class="java.lang.String"/>
+    <parameter name="PERIODE_RAPPORT" class="java.lang.String"/>
+
+    <field name="numero" class="java.lang.String"/>
+    <field name="reference" class="java.lang.String"/>
+    <field name="planNom" class="java.lang.String"/>
+    <field name="montant" class="java.lang.String"/>
+    <field name="statut" class="java.lang.String"/>
+    <field name="datePaiement" class="java.lang.String"/>
+    <field name="dateEcheance" class="java.lang.String"/>
+    <field name="typePaiement" class="java.lang.String"/>
+
+    <title>
+        <band height="98" splitType="Stretch">
+            <line>
+                <reportElement x="0" y="0" width="555" height="1" forecolor="#374151" uuid="b2000002-0002-4002-8002-000000000002"/>
+            </line>
+            <image onErrorType="Blank">
+                <reportElement x="0" y="8" width="46" height="46" uuid="b2000003-0003-4003-8003-000000000003"/>
+                <imageExpression><![CDATA[$P{LOGO_HOPITAL}]]></imageExpression>
+            </image>
+            <textField>
+                <reportElement x="54" y="8" width="501" height="20" forecolor="#111827" uuid="b2000004-0004-4004-8004-000000000004"/>
+                <textElement verticalAlignment="Middle"><font size="14" isBold="true"/></textElement>
+                <textFieldExpression><![CDATA[$P{NOM_HOPITAL}]]></textFieldExpression>
+            </textField>
+            <staticText>
+                <reportElement x="54" y="30" width="501" height="16" forecolor="#374151" uuid="b2000005-0005-4005-8005-000000000005"/>
+                <textElement><font size="10" isBold="true"/></textElement>
+                <text><![CDATA[Rapport des paiements d'abonnement SaaS — Shambua Santé]]></text>
+            </staticText>
+            <textField>
+                <reportElement x="54" y="50" width="501" height="12" forecolor="#6B7280" uuid="b2000006-0006-4006-8006-000000000006"/>
+                <textElement><font size="7"/></textElement>
+                <textFieldExpression><![CDATA["Tenant #" + ($P{ID_TENANT} != null ? $P{ID_TENANT} : "—") + " · " + ($P{SOUS_DOMAINE} != null ? $P{SOUS_DOMAINE} : "—")]]></textFieldExpression>
+            </textField>
+            <textField>
+                <reportElement x="54" y="62" width="501" height="12" forecolor="#6B7280" uuid="b2000007-0007-4007-8007-000000000007"/>
+                <textElement><font size="7"/></textElement>
+                <textFieldExpression><![CDATA[$P{INFOS_ETABLISSEMENT} != null ? $P{INFOS_ETABLISSEMENT} : "—"]]></textFieldExpression>
+            </textField>
+            <textField>
+                <reportElement x="54" y="74" width="501" height="12" forecolor="#9CA3AF" uuid="b2000008-0008-4008-8008-000000000008"/>
+                <textElement><font size="7" isItalic="true"/></textElement>
+                <textFieldExpression><![CDATA["Réf. " + $P{REFERENCE_RAPPORT} + " · Généré le " + new java.text.SimpleDateFormat("dd/MM/yyyy HH:mm").format($P{DATE_GENERATION}) + " · Par " + $P{GENERE_PAR}]]></textFieldExpression>
+            </textField>
+            <line>
+                <reportElement x="0" y="92" width="555" height="1" forecolor="#E5E7EB" uuid="b200003a-003a-403a-803a-00000000003a"/>
+            </line>
+        </band>
+    </title>
+
+    <pageHeader>
+        <band height="52" splitType="Stretch">
+            <rectangle>
+                <reportElement mode="Transparent" x="0" y="4" width="180" height="40" uuid="b2000009-0009-4009-8009-000000000009"/>
+                <graphicElement><pen lineWidth="0.5" lineColor="#D1D5DB"/></graphicElement>
+            </rectangle>
+            <staticText>
+                <reportElement x="8" y="10" width="164" height="12" forecolor="#6B7280" uuid="b2000010-0010-4010-8010-000000000010"/>
+                <textElement><font size="7" isBold="true"/></textElement>
+                <text><![CDATA[FORFAIT ACTUEL]]></text>
+            </staticText>
+            <textField>
+                <reportElement x="8" y="24" width="164" height="14" forecolor="#111827" uuid="b2000011-0011-4011-8011-000000000011"/>
+                <textElement><font size="10" isBold="true"/></textElement>
+                <textFieldExpression><![CDATA[$P{PLAN_ACTUEL}]]></textFieldExpression>
+            </textField>
+
+            <rectangle>
+                <reportElement mode="Transparent" x="188" y="4" width="180" height="40" uuid="b2000012-0012-4012-8012-000000000012"/>
+                <graphicElement><pen lineWidth="0.5" lineColor="#D1D5DB"/></graphicElement>
+            </rectangle>
+            <staticText>
+                <reportElement x="196" y="10" width="164" height="12" forecolor="#6B7280" uuid="b2000013-0013-4013-8013-000000000013"/>
+                <textElement><font size="7" isBold="true"/></textElement>
+                <text><![CDATA[NOMBRE DE PAIEMENTS]]></text>
+            </staticText>
+            <textField>
+                <reportElement x="196" y="24" width="164" height="14" forecolor="#111827" uuid="b2000014-0014-4014-8014-000000000014"/>
+                <textElement><font size="10" isBold="true"/></textElement>
+                <textFieldExpression><![CDATA[$P{NB_PAIEMENTS}]]></textFieldExpression>
+            </textField>
+
+            <rectangle>
+                <reportElement mode="Transparent" x="376" y="4" width="179" height="40" uuid="b2000015-0015-4015-8015-000000000015"/>
+                <graphicElement><pen lineWidth="0.5" lineColor="#D1D5DB"/></graphicElement>
+            </rectangle>
+            <staticText>
+                <reportElement x="384" y="10" width="163" height="12" forecolor="#6B7280" uuid="b2000016-0016-4016-8016-000000000016"/>
+                <textElement><font size="7" isBold="true"/></textElement>
+                <text><![CDATA[TOTAL CUMULÉ PAYÉ]]></text>
+            </staticText>
+            <textField>
+                <reportElement x="384" y="24" width="163" height="14" forecolor="#111827" uuid="b2000017-0017-4017-8017-000000000017"/>
+                <textElement><font size="10" isBold="true"/></textElement>
+                <textFieldExpression><![CDATA[$P{TOTAL_PAYE}]]></textFieldExpression>
+            </textField>
+        </band>
+    </pageHeader>
+
+    <columnHeader>
+        <band height="28">
+            <staticText>
+                <reportElement mode="Opaque" x="0" y="0" width="555" height="12" backcolor="#F9FAFB" forecolor="#374151" uuid="b2000018-0018-4018-8018-000000000018"/>
+                <box leftPadding="4"><pen lineWidth="0.25" lineColor="#E5E7EB"/></box>
+                <textElement verticalAlignment="Middle"><font size="8" isBold="true"/></textElement>
+                <text><![CDATA[Détail des paiements enregistrés]]></text>
+            </staticText>
+            <staticText>
+                <reportElement mode="Opaque" x="0" y="12" width="22" height="14" backcolor="#F9FAFB" forecolor="#374151" uuid="b2000019-0019-4019-8019-000000000019"/>
+                <box><pen lineWidth="0.25" lineColor="#D1D5DB"/></box>
+                <textElement textAlignment="Center" verticalAlignment="Middle"><font size="7" isBold="true"/></textElement>
+                <text><![CDATA[#]]></text>
+            </staticText>
+            <staticText>
+                <reportElement mode="Opaque" x="22" y="12" width="68" height="14" backcolor="#F9FAFB" forecolor="#374151" uuid="b2000020-0020-4020-8020-000000000020"/>
+                <box><pen lineWidth="0.25" lineColor="#D1D5DB"/></box>
+                <textElement verticalAlignment="Middle"><font size="7" isBold="true"/></textElement>
+                <text><![CDATA[ Référence]]></text>
+            </staticText>
+            <staticText>
+                <reportElement mode="Opaque" x="90" y="12" width="62" height="14" backcolor="#F9FAFB" forecolor="#374151" uuid="b2000021-0021-4021-8021-000000000021"/>
+                <box><pen lineWidth="0.25" lineColor="#D1D5DB"/></box>
+                <textElement verticalAlignment="Middle"><font size="7" isBold="true"/></textElement>
+                <text><![CDATA[ Forfait]]></text>
+            </staticText>
+            <staticText>
+                <reportElement mode="Opaque" x="152" y="12" width="72" height="14" backcolor="#F9FAFB" forecolor="#374151" uuid="b2000022-0022-4022-8022-000000000022"/>
+                <box><pen lineWidth="0.25" lineColor="#D1D5DB"/></box>
+                <textElement verticalAlignment="Middle"><font size="7" isBold="true"/></textElement>
+                <text><![CDATA[ Montant]]></text>
+            </staticText>
+            <staticText>
+                <reportElement mode="Opaque" x="224" y="12" width="58" height="14" backcolor="#F9FAFB" forecolor="#374151" uuid="b2000023-0023-4023-8023-000000000023"/>
+                <box><pen lineWidth="0.25" lineColor="#D1D5DB"/></box>
+                <textElement verticalAlignment="Middle"><font size="7" isBold="true"/></textElement>
+                <text><![CDATA[ Statut]]></text>
+            </staticText>
+            <staticText>
+                <reportElement mode="Opaque" x="282" y="12" width="82" height="14" backcolor="#F9FAFB" forecolor="#374151" uuid="b2000024-0024-4024-8024-000000000024"/>
+                <box><pen lineWidth="0.25" lineColor="#D1D5DB"/></box>
+                <textElement verticalAlignment="Middle"><font size="7" isBold="true"/></textElement>
+                <text><![CDATA[ Date paiement]]></text>
+            </staticText>
+            <staticText>
+                <reportElement mode="Opaque" x="364" y="12" width="78" height="14" backcolor="#F9FAFB" forecolor="#374151" uuid="b2000025-0025-4025-8025-000000000025"/>
+                <box><pen lineWidth="0.25" lineColor="#D1D5DB"/></box>
+                <textElement verticalAlignment="Middle"><font size="7" isBold="true"/></textElement>
+                <text><![CDATA[ Échéance]]></text>
+            </staticText>
+            <staticText>
+                <reportElement mode="Opaque" x="442" y="12" width="113" height="14" backcolor="#F9FAFB" forecolor="#374151" uuid="b2000026-0026-4026-8026-000000000026"/>
+                <box><pen lineWidth="0.25" lineColor="#D1D5DB"/></box>
+                <textElement verticalAlignment="Middle"><font size="7" isBold="true"/></textElement>
+                <text><![CDATA[ Type]]></text>
+            </staticText>
+        </band>
+    </columnHeader>
+
+    <detail>
+        <band height="16" splitType="Stretch">
+            <textField>
+                <reportElement x="0" y="0" width="22" height="14" forecolor="#374151" uuid="b2000027-0027-4027-8027-000000000027"/>
+                <box leftPadding="2"><pen lineWidth="0.25" lineColor="#E5E7EB"/></box>
+                <textElement textAlignment="Center" verticalAlignment="Top"><font size="7"/></textElement>
+                <textFieldExpression><![CDATA[$F{numero}]]></textFieldExpression>
+            </textField>
+            <textField textAdjust="StretchHeight">
+                <reportElement x="22" y="0" width="68" height="14" forecolor="#374151" uuid="b2000028-0028-4028-8028-000000000028"/>
+                <box leftPadding="2"><pen lineWidth="0.25" lineColor="#E5E7EB"/></box>
+                <textElement verticalAlignment="Top"><font size="7"/></textElement>
+                <textFieldExpression><![CDATA[$F{reference}]]></textFieldExpression>
+            </textField>
+            <textField textAdjust="StretchHeight">
+                <reportElement x="90" y="0" width="62" height="14" forecolor="#111827" uuid="b2000029-0029-4029-8029-000000000029"/>
+                <box leftPadding="2"><pen lineWidth="0.25" lineColor="#E5E7EB"/></box>
+                <textElement verticalAlignment="Top"><font size="7"/></textElement>
+                <textFieldExpression><![CDATA[$F{planNom}]]></textFieldExpression>
+            </textField>
+            <textField textAdjust="StretchHeight">
+                <reportElement x="152" y="0" width="72" height="14" forecolor="#111827" uuid="b2000030-0030-4030-8030-000000000030"/>
+                <box leftPadding="2"><pen lineWidth="0.25" lineColor="#E5E7EB"/></box>
+                <textElement verticalAlignment="Top"><font size="7" isBold="true"/></textElement>
+                <textFieldExpression><![CDATA[$F{montant}]]></textFieldExpression>
+            </textField>
+            <textField textAdjust="StretchHeight">
+                <reportElement x="224" y="0" width="58" height="14" forecolor="#374151" uuid="b2000031-0031-4031-8031-000000000031"/>
+                <box leftPadding="2"><pen lineWidth="0.25" lineColor="#E5E7EB"/></box>
+                <textElement verticalAlignment="Top"><font size="7"/></textElement>
+                <textFieldExpression><![CDATA[$F{statut}]]></textFieldExpression>
+            </textField>
+            <textField textAdjust="StretchHeight">
+                <reportElement x="282" y="0" width="82" height="14" forecolor="#374151" uuid="b2000032-0032-4032-8032-000000000032"/>
+                <box leftPadding="2"><pen lineWidth="0.25" lineColor="#E5E7EB"/></box>
+                <textElement verticalAlignment="Top"><font size="7"/></textElement>
+                <textFieldExpression><![CDATA[$F{datePaiement}]]></textFieldExpression>
+            </textField>
+            <textField textAdjust="StretchHeight">
+                <reportElement x="364" y="0" width="78" height="14" forecolor="#374151" uuid="b2000033-0033-4033-8033-000000000033"/>
+                <box leftPadding="2"><pen lineWidth="0.25" lineColor="#E5E7EB"/></box>
+                <textElement verticalAlignment="Top"><font size="7"/></textElement>
+                <textFieldExpression><![CDATA[$F{dateEcheance}]]></textFieldExpression>
+            </textField>
+            <textField textAdjust="StretchHeight">
+                <reportElement x="442" y="0" width="113" height="14" forecolor="#374151" uuid="b2000034-0034-4034-8034-000000000034"/>
+                <box leftPadding="2"><pen lineWidth="0.25" lineColor="#E5E7EB"/></box>
+                <textElement verticalAlignment="Top"><font size="7"/></textElement>
+                <textFieldExpression><![CDATA[$F{typePaiement}]]></textFieldExpression>
+            </textField>
+        </band>
+    </detail>
+
+    <pageFooter>
+        <band height="18">
+            <line>
+                <reportElement x="0" y="0" width="555" height="1" forecolor="#E5E7EB" uuid="b200003b-003b-403b-803b-00000000003b"/>
+            </line>
+            <textField>
+                <reportElement x="0" y="4" width="555" height="12" forecolor="#9CA3AF" uuid="b2000035-0035-4035-8035-000000000035"/>
+                <textElement textAlignment="Center"><font size="7"/></textElement>
+                <textFieldExpression><![CDATA["Page " + $V{PAGE_NUMBER} + " / " + $V{PAGE_COUNT} + " · " + $P{NOM_HOPITAL} + " · Shambua Santé"]]></textFieldExpression>
+            </textField>
+        </band>
+    </pageFooter>
+
+    <summary>
+        <band height="44" splitType="Stretch">
+            <line>
+                <reportElement x="285" y="8" width="270" height="1" forecolor="#D1D5DB" uuid="b200003c-003c-403c-803c-00000000003c"/>
+            </line>
+            <staticText>
+                <reportElement x="295" y="14" width="120" height="12" forecolor="#6B7280" uuid="b2000037-0037-4037-8037-000000000037"/>
+                <textElement><font size="8" isBold="true"/></textElement>
+                <text><![CDATA[Total des paiements]]></text>
+            </staticText>
+            <textField>
+                <reportElement x="420" y="14" width="125" height="12" forecolor="#111827" uuid="b2000038-0038-4038-8038-000000000038"/>
+                <textElement textAlignment="Right"><font size="9" isBold="true"/></textElement>
+                <textFieldExpression><![CDATA[$P{TOTAL_PAYE}]]></textFieldExpression>
+            </textField>
+            <staticText>
+                <reportElement x="0" y="32" width="555" height="12" forecolor="#9CA3AF" uuid="b2000039-0039-4039-8039-000000000039"/>
+                <textElement textAlignment="Center"><font size="7" isItalic="true"/></textElement>
+                <text><![CDATA[Document confidentiel — historique des paiements d'abonnement SaaS Shambua Santé pour votre établissement.]]></text>
+            </staticText>
+        </band>
+    </summary>
+</jasperReport>

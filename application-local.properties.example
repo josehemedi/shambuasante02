@@ -1,0 +1,21 @@
+# ===================================================================
+# Configuration Hospicloud — exemple
+# Copier vers application-local.properties et adapter
+# ===================================================================
+
+# JWT
+app.jwt.secret=change-this-secret-in-production-min-256-bits
+app.jwt.expiration-ms=86400000
+
+# CORS (origines frontend autorisées, séparées par virgule)
+app.cors.allowed-origins=http://localhost:5173,http://127.0.0.1:5173
+
+# Base de données
+spring.datasource.url=jdbc:mysql://localhost:3308/hospicloud?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC
+spring.datasource.username=root
+spring.datasource.password=your_password
+
+# OpenAI (assistant IA clinique)
+# Copier votre clé depuis https://platform.openai.com/api-keys
+OPENAI_API_KEY=sk-your-openai-api-key
+OPENAI_MODEL=gpt-4o-mini

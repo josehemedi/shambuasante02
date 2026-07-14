@@ -1,0 +1,131 @@
+package hospicloud.dtos.archive;
+
+import hospicloud.model.archive.StatutArchive;
+import hospicloud.model.archive.TypeEpisode;
+
+import java.time.LocalDateTime;
+import java.util.List;
+
+public class ArchiveDossierResponseDto {
+
+    private Long id;
+    private Long patientId;
+    private String nomPatient;
+    private String numeroDossier;
+    private TypeEpisode typeEpisode;
+    private Long episodeId;
+    private StatutArchive statutArchive;
+    private LocalDateTime dateFinEpisode;
+    private LocalDateTime dateDemandeArchivage;
+    private LocalDateTime dateArchivage;
+    private Integer archivePar;
+    private String nomArchiviste;
+    private Integer verifiePar;
+    private String nomVerificateur;
+    private String motifArchivage;
+    private String observation;
+    private boolean dossierComplet;
+    private String emplacementPhysique;
+    private String numeroBoiteArchive;
+    private String numeroRayon;
+    private LocalDateTime dateRestauration;
+    private Integer restaurePar;
+    private String motifRestauration;
+    private Integer idMedecin;
+    private String nomMedecin;
+    private Integer idService;
+    private int version;
+    private LocalDateTime createdAt;
+    private LocalDateTime updatedAt;
+    private List<String> actionsAutorisees;
+
+    public Long getId() { return id; }
+    public void setId(Long id) { this.id = id; }
+
+    public Long getPatientId() { return patientId; }
+    public void setPatientId(Long patientId) { this.patientId = patientId; }
+
+    public String getNomPatient() { return nomPatient; }
+    public void setNomPatient(String nomPatient) { this.nomPatient = nomPatient; }
+
+    public String getNumeroDossier() { return numeroDossier; }
+    public void setNumeroDossier(String numeroDossier) { this.numeroDossier = numeroDossier; }
+
+    public TypeEpisode getTypeEpisode() { return typeEpisode; }
+    public void setTypeEpisode(TypeEpisode typeEpisode) { this.typeEpisode = typeEpisode; }
+
+    public Long getEpisodeId() { return episodeId; }
+    public void setEpisodeId(Long episodeId) { this.episodeId = episodeId; }
+
+    public StatutArchive getStatutArchive() { return statutArchive; }
+    public void setStatutArchive(StatutArchive statutArchive) { this.statutArchive = statutArchive; }
+
+    public LocalDateTime getDateFinEpisode() { return dateFinEpisode; }
+    public void setDateFinEpisode(LocalDateTime dateFinEpisode) { this.dateFinEpisode = dateFinEpisode; }
+
+    public LocalDateTime getDateDemandeArchivage() { return dateDemandeArchivage; }
+    public void setDateDemandeArchivage(LocalDateTime dateDemandeArchivage) { this.dateDemandeArchivage = dateDemandeArchivage; }
+
+    public LocalDateTime getDateArchivage() { return dateArchivage; }
+    public void setDateArchivage(LocalDateTime dateArchivage) { this.dateArchivage = dateArchivage; }
+
+    public Integer getArchivePar() { return archivePar; }
+    public void setArchivePar(Integer archivePar) { this.archivePar = archivePar; }
+
+    public String getNomArchiviste() { return nomArchiviste; }
+    public void setNomArchiviste(String nomArchiviste) { this.nomArchiviste = nomArchiviste; }
+
+    public Integer getVerifiePar() { return verifiePar; }
+    public void setVerifiePar(Integer verifiePar) { this.verifiePar = verifiePar; }
+
+    public String getNomVerificateur() { return nomVerificateur; }
+    public void setNomVerificateur(String nomVerificateur) { this.nomVerificateur = nomVerificateur; }
+
+    public String getMotifArchivage() { return motifArchivage; }
+    public void setMotifArchivage(String motifArchivage) { this.motifArchivage = motifArchivage; }
+
+    public String getObservation() { return observation; }
+    public void setObservation(String observation) { this.observation = observation; }
+
+    public boolean isDossierComplet() { return dossierComplet; }
+    public void setDossierComplet(boolean dossierComplet) { this.dossierComplet = dossierComplet; }
+
+    public String getEmplacementPhysique() { return emplacementPhysique; }
+    public void setEmplacementPhysique(String emplacementPhysique) { this.emplacementPhysique = emplacementPhysique; }
+
+    public String getNumeroBoiteArchive() { return numeroBoiteArchive; }
+    public void setNumeroBoiteArchive(String numeroBoiteArchive) { this.numeroBoiteArchive = numeroBoiteArchive; }
+
+    public String getNumeroRayon() { return numeroRayon; }
+    public void setNumeroRayon(String numeroRayon) { this.numeroRayon = numeroRayon; }
+
+    public LocalDateTime getDateRestauration() { return dateRestauration; }
+    public void setDateRestauration(LocalDateTime dateRestauration) { this.dateRestauration = dateRestauration; }
+
+    public Integer getRestaurePar() { return restaurePar; }
+    public void setRestaurePar(Integer restaurePar) { this.restaurePar = restaurePar; }
+
+    public String getMotifRestauration() { return motifRestauration; }
+    public void setMotifRestauration(String motifRestauration) { this.motifRestauration = motifRestauration; }
+
+    public Integer getIdMedecin() { return idMedecin; }
+    public void setIdMedecin(Integer idMedecin) { this.idMedecin = idMedecin; }
+
+    public String getNomMedecin() { return nomMedecin; }
+    public void setNomMedecin(String nomMedecin) { this.nomMedecin = nomMedecin; }
+
+    public Integer getIdService() { return idService; }
+    public void setIdService(Integer idService) { this.idService = idService; }
+
+    public int getVersion() { return version; }
+    public void setVersion(int version) { this.version = version; }
+
+    public LocalDateTime getCreatedAt() { return createdAt; }
+    public void setCreatedAt(LocalDateTime createdAt) { this.createdAt = createdAt; }
+
+    public LocalDateTime getUpdatedAt() { return updatedAt; }
+    public void setUpdatedAt(LocalDateTime updatedAt) { this.updatedAt = updatedAt; }
+
+    public List<String> getActionsAutorisees() { return actionsAutorisees; }
+    public void setActionsAutorisees(List<String> actionsAutorisees) { this.actionsAutorisees = actionsAutorisees; }
+}

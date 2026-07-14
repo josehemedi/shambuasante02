@@ -1,0 +1,143 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports"
+              xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+              xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd"
+              name="Caissier_Historique"
+              pageWidth="802"
+              pageHeight="120"
+              orientation="Landscape"
+              columnWidth="802"
+              leftMargin="0"
+              rightMargin="0"
+              topMargin="0"
+              bottomMargin="0"
+              uuid="e63d5fbe-9b92-4f4f-9a0d-8ba80354fe42">
+
+    <field name="numero" class="java.lang.String"/>
+    <field name="recu" class="java.lang.String"/>
+    <field name="facture" class="java.lang.String"/>
+    <field name="patient" class="java.lang.String"/>
+    <field name="montant" class="java.lang.String"/>
+    <field name="mode" class="java.lang.String"/>
+    <field name="datePaiement" class="java.lang.String"/>
+    <field name="caissier" class="java.lang.String"/>
+    <field name="soldeRestant" class="java.lang.String"/>
+
+    <columnHeader>
+        <band height="16">
+            <staticText>
+                <reportElement x="0" y="0" width="22" height="14" forecolor="#111827" uuid="d101f57a-afbd-45a8-a177-ea133dfd0cca"/>
+                <box><pen lineWidth="0.5" lineColor="#D1D5DB"/></box>
+                <textElement textAlignment="Center" verticalAlignment="Middle"><font size="6" isBold="true"/></textElement>
+                <text><![CDATA[#]]></text>
+            </staticText>
+            <staticText>
+                <reportElement x="22" y="0" width="72" height="14" forecolor="#111827" uuid="8a24731b-4463-4846-abd8-7008dcf9fbf7"/>
+                <box><pen lineWidth="0.5" lineColor="#D1D5DB"/></box>
+                <textElement verticalAlignment="Middle"><font size="6" isBold="true"/></textElement>
+                <text><![CDATA[ Reçu]]></text>
+            </staticText>
+            <staticText>
+                <reportElement x="94" y="0" width="72" height="14" forecolor="#111827" uuid="4fc722c4-dc54-4c18-890b-572fbe7735e5"/>
+                <box><pen lineWidth="0.5" lineColor="#D1D5DB"/></box>
+                <textElement verticalAlignment="Middle"><font size="6" isBold="true"/></textElement>
+                <text><![CDATA[ Facture]]></text>
+            </staticText>
+            <staticText>
+                <reportElement x="166" y="0" width="110" height="14" forecolor="#111827" uuid="4da1ffa9-66b7-4ac1-8ac8-a048bb456603"/>
+                <box><pen lineWidth="0.5" lineColor="#D1D5DB"/></box>
+                <textElement verticalAlignment="Middle"><font size="6" isBold="true"/></textElement>
+                <text><![CDATA[ Patient]]></text>
+            </staticText>
+            <staticText>
+                <reportElement x="276" y="0" width="80" height="14" forecolor="#111827" uuid="f6b05269-78fd-49a4-81ea-c703d8836268"/>
+                <box><pen lineWidth="0.5" lineColor="#D1D5DB"/></box>
+                <textElement verticalAlignment="Middle"><font size="6" isBold="true"/></textElement>
+                <text><![CDATA[ Montant]]></text>
+            </staticText>
+            <staticText>
+                <reportElement x="356" y="0" width="70" height="14" forecolor="#111827" uuid="e878e203-6421-4f61-aef7-cf1f88282f08"/>
+                <box><pen lineWidth="0.5" lineColor="#D1D5DB"/></box>
+                <textElement verticalAlignment="Middle"><font size="6" isBold="true"/></textElement>
+                <text><![CDATA[ Mode]]></text>
+            </staticText>
+            <staticText>
+                <reportElement x="426" y="0" width="90" height="14" forecolor="#111827" uuid="5b0f5ec9-b6b2-4ac7-a173-4df19fae144d"/>
+                <box><pen lineWidth="0.5" lineColor="#D1D5DB"/></box>
+                <textElement verticalAlignment="Middle"><font size="6" isBold="true"/></textElement>
+                <text><![CDATA[ Date]]></text>
+            </staticText>
+            <staticText>
+                <reportElement x="516" y="0" width="90" height="14" forecolor="#111827" uuid="4a5a2e76-a772-41a1-b718-158f09d13df4"/>
+                <box><pen lineWidth="0.5" lineColor="#D1D5DB"/></box>
+                <textElement verticalAlignment="Middle"><font size="6" isBold="true"/></textElement>
+                <text><![CDATA[ Caissier]]></text>
+            </staticText>
+            <staticText>
+                <reportElement x="606" y="0" width="196" height="14" forecolor="#111827" uuid="05c32970-34cd-4e1f-80d3-37895bd84524"/>
+                <box><pen lineWidth="0.5" lineColor="#D1D5DB"/></box>
+                <textElement verticalAlignment="Middle"><font size="6" isBold="true"/></textElement>
+                <text><![CDATA[ Solde restant]]></text>
+            </staticText>
+        </band>
+    </columnHeader>
+
+    <detail>
+        <band height="14" splitType="Stretch">
+            <textField>
+                <reportElement x="0" y="0" width="22" height="12" uuid="44ed93da-1feb-414d-916b-87c26c557147"/>
+                <box leftPadding="2"><pen lineWidth="0.25" lineColor="#E5E7EB"/></box>
+                <textElement textAlignment="Center" verticalAlignment="Top"><font size="6"/></textElement>
+                <textFieldExpression><![CDATA[$F{numero}]]></textFieldExpression>
+            </textField>
+            <textField textAdjust="StretchHeight">
+                <reportElement x="22" y="0" width="72" height="12" uuid="ac2f9e97-ae66-4c94-94c2-edf6820b886b"/>
+                <box leftPadding="2"><pen lineWidth="0.25" lineColor="#E5E7EB"/></box>
+                <textElement verticalAlignment="Top"><font size="6"/></textElement>
+                <textFieldExpression><![CDATA[$F{recu}]]></textFieldExpression>
+            </textField>
+            <textField textAdjust="StretchHeight">
+                <reportElement x="94" y="0" width="72" height="12" uuid="5f483df4-3431-4742-8119-68a937ffa47b"/>
+                <box leftPadding="2"><pen lineWidth="0.25" lineColor="#E5E7EB"/></box>
+                <textElement verticalAlignment="Top"><font size="6"/></textElement>
+                <textFieldExpression><![CDATA[$F{facture}]]></textFieldExpression>
+            </textField>
+            <textField textAdjust="StretchHeight">
+                <reportElement x="166" y="0" width="110" height="12" uuid="8512893f-8dc7-485b-8634-ecd27e7d5b1c"/>
+                <box leftPadding="2"><pen lineWidth="0.25" lineColor="#E5E7EB"/></box>
+                <textElement verticalAlignment="Top"><font size="6"/></textElement>
+                <textFieldExpression><![CDATA[$F{patient}]]></textFieldExpression>
+            </textField>
+            <textField textAdjust="StretchHeight">
+                <reportElement x="276" y="0" width="80" height="12" uuid="d6294073-d26c-423d-8bda-4bd257e8fdaa"/>
+                <box leftPadding="2"><pen lineWidth="0.25" lineColor="#E5E7EB"/></box>
+                <textElement verticalAlignment="Top"><font size="6" isBold="true"/></textElement>
+                <textFieldExpression><![CDATA[$F{montant}]]></textFieldExpression>
+            </textField>
+            <textField textAdjust="StretchHeight">
+                <reportElement x="356" y="0" width="70" height="12" uuid="40afcb70-bab3-4796-965b-61dcc8a5461c"/>
+                <box leftPadding="2"><pen lineWidth="0.25" lineColor="#E5E7EB"/></box>
+                <textElement verticalAlignment="Top"><font size="6"/></textElement>
+                <textFieldExpression><![CDATA[$F{mode}]]></textFieldExpression>
+            </textField>
+            <textField textAdjust="StretchHeight">
+                <reportElement x="426" y="0" width="90" height="12" uuid="608b7015-86bd-4e30-a3d7-547622fdbcc1"/>
+                <box leftPadding="2"><pen lineWidth="0.25" lineColor="#E5E7EB"/></box>
+                <textElement verticalAlignment="Top"><font size="6"/></textElement>
+                <textFieldExpression><![CDATA[$F{datePaiement}]]></textFieldExpression>
+            </textField>
+            <textField textAdjust="StretchHeight">
+                <reportElement x="516" y="0" width="90" height="12" uuid="66eaf715-2c1e-49a3-89e2-6f5232ef267a"/>
+                <box leftPadding="2"><pen lineWidth="0.25" lineColor="#E5E7EB"/></box>
+                <textElement verticalAlignment="Top"><font size="6"/></textElement>
+                <textFieldExpression><![CDATA[$F{caissier}]]></textFieldExpression>
+            </textField>
+            <textField textAdjust="StretchHeight">
+                <reportElement x="606" y="0" width="196" height="12" uuid="48fd340f-d8ac-42de-8948-0d753207dc2e"/>
+                <box leftPadding="2"><pen lineWidth="0.25" lineColor="#E5E7EB"/></box>
+                <textElement verticalAlignment="Top"><font size="6"/></textElement>
+                <textFieldExpression><![CDATA[$F{soldeRestant}]]></textFieldExpression>
+            </textField>
+        </band>
+    </detail>
+</jasperReport>

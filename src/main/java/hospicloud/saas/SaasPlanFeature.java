@@ -1,0 +1,18 @@
+package hospicloud.saas;
+
+public enum SaasPlanFeature {
+    PATIENTS,
+    APPOINTMENTS,
+    CONSULTATIONS,
+    STAFF_MANAGEMENT,
+    LAB,
+    PHARMACY,
+    BILLING,
+    TELECONSULTATION,
+    REPORTS,
+    AI_ASSISTANT,
+    PRIORITY_SUPPORT,
+    CUSTOMIZATION,
+    ENHANCED_BACKUPS,
+    INTEGRATIONS
+}
