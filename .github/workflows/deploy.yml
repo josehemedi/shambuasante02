@@ -1,0 +1,39 @@
+name: Deploy Shambua Sante
+
+on:
+  push:
+    branches:
+      - main # ou master selon sa branche par défaut
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Deploy to VPS via SSH
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USERNAME }}
+          key: ${{ secrets.SSH_KEY }}
+          port: 22
+          script: |
+            cd /home/github-deployer/apps/gestion-hopital
+            
+            # Initialiser le dépôt s'il n'est pas là, sinon tirer les changements
+            if [ ! -d ".git" ]; then
+              git clone https://github.com/${{ github.repository }}.git .
+            else
+              git fetch --all
+              git reset --hard origin/main
+            fi
+            
+            # Recréer le fichier .env de production (Étape 4)
+            cp .env.production .env 2>/dev/null || true
+
+            # Lancer l'application
+            docker compose down
+            docker compose up -d --build
+            
+            # Nettoyer les anciennes images pour ne pas remplir le disque du VPS
+            docker image prune -f
