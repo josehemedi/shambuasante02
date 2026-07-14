@@ -56,11 +56,13 @@ public class SecurityConfig {
                     .accessDeniedHandler((request, response, accessDeniedException) -> {
                         response.setStatus(HttpStatus.FORBIDDEN.value());
                         response.setContentType(MediaType.APPLICATION_JSON_VALUE);
+                        // Message neutre — le front n'affiche plus ce 403 comme une alerte bloquante
                         objectMapper.writeValue(response.getOutputStream(), new ApiError(
                                 HttpStatus.FORBIDDEN.value(),
                                 "Forbidden",
-                                "Accès refusé pour votre rôle ou votre session.",
-                                request.getRequestURI()));
+                                null,
+                                request.getRequestURI(),
+                                "ACCESS_DENIED"));
                     }))
             .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
             .addFilterAfter(tenantResolverFilter, JwtAuthenticationFilter.class)

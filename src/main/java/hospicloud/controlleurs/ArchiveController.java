@@ -7,7 +7,11 @@ import hospicloud.model.archive.TypeEpisode;
 import hospicloud.services.archive.ArchivageService;
 import hospicloud.services.archive.DemandeAccesArchiveService;
 import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -144,6 +148,48 @@ public class ArchiveController {
     @GetMapping("/{id}/historique")
     public List<HistoriqueArchivageDto> historique(@PathVariable Long id) {
         return archivageService.historique(id);
+    }
+
+    @GetMapping("/{id}/fichiers")
+    public List<ArchiveFichierDto> listerFichiers(@PathVariable Long id) {
+        return archivageService.listerFichiers(id);
+    }
+
+    @GetMapping("/{id}/fichiers/{fichierId}/download")
+    public ResponseEntity<byte[]> telechargerFichier(@PathVariable Long id, @PathVariable Long fichierId) {
+        byte[] content = archivageService.telechargerFichier(id, fichierId);
+        ArchiveFichierDto meta = archivageService.getFichierMeta(id, fichierId);
+        String filename = meta.getNomFichier() != null ? meta.getNomFichier() : ("fichier_" + fichierId);
+        MediaType mediaType = MediaType.APPLICATION_OCTET_STREAM;
+        try {
+            if (meta.getMimeType() != null && !meta.getMimeType().isBlank()) {
+                mediaType = MediaType.parseMediaType(meta.getMimeType());
+            }
+        } catch (Exception ignored) {
+            mediaType = MediaType.APPLICATION_OCTET_STREAM;
+        }
+        return ResponseEntity.ok()
+                .header(HttpHeaders.CONTENT_DISPOSITION, "inline; filename=\"" + filename.replace("\"", "") + "\"")
+                .contentType(mediaType)
+                .body(content);
+    }
+
+    @PostMapping("/{id}/fichiers/pdf")
+    public ArchiveFichierDto regenererPdf(@PathVariable Long id) {
+        return archivageService.regenererPdf(id);
+    }
+
+    @PostMapping(value = "/{id}/fichiers/upload", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ArchiveFichierDto uploaderPieceJointe(
+            @PathVariable Long id,
+            @RequestParam("file") MultipartFile file,
+            @RequestParam(value = "libelle", required = false) String libelle) {
+        return archivageService.uploaderPieceJointe(id, file, libelle);
+    }
+
+    @DeleteMapping("/{id}/fichiers/{fichierId}")
+    public void supprimerPieceJointe(@PathVariable Long id, @PathVariable Long fichierId) {
+        archivageService.supprimerPieceJointe(id, fichierId);
     }
 
     @PostMapping("/{id}/demandes-acces")

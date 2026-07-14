@@ -13,11 +13,14 @@ import hospicloud.security.CurrentUserService;
 import hospicloud.security.TenantContext;
 import hospicloud.security.archive.ArchivePermissionService;
 import hospicloud.services.archive.ArchivageService;
+import hospicloud.services.archive.ArchivePdfService;
+import hospicloud.services.archive.ArchiveSnapshotService;
 import hospicloud.services.archive.VerificationDossierService;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -34,6 +37,8 @@ public class ArchivageServiceImpl implements ArchivageService {
     private final ArchivePermissionService permissionService;
     private final CurrentUserService currentUserService;
     private final ArchiveAuditHelper auditHelper;
+    private final ArchiveSnapshotService snapshotService;
+    private final ArchivePdfService archivePdfService;
     private final JdbcTemplate jdbcTemplate;
 
     public ArchivageServiceImpl(ArchiveDossierRepository archiveRepository,
@@ -42,6 +47,8 @@ public class ArchivageServiceImpl implements ArchivageService {
                                 ArchivePermissionService permissionService,
                                 CurrentUserService currentUserService,
                                 ArchiveAuditHelper auditHelper,
+                                ArchiveSnapshotService snapshotService,
+                                ArchivePdfService archivePdfService,
                                 JdbcTemplate jdbcTemplate) {
         this.archiveRepository = archiveRepository;
         this.historiqueRepository = historiqueRepository;
@@ -49,6 +56,8 @@ public class ArchivageServiceImpl implements ArchivageService {
         this.permissionService = permissionService;
         this.currentUserService = currentUserService;
         this.auditHelper = auditHelper;
+        this.snapshotService = snapshotService;
+        this.archivePdfService = archivePdfService;
         this.jdbcTemplate = jdbcTemplate;
     }
 
@@ -69,7 +78,7 @@ public class ArchivageServiceImpl implements ArchivageService {
     }
 
     @Override
-    @Transactional(readOnly = true)
+    @Transactional
     public ArchiveDossierResponseDto consulter(Long id) {
         permissionService.require(ArchivePermissionService.ARCHIVE_VOIR);
         if (permissionService.isSuperAdminTechnicalOnly()) {
@@ -78,8 +87,19 @@ public class ArchivageServiceImpl implements ArchivageService {
         ArchiveDossier archive = loadArchiveScoped(id);
         auditHelper.log("ARCHIVE_CONSULTEE", "SUCCESS",
                 "Consultation d'une archive", id,
-                archive.getStatutArchive().name(), archive.getStatutArchive().name(), null);
-        return ArchiveMapper.toDto(archive, permissionService);
+                null, null, null);
+        ArchiveContenuSnapshotDto snapshot = snapshotService.lire(archive.getHopitalId(), id);
+        if (snapshot == null) {
+            try {
+                snapshot = snapshotService.capturerEtPersister(archive);
+            } catch (Exception ignored) {
+                snapshot = null;
+            }
+        }
+        if (archivePdfService.lister(archive.getHopitalId(), id).isEmpty()) {
+            tryGeneratePdf(archive);
+        }
+        return enrich(ArchiveMapper.toDto(archive, permissionService, snapshot));
     }
 
     @Override
@@ -148,7 +168,15 @@ public class ArchivageServiceImpl implements ArchivageService {
         enregistrerHistorique(archive, null, StatutArchive.A_VERIFIER,
                 "ENREGISTREMENT_EPISODE", null, "Épisode enregistré pour archivage");
 
-        return ArchiveMapper.toDto(loadArchive(id), permissionService);
+        try {
+            snapshotService.capturerEtPersister(archive);
+        } catch (Exception ignored) {
+            // non bloquant : re-capturé à la consultation / archivage
+        }
+        tryGeneratePdf(loadArchive(id));
+
+        return enrich(ArchiveMapper.toDto(loadArchive(id), permissionService,
+                snapshotService.lire(hopitalId, id)));
     }
 
     @Override
@@ -190,9 +218,16 @@ public class ArchivageServiceImpl implements ArchivageService {
         archive.setVerifiePar(currentUserService.getCurrentUtilisateurId());
         archive.setObservation(request.getObservation());
         applyUpdate(archive, ancien, "DOSSIER_PRET_A_ARCHIVER", request.getMotif());
+        try {
+            snapshotService.capturerEtPersister(loadArchive(id));
+        } catch (Exception ignored) {
+            // non bloquant avant archivage final
+        }
+        tryGeneratePdf(loadArchive(id));
         auditHelper.log("DOSSIER_PRET_A_ARCHIVER", "SUCCESS", "Dossier prêt à archiver",
                 id, ancien.name(), StatutArchive.PRET_A_ARCHIVER.name(), request.getMotif());
-        return ArchiveMapper.toDto(loadArchive(id), permissionService);
+        return enrich(ArchiveMapper.toDto(loadArchive(id), permissionService, snapshotService.lire(
+                TenantContext.getRequiredHopitalId(), id)));
     }
 
     @Override
@@ -222,9 +257,12 @@ public class ArchivageServiceImpl implements ArchivageService {
         archive.setNumeroRayon(request.getNumeroRayon());
         archive.setObservation(request.getObservation());
         applyUpdate(archive, ancien, "DOSSIER_ARCHIVE", request.getMotif());
-        auditHelper.log("DOSSIER_ARCHIVE", "SUCCESS", "Épisode archivé",
+        // Fige TOUTES les informations du patient dans l'archive + PDF
+        ArchiveContenuSnapshotDto snapshot = snapshotService.capturerEtPersister(archive);
+        tryGeneratePdf(loadArchive(id));
+        auditHelper.log("DOSSIER_ARCHIVE", "SUCCESS", "Épisode archivé avec snapshot patient",
                 id, ancien.name(), StatutArchive.ARCHIVE.name(), request.getMotif());
-        return ArchiveMapper.toDto(loadArchive(id), permissionService);
+        return enrich(ArchiveMapper.toDto(loadArchive(id), permissionService, snapshot));
     }
 
     @Override
@@ -260,6 +298,98 @@ public class ArchivageServiceImpl implements ArchivageService {
         return historiqueRepository.findByArchiveId(hopitalId, id).stream()
                 .map(ArchiveMapper::toDto)
                 .collect(Collectors.toList());
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<ArchiveFichierDto> listerFichiers(Long archiveId) {
+        permissionService.require(ArchivePermissionService.ARCHIVE_VOIR);
+        ArchiveDossier archive = loadArchiveScoped(archiveId);
+        return archivePdfService.lister(archive.getHopitalId(), archiveId);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public byte[] telechargerFichier(Long archiveId, Long fichierId) {
+        permissionService.require(ArchivePermissionService.ARCHIVE_VOIR);
+        if (permissionService.isSuperAdminTechnicalOnly()) {
+            throw new ForbiddenException("Le super administrateur n'a pas accès au contenu médical des archives.");
+        }
+        ArchiveDossier archive = loadArchiveScoped(archiveId);
+        ArchiveFichier fichier = archivePdfService.getFichierOuThrow(archive.getHopitalId(), fichierId);
+        if (!archiveId.equals(fichier.getArchiveId())) {
+            throw new ResourceNotFoundException("Fichier d'archive introuvable");
+        }
+        return archivePdfService.lireContenu(fichier);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public ArchiveFichierDto getFichierMeta(Long archiveId, Long fichierId) {
+        permissionService.require(ArchivePermissionService.ARCHIVE_VOIR);
+        ArchiveDossier archive = loadArchiveScoped(archiveId);
+        ArchiveFichier fichier = archivePdfService.getFichierOuThrow(archive.getHopitalId(), fichierId);
+        if (!archiveId.equals(fichier.getArchiveId())) {
+            throw new ResourceNotFoundException("Fichier d'archive introuvable");
+        }
+        return archivePdfService.lister(archive.getHopitalId(), archiveId).stream()
+                .filter(f -> fichierId.equals(f.getId()))
+                .findFirst()
+                .orElseThrow(() -> new ResourceNotFoundException("Fichier d'archive introuvable"));
+    }
+
+    @Override
+    public ArchiveFichierDto regenererPdf(Long archiveId) {
+        permissionService.require(ArchivePermissionService.ARCHIVE_VERIFIER);
+        ArchiveDossier archive = loadArchiveScoped(archiveId);
+        try {
+            snapshotService.capturerEtPersister(archive);
+        } catch (Exception ignored) {
+            // snapshot optionnel avant PDF
+        }
+        return archivePdfService.genererEtAttacher(loadArchive(archiveId));
+    }
+
+    @Override
+    public ArchiveFichierDto uploaderPieceJointe(Long archiveId, MultipartFile file, String libelle) {
+        permissionService.require(ArchivePermissionService.ARCHIVE_VERIFIER);
+        ArchiveDossier archive = loadArchiveScoped(archiveId);
+        ArchiveFichierDto dto = archivePdfService.uploaderPieceJointe(archive, file, libelle);
+        auditHelper.log("ARCHIVE_PIECE_JOINTE", "SUCCESS",
+                "Pièce jointe ajoutée: " + (dto != null ? dto.getNomFichier() : ""),
+                archiveId, null, null, null);
+        return dto;
+    }
+
+    @Override
+    public void supprimerPieceJointe(Long archiveId, Long fichierId) {
+        permissionService.require(ArchivePermissionService.ARCHIVE_VERIFIER);
+        ArchiveDossier archive = loadArchiveScoped(archiveId);
+        archivePdfService.supprimerPieceJointe(archive, fichierId);
+        auditHelper.log("ARCHIVE_PIECE_JOINTE_SUPPR", "SUCCESS",
+                "Pièce jointe supprimée id=" + fichierId, archiveId, null, null, null);
+    }
+
+    private ArchiveDossierResponseDto enrich(ArchiveDossierResponseDto dto) {
+        if (dto == null || dto.getId() == null) {
+            return dto;
+        }
+        Integer hopitalId = TenantContext.getRequiredHopitalId();
+        ArchiveMapper.attachFichiers(dto, archivePdfService.lister(hopitalId, dto.getId()));
+        return dto;
+    }
+
+    private void tryGeneratePdf(ArchiveDossier archive) {
+        if (archive == null) {
+            return;
+        }
+        try {
+            archivePdfService.genererEtAttacher(archive);
+        } catch (Exception e) {
+            auditHelper.log("ARCHIVE_PDF", "ERROR",
+                    "Génération PDF non bloquante échouée: " + e.getMessage(),
+                    archive.getId(), null, null, null);
+        }
     }
 
     @Override

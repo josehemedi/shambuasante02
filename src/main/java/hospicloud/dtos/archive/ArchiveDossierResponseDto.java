@@ -34,6 +34,12 @@ public class ArchiveDossierResponseDto {
     private Integer idMedecin;
     private String nomMedecin;
     private Integer idService;
+    private Long dossierVirtuelId;
+    private String nomDossierVirtuel;
+    private ArchiveContenuSnapshotDto contenuSnapshot;
+    private List<ArchiveFichierDto> fichiers;
+    private boolean hasPdf;
+    private String nomPdf;
     private int version;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
@@ -116,6 +122,26 @@ public class ArchiveDossierResponseDto {
 
     public Integer getIdService() { return idService; }
     public void setIdService(Integer idService) { this.idService = idService; }
+
+    public Long getDossierVirtuelId() { return dossierVirtuelId; }
+    public void setDossierVirtuelId(Long dossierVirtuelId) { this.dossierVirtuelId = dossierVirtuelId; }
+
+    public String getNomDossierVirtuel() { return nomDossierVirtuel; }
+    public void setNomDossierVirtuel(String nomDossierVirtuel) { this.nomDossierVirtuel = nomDossierVirtuel; }
+
+    public ArchiveContenuSnapshotDto getContenuSnapshot() { return contenuSnapshot; }
+    public void setContenuSnapshot(ArchiveContenuSnapshotDto contenuSnapshot) {
+        this.contenuSnapshot = contenuSnapshot;
+    }
+
+    public List<ArchiveFichierDto> getFichiers() { return fichiers; }
+    public void setFichiers(List<ArchiveFichierDto> fichiers) { this.fichiers = fichiers; }
+
+    public boolean isHasPdf() { return hasPdf; }
+    public void setHasPdf(boolean hasPdf) { this.hasPdf = hasPdf; }
+
+    public String getNomPdf() { return nomPdf; }
+    public void setNomPdf(String nomPdf) { this.nomPdf = nomPdf; }
 
     public int getVersion() { return version; }
     public void setVersion(int version) { this.version = version; }

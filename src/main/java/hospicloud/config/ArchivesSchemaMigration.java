@@ -109,9 +109,98 @@ public class ArchivesSchemaMigration {
                 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4
                 """);
 
+            jdbcTemplate.execute("""
+                CREATE TABLE IF NOT EXISTS archives_dossiers_virtuels (
+                    id BIGINT NOT NULL AUTO_INCREMENT,
+                    hopital_id INT NOT NULL,
+                    parent_id BIGINT NULL,
+                    nom VARCHAR(180) NOT NULL,
+                    created_by INT NULL,
+                    created_at TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP,
+                    updated_at TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+                    PRIMARY KEY (id),
+                    KEY idx_adv_hopital_parent (hopital_id, parent_id),
+                    UNIQUE KEY uk_adv_nom_parent (hopital_id, parent_id, nom)
+                ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4
+                """);
+
+            ensureColumn("archives_dossiers", "dossier_virtuel_id", "BIGINT NULL");
+            ensureColumn("archives_dossiers", "contenu_snapshot", "LONGTEXT NULL");
+            ensureColumn("archives_dossiers", "snapshot_at", "DATETIME NULL");
+            ensureColumn("archives_dossiers", "nom_patient_fige", "VARCHAR(255) NULL");
+            ensureColumn("archives_dossiers", "numero_dossier_fige", "VARCHAR(80) NULL");
+            ensureIndex("archives_dossiers", "idx_archive_dossier_virtuel",
+                    "CREATE INDEX idx_archive_dossier_virtuel ON archives_dossiers (hopital_id, dossier_virtuel_id)");
+
+            jdbcTemplate.execute("""
+                CREATE TABLE IF NOT EXISTS archives_fichiers (
+                    id BIGINT NOT NULL AUTO_INCREMENT,
+                    hopital_id INT NOT NULL,
+                    archive_id BIGINT NOT NULL,
+                    type_fichier VARCHAR(60) NOT NULL DEFAULT 'DOSSIER_PATIENT',
+                    nom_fichier VARCHAR(255) NOT NULL,
+                    chemin_stockage VARCHAR(1000) NOT NULL,
+                    mime_type VARCHAR(120) NOT NULL DEFAULT 'application/pdf',
+                    taille_octets BIGINT NULL,
+                    genere_at DATETIME NULL,
+                    genere_par INT NULL,
+                    created_at TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP,
+                    updated_at TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+                    PRIMARY KEY (id),
+                    UNIQUE KEY uk_af_archive_type (hopital_id, archive_id, type_fichier),
+                    KEY idx_af_archive (hopital_id, archive_id),
+                    CONSTRAINT fk_af_archive FOREIGN KEY (archive_id)
+                        REFERENCES archives_dossiers (id) ON DELETE CASCADE
+                ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4
+                """);
+
             log.info("Migration module archivage appliquée");
         } catch (Exception e) {
             log.warn("Migration module archivage ignorée: {}", e.getMessage());
+        }
+    }
+
+    private void ensureColumn(String table, String column, String definition) {
+        try {
+            Integer count = jdbcTemplate.queryForObject(
+                    """
+                    SELECT COUNT(*) FROM information_schema.COLUMNS
+                    WHERE TABLE_SCHEMA = DATABASE()
+                      AND TABLE_NAME = ?
+                      AND COLUMN_NAME = ?
+                    """,
+                    Integer.class,
+                    table,
+                    column
+            );
+            if (count != null && count == 0) {
+                jdbcTemplate.execute("ALTER TABLE " + table + " ADD COLUMN " + column + " " + definition);
+                log.info("Colonne {}.{} ajoutée", table, column);
+            }
+        } catch (Exception e) {
+            log.warn("Colonne {}.{}: {}", table, column, e.getMessage());
+        }
+    }
+
+    private void ensureIndex(String table, String indexName, String createSql) {
+        try {
+            Integer count = jdbcTemplate.queryForObject(
+                    """
+                    SELECT COUNT(*) FROM information_schema.STATISTICS
+                    WHERE TABLE_SCHEMA = DATABASE()
+                      AND TABLE_NAME = ?
+                      AND INDEX_NAME = ?
+                    """,
+                    Integer.class,
+                    table,
+                    indexName
+            );
+            if (count != null && count == 0) {
+                jdbcTemplate.execute(createSql);
+                log.info("Index {}.{} ajouté", table, indexName);
+            }
+        } catch (Exception e) {
+            log.warn("Index {}.{}: {}", table, indexName, e.getMessage());
         }
     }
 }

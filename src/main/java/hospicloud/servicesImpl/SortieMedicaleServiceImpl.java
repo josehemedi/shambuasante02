@@ -29,6 +29,8 @@ import hospicloud.security.TenantContext;
 import hospicloud.services.OrdonnanceService;
 import hospicloud.services.SortieMedicaleService;
 import hospicloud.services.archive.ArchiveWorkflowService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
@@ -42,6 +44,8 @@ import java.util.Set;
 @Service
 @Transactional
 public class SortieMedicaleServiceImpl implements SortieMedicaleService {
+
+    private static final Logger log = LoggerFactory.getLogger(SortieMedicaleServiceImpl.class);
 
     private static final Set<String> ETATS_SORTIE_VALIDES = Set.of(
             "GUERI", "AMELIORE", "STATIONNAIRE", "DECES", "TRANSFERE");
@@ -231,9 +235,13 @@ public class SortieMedicaleServiceImpl implements SortieMedicaleService {
                 response.setIdArchiveDossier(id);
                 response.setDossierEnvoyeArchiviste(true);
             });
+            if (archiveId.isEmpty()) {
+                log.warn("Sortie autorisée (admission {}) mais dossier non créé pour l'archiviste — hopital {}",
+                        admission.getIdAdmission(), hopitalId);
+            }
             response.setMessage(archiveId.isPresent()
                     ? "Sortie médicale autorisée. L'archiviste a été notifié : le dossier est prêt à être archivé."
-                    : "Sortie médicale autorisée. La réception peut délivrer le bon de sortie final.");
+                    : "Sortie médicale autorisée. Attention : le dossier n'a pas pu être envoyé à l'archiviste automatiquement — vérifiez les logs.");
         } else {
             Long episodeId = consultation != null && consultation.getIdConsultation() != null
                     ? consultation.getIdConsultation()
@@ -250,9 +258,13 @@ public class SortieMedicaleServiceImpl implements SortieMedicaleService {
                 response.setIdArchiveDossier(id);
                 response.setDossierEnvoyeArchiviste(true);
             });
+            if (archiveId.isEmpty()) {
+                log.warn("Sortie autorisée (consultation {}) mais dossier non créé pour l'archiviste — hopital {}",
+                        episodeId, hopitalId);
+            }
             response.setMessage(archiveId.isPresent()
                     ? "Sortie médicale autorisée. L'archiviste a été notifié : le dossier est prêt à être archivé."
-                    : "Sortie médicale autorisée. La réception peut délivrer le bon de sortie final.");
+                    : "Sortie médicale autorisée. Attention : le dossier n'a pas pu être envoyé à l'archiviste automatiquement — vérifiez les logs.");
         }
         return response;
     }

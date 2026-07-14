@@ -24,6 +24,19 @@ public interface ArchiveDossierRepository {
 
     long count(Integer hopitalId, ArchiveSearchFilter filter);
 
+    List<ArchiveDossier> listByDossierVirtuel(Integer hopitalId, Long dossierVirtuelId);
+
+    boolean updateDossierVirtuelId(Integer hopitalId, Long archiveId, Long dossierVirtuelId);
+
+    boolean saveContenuSnapshot(Integer hopitalId,
+                                Long archiveId,
+                                String contenuSnapshot,
+                                java.time.LocalDateTime snapshotAt,
+                                String nomPatientFige,
+                                String numeroDossierFige);
+
+    String findContenuSnapshot(Integer hopitalId, Long archiveId);
+
     ArchiveStatistiquesDto computeStatistiques(Integer hopitalId);
 
     ReglesArchivageHopital findOrCreateRegles(Integer hopitalId);

@@ -16,6 +16,7 @@ public class ArchivePermissionService {
     public static final String ARCHIVE_VOIR_HISTORIQUE = "ARCHIVE_VOIR_HISTORIQUE";
     public static final String ARCHIVE_GERER_DEMANDES_ACCES = "ARCHIVE_GERER_DEMANDES_ACCES";
     public static final String ARCHIVE_VOIR_STATISTIQUES = "ARCHIVE_VOIR_STATISTIQUES";
+    public static final String ARCHIVE_CLASSER = "ARCHIVE_CLASSER";
 
     private final CurrentUserService currentUserService;
 
@@ -44,6 +45,7 @@ public class ArchivePermissionService {
                     || role == Role.TENANT_ADMIN || role == Role.RECEPTION;
             case ARCHIVE_VOIR_STATISTIQUES -> role == Role.ARCHIVISTE || role == Role.TENANT_ADMIN
                     || role == Role.MEDECIN || role == Role.RECEPTION;
+            case ARCHIVE_CLASSER -> role == Role.ARCHIVISTE || role == Role.TENANT_ADMIN;
             default -> false;
         };
     }

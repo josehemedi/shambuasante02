@@ -27,6 +27,7 @@ public class ArchiveDossier {
     private int version;
     private Integer idMedecin;
     private Integer idService;
+    private Long dossierVirtuelId;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 
@@ -36,6 +37,7 @@ public class ArchiveDossier {
     private String nomMedecin;
     private String nomArchiviste;
     private String nomVerificateur;
+    private String nomDossierVirtuel;
 
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
@@ -106,6 +108,9 @@ public class ArchiveDossier {
     public Integer getIdService() { return idService; }
     public void setIdService(Integer idService) { this.idService = idService; }
 
+    public Long getDossierVirtuelId() { return dossierVirtuelId; }
+    public void setDossierVirtuelId(Long dossierVirtuelId) { this.dossierVirtuelId = dossierVirtuelId; }
+
     public LocalDateTime getCreatedAt() { return createdAt; }
     public void setCreatedAt(LocalDateTime createdAt) { this.createdAt = createdAt; }
 
@@ -126,4 +131,7 @@ public class ArchiveDossier {
 
     public String getNomVerificateur() { return nomVerificateur; }
     public void setNomVerificateur(String nomVerificateur) { this.nomVerificateur = nomVerificateur; }
+
+    public String getNomDossierVirtuel() { return nomDossierVirtuel; }
+    public void setNomDossierVirtuel(String nomDossierVirtuel) { this.nomDossierVirtuel = nomDossierVirtuel; }
 }

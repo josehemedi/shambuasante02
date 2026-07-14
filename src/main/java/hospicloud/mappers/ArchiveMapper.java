@@ -1,6 +1,8 @@
 package hospicloud.mappers;
 
+import hospicloud.dtos.archive.ArchiveContenuSnapshotDto;
 import hospicloud.dtos.archive.ArchiveDossierResponseDto;
+import hospicloud.dtos.archive.ArchiveFichierDto;
 import hospicloud.dtos.archive.DemandeAccesArchiveDto;
 import hospicloud.dtos.archive.HistoriqueArchivageDto;
 import hospicloud.model.archive.ArchiveDossier;
@@ -45,13 +47,36 @@ public final class ArchiveMapper {
         dto.setIdMedecin(archive.getIdMedecin());
         dto.setNomMedecin(archive.getNomMedecin());
         dto.setIdService(archive.getIdService());
+        dto.setDossierVirtuelId(archive.getDossierVirtuelId());
+        dto.setNomDossierVirtuel(archive.getNomDossierVirtuel());
         dto.setVersion(archive.getVersion());
         dto.setCreatedAt(archive.getCreatedAt());
         dto.setUpdatedAt(archive.getUpdatedAt());
         if (permissions != null) {
             dto.setActionsAutorisees(resolveActions(archive, permissions));
+            if (permissions.has(ArchivePermissionService.ARCHIVE_CLASSER)) {
+                dto.getActionsAutorisees().add("CLASSER");
+            }
         }
         return dto;
+    }
+
+    public static ArchiveDossierResponseDto toDto(ArchiveDossier archive,
+                                                  ArchivePermissionService permissions,
+                                                  ArchiveContenuSnapshotDto snapshot) {
+        ArchiveDossierResponseDto dto = toDto(archive, permissions);
+        dto.setContenuSnapshot(snapshot);
+        return dto;
+    }
+
+    public static void attachFichiers(ArchiveDossierResponseDto dto, List<ArchiveFichierDto> fichiers) {
+        if (dto == null) {
+            return;
+        }
+        List<ArchiveFichierDto> list = fichiers != null ? fichiers : List.of();
+        dto.setFichiers(list);
+        dto.setHasPdf(!list.isEmpty());
+        dto.setNomPdf(list.isEmpty() ? null : list.get(0).getNomFichier());
     }
 
     public static HistoriqueArchivageDto toDto(HistoriqueArchivage h) {

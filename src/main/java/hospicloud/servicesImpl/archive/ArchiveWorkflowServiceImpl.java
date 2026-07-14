@@ -9,6 +9,8 @@ import hospicloud.repositories.archive.ArchiveDossierRepository;
 import hospicloud.repositories.archive.HistoriqueArchivageRepository;
 import hospicloud.security.CurrentUserService;
 import hospicloud.services.RealtimeNotificationService;
+import hospicloud.services.archive.ArchivePdfService;
+import hospicloud.services.archive.ArchiveSnapshotService;
 import hospicloud.services.archive.ArchiveWorkflowService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -33,19 +35,25 @@ public class ArchiveWorkflowServiceImpl implements ArchiveWorkflowService {
     private final CurrentUserService currentUserService;
     private final JdbcTemplate jdbcTemplate;
     private final RealtimeNotificationService realtimeNotificationService;
+    private final ArchiveSnapshotService snapshotService;
+    private final ArchivePdfService archivePdfService;
 
     public ArchiveWorkflowServiceImpl(ArchiveDossierRepository archiveRepository,
                                       HistoriqueArchivageRepository historiqueRepository,
                                       ArchiveAuditHelper auditHelper,
                                       CurrentUserService currentUserService,
                                       JdbcTemplate jdbcTemplate,
-                                      RealtimeNotificationService realtimeNotificationService) {
+                                      RealtimeNotificationService realtimeNotificationService,
+                                      ArchiveSnapshotService snapshotService,
+                                      ArchivePdfService archivePdfService) {
         this.archiveRepository = archiveRepository;
         this.historiqueRepository = historiqueRepository;
         this.auditHelper = auditHelper;
         this.currentUserService = currentUserService;
         this.jdbcTemplate = jdbcTemplate;
         this.realtimeNotificationService = realtimeNotificationService;
+        this.snapshotService = snapshotService;
+        this.archivePdfService = archivePdfService;
     }
 
     @Override
@@ -214,6 +222,19 @@ public class ArchiveWorkflowServiceImpl implements ArchiveWorkflowService {
 
             log.info("Dossier archive {} créé pour hôpital {} patient {} (épisode {})",
                     archiveId, hopitalId, patientId, episodeId);
+
+            try {
+                snapshotService.capturerEtPersister(archive);
+            } catch (Exception snapEx) {
+                log.warn("Snapshot patient non capturé pour archive {}: {}", archiveId, snapEx.getMessage());
+            }
+
+            try {
+                ArchiveDossier fresh = archiveRepository.findById(hopitalId, archiveId).orElse(archive);
+                archivePdfService.genererEtAttacher(fresh);
+            } catch (Exception pdfEx) {
+                log.warn("PDF dossier non généré pour archive {}: {}", archiveId, pdfEx.getMessage());
+            }
 
             if (notifyArchivistes) {
                 realtimeNotificationService.notifyArchivistesDossierPatientSorti(

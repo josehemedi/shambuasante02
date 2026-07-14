@@ -32,16 +32,19 @@ public class ArchiveDossierRepositoryImpl implements ArchiveDossierRepository {
 
     private static final String BASE_SELECT = """
             SELECT a.*,
-                   TRIM(CONCAT(COALESCE(p.prenom, ''), ' ', COALESCE(p.nom, ''))) AS nom_patient,
-                   CONCAT('PT-', p.id_patient) AS numero_dossier,
+                   COALESCE(a.nom_patient_fige,
+                       TRIM(CONCAT(COALESCE(p.prenom, ''), ' ', COALESCE(p.nom, '')))) AS nom_patient,
+                   COALESCE(a.numero_dossier_fige, CONCAT('PT-', p.id_patient)) AS numero_dossier,
                    TRIM(CONCAT(COALESCE(m.prenom, ''), ' ', COALESCE(m.nom, ''))) AS nom_medecin,
                    ua.email AS nom_archiviste,
-                   uv.email AS nom_verificateur
+                   uv.email AS nom_verificateur,
+                   dv.nom AS nom_dossier_virtuel
             FROM archives_dossiers a
-            INNER JOIN patients p ON p.id_patient = a.patient_id AND p.id_hopital = a.hopital_id
+            LEFT JOIN patients p ON p.id_patient = a.patient_id AND p.id_hopital = a.hopital_id
             LEFT JOIN medecin m ON m.id_medecin = a.id_medecin
             LEFT JOIN utilisateurs ua ON ua.id_utilisateur = a.archive_par
             LEFT JOIN utilisateurs uv ON uv.id_utilisateur = a.verifie_par
+            LEFT JOIN archives_dossiers_virtuels dv ON dv.id = a.dossier_virtuel_id AND dv.hopital_id = a.hopital_id
             """;
 
     private final RowMapper<ArchiveDossier> rowMapper = (rs, rowNum) -> {
@@ -87,6 +90,17 @@ public class ArchiveDossierRepositoryImpl implements ArchiveDossierRepository {
         a.setNomMedecin(rs.getString("nom_medecin"));
         a.setNomArchiviste(rs.getString("nom_archiviste"));
         a.setNomVerificateur(rs.getString("nom_verificateur"));
+        try {
+            long dvId = rs.getLong("dossier_virtuel_id");
+            if (!rs.wasNull()) a.setDossierVirtuelId(dvId);
+        } catch (Exception ignored) {
+            // colonne absente avant migration
+        }
+        try {
+            a.setNomDossierVirtuel(rs.getString("nom_dossier_virtuel"));
+        } catch (Exception ignored) {
+            // ignore
+        }
         return a;
     };
 
@@ -208,7 +222,7 @@ public class ArchiveDossierRepositoryImpl implements ArchiveDossierRepository {
     public long count(Integer hopitalId, ArchiveSearchFilter filter) {
         StringBuilder sql = new StringBuilder("""
                 SELECT COUNT(1) FROM archives_dossiers a
-                INNER JOIN patients p ON p.id_patient = a.patient_id AND p.id_hopital = a.hopital_id
+                LEFT JOIN patients p ON p.id_patient = a.patient_id AND p.id_hopital = a.hopital_id
                 WHERE a.hopital_id = ?
                 """);
         List<Object> params = new ArrayList<>();
@@ -216,6 +230,64 @@ public class ArchiveDossierRepositoryImpl implements ArchiveDossierRepository {
         appendFilters(sql, params, filter);
         Long total = jdbcTemplate.queryForObject(sql.toString(), Long.class, params.toArray());
         return total != null ? total : 0L;
+    }
+
+    @Override
+    public List<ArchiveDossier> listByDossierVirtuel(Integer hopitalId, Long dossierVirtuelId) {
+        if (dossierVirtuelId == null) {
+            return jdbcTemplate.query(
+                    BASE_SELECT + """
+                    WHERE a.hopital_id = ? AND a.dossier_virtuel_id IS NULL
+                    ORDER BY a.date_demande_archivage DESC, a.created_at DESC
+                    """,
+                    rowMapper, hopitalId);
+        }
+        return jdbcTemplate.query(
+                BASE_SELECT + """
+                WHERE a.hopital_id = ? AND a.dossier_virtuel_id = ?
+                ORDER BY a.date_demande_archivage DESC, a.created_at DESC
+                """,
+                rowMapper, hopitalId, dossierVirtuelId);
+    }
+
+    @Override
+    public boolean updateDossierVirtuelId(Integer hopitalId, Long archiveId, Long dossierVirtuelId) {
+        return jdbcTemplate.update(
+                "UPDATE archives_dossiers SET dossier_virtuel_id = ? WHERE hopital_id = ? AND id = ?",
+                dossierVirtuelId, hopitalId, archiveId) > 0;
+    }
+
+    @Override
+    public boolean saveContenuSnapshot(Integer hopitalId,
+                                       Long archiveId,
+                                       String contenuSnapshot,
+                                       LocalDateTime snapshotAt,
+                                       String nomPatientFige,
+                                       String numeroDossierFige) {
+        return jdbcTemplate.update(
+                """
+                UPDATE archives_dossiers
+                   SET contenu_snapshot = ?,
+                       snapshot_at = ?,
+                       nom_patient_fige = COALESCE(?, nom_patient_fige),
+                       numero_dossier_fige = COALESCE(?, numero_dossier_fige)
+                 WHERE hopital_id = ? AND id = ?
+                """,
+                contenuSnapshot,
+                snapshotAt != null ? Timestamp.valueOf(snapshotAt) : Timestamp.valueOf(LocalDateTime.now()),
+                nomPatientFige,
+                numeroDossierFige,
+                hopitalId,
+                archiveId) > 0;
+    }
+
+    @Override
+    public String findContenuSnapshot(Integer hopitalId, Long archiveId) {
+        List<String> rows = jdbcTemplate.query(
+                "SELECT contenu_snapshot FROM archives_dossiers WHERE hopital_id = ? AND id = ?",
+                (rs, i) -> rs.getString("contenu_snapshot"),
+                hopitalId, archiveId);
+        return rows.isEmpty() ? null : rows.get(0);
     }
 
     @Override
