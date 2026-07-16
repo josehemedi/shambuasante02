@@ -103,6 +103,10 @@ services:
       SPRING_DATA_REDIS_PORT: 6379
       APP_JWT_SECRET: ${APP_JWT_SECRET:-shambua-change-me-in-production-use-long-secret-key-256bits}
       APP_ASYNC_STORAGE_DIR: /var/hospicloud/async
+      # OpenAI — définir OPENAI_API_KEY dans .env du serveur (jamais dans Git)
+      OPENAI_API_KEY: ${OPENAI_API_KEY:-}
+      OPENAI_MODEL: ${OPENAI_MODEL:-gpt-4o-mini}
+      AI_ENABLED: ${AI_ENABLED:-true}
       JAVA_OPTS: ${JAVA_OPTS:--XX:+UseContainerSupport -XX:MaxRAMPercentage=75.0}
     ports:
       - "${APP_PORT:-8082}:8082"

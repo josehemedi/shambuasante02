@@ -1,6 +1,7 @@
 # ===================================================================
-# Configuration Hospicloud — exemple
-# Copier vers application-local.properties et adapter
+# Configuration Hospicloud — exemple (versionné, sans secrets)
+# Copier vers application-local.properties et renseigner vos valeurs :
+#   copy application-local.properties.example application-local.properties
 # ===================================================================
 
 # JWT
@@ -15,7 +16,13 @@ spring.datasource.url=jdbc:mysql://localhost:3308/hospicloud?useSSL=false&allowP
 spring.datasource.username=root
 spring.datasource.password=your_password
 
+# ---------------------------------------------------------------------------
 # OpenAI (assistant IA clinique)
-# Copier votre clé depuis https://platform.openai.com/api-keys
+# 1) Créer une clé : https://platform.openai.com/api-keys
+# 2) Coller la clé ici OU exporter la variable d'environnement OPENAI_API_KEY
+# 3) Ne jamais committer application-local.properties ni la clé dans GitHub
+# Production : définir OPENAI_API_KEY dans les secrets du serveur / hébergeur
+# ---------------------------------------------------------------------------
 OPENAI_API_KEY=sk-your-openai-api-key
 OPENAI_MODEL=gpt-4o-mini
+AI_ENABLED=true

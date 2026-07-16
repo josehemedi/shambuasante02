@@ -51,6 +51,14 @@ public class AiClinicalAssistantServiceImpl implements AiClinicalAssistantServic
         this.model = model;
         this.enabled = enabled;
         this.chatClient = chatClientBuilder != null && isConfigured() ? chatClientBuilder.build() : null;
+        if (!isConfigured()) {
+            logger.warn(
+                    "Assistant IA désactivé : OPENAI_API_KEY absente ou invalide. "
+                            + "Définissez-la dans application-local.properties (local) "
+                            + "ou en variable d'environnement (production).");
+        } else {
+            logger.info("Assistant IA OpenAI prêt (modèle {}).", model);
+        }
     }
 
     @Override
@@ -123,7 +131,14 @@ public class AiClinicalAssistantServiceImpl implements AiClinicalAssistantServic
     }
 
     private boolean isConfigured() {
-        return enabled && apiKey != null && !apiKey.isBlank();
+        if (!enabled || apiKey == null || apiKey.isBlank()) {
+            return false;
+        }
+        String normalized = apiKey.toLowerCase(Locale.ROOT);
+        // Rejeter les placeholders d'exemple
+        return !normalized.contains("your-openai")
+                && !normalized.equals("sk-xxx")
+                && apiKey.startsWith("sk-");
     }
 
     private String normalizeAnalysisType(String analysisType) {
