@@ -52,8 +52,7 @@ public class TenantResolverFilter extends OncePerRequestFilter {
             return hopitalId;
         }
 
-        // SaaS multi-tenant : sans JWT, jamais initialiser le tenant via X-Hopital-Id
-        // (endpoints publics utilisent subdomain / paramètres validés côté service).
+        // SaaS multi-tenant : sans JWT, jamais initialiser le tenant via X-Hopital-Id.
         return null;
     }
 }

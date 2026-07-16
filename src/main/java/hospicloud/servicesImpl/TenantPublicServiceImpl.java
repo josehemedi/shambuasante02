@@ -32,7 +32,22 @@ public class TenantPublicServiceImpl implements TenantPublicService {
         }
         Hopital hopital = hopitalRepository.findBySousDomaine(subdomain.trim().toLowerCase())
                 .orElseThrow(() -> new ResourceNotFoundException("Établissement introuvable pour ce sous-domaine"));
+        return toDto(hopital);
+    }
 
+    @Override
+    public TenantPublicDTO getByHopitalId(Integer hopitalId) {
+        if (hopitalId == null) {
+            throw new ResourceNotFoundException("Aucun établissement associé au compte");
+        }
+        Hopital hopital = hopitalRepository.rechercherhopitalParId(hopitalId.longValue());
+        if (hopital == null) {
+            throw new ResourceNotFoundException("Établissement introuvable pour ce compte");
+        }
+        return toDto(hopital);
+    }
+
+    private TenantPublicDTO toDto(Hopital hopital) {
         TenantPublicDTO dto = new TenantPublicDTO();
         dto.setIdHopital(hopital.getIdHopital());
         dto.setSousDomaine(hopital.getSousDomaine());

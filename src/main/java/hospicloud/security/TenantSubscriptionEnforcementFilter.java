@@ -25,6 +25,7 @@ public class TenantSubscriptionEnforcementFilter extends OncePerRequestFilter {
 
     private static final Set<String> TENANT_ADMIN_RENEWAL_PREFIXES = Set.of(
             "/api/tenant-admin/subscription",
+            "/api/tenant/current",
             "/api/auth/me",
             "/api/auth/logout"
     );

@@ -79,6 +79,7 @@ public class SecurityConfig {
                 .requestMatchers("/api/tenant-admin/**").hasRole("TENANT_ADMIN")
 
                 .requestMatchers("/api/tenant/cashier/**").hasAnyRole("CAISSIER", "TENANT_ADMIN")
+                .requestMatchers(HttpMethod.GET, "/api/tenant/current").authenticated()
 
                 .requestMatchers("/api/monitoring/**").hasRole("SUPER_ADMIN")
                 .requestMatchers(HttpMethod.GET, "/api/audit/**").hasRole("SUPER_ADMIN")
