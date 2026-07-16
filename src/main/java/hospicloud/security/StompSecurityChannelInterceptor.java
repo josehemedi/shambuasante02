@@ -255,6 +255,7 @@ public class StompSecurityChannelInterceptor implements ChannelInterceptor {
         }
     }
 
+    /** SaaS : X-Hopital-Id uniquement pour SUPER_ADMIN (aligné TenantResolverFilter). */
     private Integer resolveTenantId(UtilisateurPrincipal principal, StompHeaderAccessor accessor) {
         if (principal.getAppRole() == Role.SUPER_ADMIN) {
             String headerId = firstHeader(accessor, "X-Hopital-Id", "x-hopital-id");

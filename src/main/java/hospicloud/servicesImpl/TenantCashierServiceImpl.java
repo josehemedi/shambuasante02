@@ -54,7 +54,7 @@ public class TenantCashierServiceImpl implements TenantCashierService {
     @Transactional
     public Map<String, Object> collectPayment(TenantCashierPaymentRequestDTO request) {
         UtilisateurPrincipal principal = TenantAccessSupport.requirePrincipal(Role.CAISSIER, Role.TENANT_ADMIN);
-        Integer hopitalId = principal.getIdHopital();
+        Integer hopitalId = TenantAccessSupport.resolveHopitalId(principal);
 
         if (request.getIdFacture() == null) {
             throw new BadRequestException("La facture est obligatoire");

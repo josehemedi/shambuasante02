@@ -42,7 +42,7 @@ public class BillingCompositionServiceImpl implements BillingCompositionService 
     @Transactional
     public Map<String, Object> composeInvoice(BillingComposeRequestDTO request) {
         UtilisateurPrincipal principal = TenantAccessSupport.requirePrincipal(Role.CAISSIER, Role.TENANT_ADMIN);
-        Integer hopitalId = principal.getIdHopital();
+        Integer hopitalId = TenantAccessSupport.resolveHopitalId(principal);
         Integer idPatient = resolvePatientId(request, hopitalId);
         return doCompose(
                 hopitalId,
@@ -104,18 +104,18 @@ public class BillingCompositionServiceImpl implements BillingCompositionService 
                     actorUserId);
             created = true;
         } else if (rebuildExistingLines) {
-            billingRepository.deleteAutoLines(idFacture);
+            billingRepository.deleteAutoLines(idFacture, hopitalId);
         }
 
         List<BillingDraftLineDTO> newLines = collectUnbilledLines(idPatient, hopitalId);
         for (BillingDraftLineDTO line : newLines) {
-            billingRepository.insertFactureItem(idFacture, line);
+            billingRepository.insertFactureItem(idFacture, hopitalId, line);
         }
 
-        BigDecimal sousTotal = billingRepository.sumFactureItems(idFacture);
+        BigDecimal sousTotal = billingRepository.sumFactureItems(idFacture, hopitalId);
         BigDecimal tauxAssurance = tauxAssuranceOverride != null
                 ? tauxAssuranceOverride
-                : billingRepository.findPatientInsuranceRate(idPatient);
+                : billingRepository.findPatientInsuranceRate(idPatient, hopitalId);
         if (tauxAssurance.compareTo(BigDecimal.ZERO) < 0) tauxAssurance = BigDecimal.ZERO;
         if (tauxAssurance.compareTo(BigDecimal.valueOf(100)) > 0) tauxAssurance = BigDecimal.valueOf(100);
 
@@ -131,7 +131,7 @@ public class BillingCompositionServiceImpl implements BillingCompositionService 
         if (unappliedAdvances.compareTo(BigDecimal.ZERO) > 0) {
             billingRepository.applyAdvancesToFacture(idPatient, hopitalId, idFacture);
         }
-        BigDecimal avances = billingRepository.sumAdvancesForFacture(idFacture);
+        BigDecimal avances = billingRepository.sumAdvancesForFacture(idFacture, hopitalId);
 
         BigDecimal netPatient = sousTotal
                 .subtract(montantAssurance)
@@ -191,7 +191,7 @@ public class BillingCompositionServiceImpl implements BillingCompositionService 
     @Transactional
     public Map<String, Object> recordAdvance(BillingAdvanceRequestDTO request) {
         UtilisateurPrincipal principal = TenantAccessSupport.requirePrincipal(Role.CAISSIER, Role.TENANT_ADMIN);
-        Integer hopitalId = principal.getIdHopital();
+        Integer hopitalId = TenantAccessSupport.resolveHopitalId(principal);
 
         if (request.getIdPatient() == null) {
             throw new BadRequestException("Le patient est obligatoire");
@@ -225,7 +225,7 @@ public class BillingCompositionServiceImpl implements BillingCompositionService 
     @Transactional
     public Map<String, Object> refreshOpenInvoices() {
         UtilisateurPrincipal principal = TenantAccessSupport.requirePrincipal(Role.CAISSIER, Role.TENANT_ADMIN);
-        Integer hopitalId = principal.getIdHopital();
+        Integer hopitalId = TenantAccessSupport.resolveHopitalId(principal);
 
         List<Integer> patients = billingRepository.listPatientsWithOpenFactures(hopitalId);
         int refreshed = 0;

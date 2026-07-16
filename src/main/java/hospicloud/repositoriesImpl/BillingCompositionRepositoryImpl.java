@@ -67,18 +67,20 @@ public class BillingCompositionRepositoryImpl implements BillingCompositionRepos
     }
 
     @Override
-    public BigDecimal findPatientInsuranceRate(Integer idPatient) {
+    public BigDecimal findPatientInsuranceRate(Integer idPatient, Integer idHopital) {
         try {
             BigDecimal rate = jdbcTemplate.queryForObject(
                     """
-                    SELECT COALESCE(taux_couverture, 0)
-                    FROM patients_assurances
-                    WHERE id_patient = ?
-                      AND (date_expiration IS NULL OR date_expiration >= CURDATE())
-                    ORDER BY id_assurance DESC
+                    SELECT COALESCE(pa.taux_couverture, 0)
+                    FROM patients_assurances pa
+                    INNER JOIN patients p ON p.id_patient = pa.id_patient
+                    WHERE pa.id_patient = ?
+                      AND p.id_hopital = ?
+                      AND (pa.date_expiration IS NULL OR pa.date_expiration >= CURDATE())
+                    ORDER BY pa.id_assurance DESC
                     LIMIT 1
                     """,
-                    BigDecimal.class, idPatient);
+                    BigDecimal.class, idPatient, idHopital);
             return rate != null ? rate : BigDecimal.ZERO;
         } catch (Exception e) {
             try {
@@ -87,9 +89,9 @@ public class BillingCompositionRepositoryImpl implements BillingCompositionRepos
                         SELECT COALESCE(s.taux_couverture, 0)
                         FROM patients p
                         LEFT JOIN societes s ON p.id_societe = s.id_societe
-                        WHERE p.id_patient = ?
+                        WHERE p.id_patient = ? AND p.id_hopital = ?
                         """,
-                        BigDecimal.class, idPatient);
+                        BigDecimal.class, idPatient, idHopital);
                 return rate != null ? rate : BigDecimal.ZERO;
             } catch (Exception ex) {
                 return BigDecimal.ZERO;
@@ -329,14 +331,14 @@ public class BillingCompositionRepositoryImpl implements BillingCompositionRepos
     }
 
     @Override
-    public BigDecimal sumAdvancesForFacture(Integer idFacture) {
+    public BigDecimal sumAdvancesForFacture(Integer idFacture, Integer idHopital) {
         try {
             BigDecimal sum = jdbcTemplate.queryForObject(
                     """
                     SELECT COALESCE(SUM(montant), 0) FROM avances_patient
-                    WHERE id_facture = ? AND appliquee = 1
+                    WHERE id_facture = ? AND id_hopital = ? AND appliquee = 1
                     """,
-                    BigDecimal.class, idFacture);
+                    BigDecimal.class, idFacture, idHopital);
             return sum != null ? sum : BigDecimal.ZERO;
         } catch (Exception e) {
             return BigDecimal.ZERO;
@@ -390,14 +392,28 @@ public class BillingCompositionRepositoryImpl implements BillingCompositionRepos
     }
 
     @Override
-    public void deleteAutoLines(Integer idFacture) {
+    public void deleteAutoLines(Integer idFacture, Integer idHopital) {
         jdbcTemplate.update(
-                "DELETE FROM facture_items WHERE id_facture = ? AND source_type IS NOT NULL",
-                idFacture);
+                """
+                DELETE fi FROM facture_items fi
+                INNER JOIN factures f ON f.id_facture = fi.id_facture
+                WHERE fi.id_facture = ?
+                  AND f.id_hopital = ?
+                  AND fi.source_type IS NOT NULL
+                """,
+                idFacture, idHopital);
     }
 
     @Override
-    public void insertFactureItem(Integer idFacture, BillingDraftLineDTO line) {
+    public void insertFactureItem(Integer idFacture, Integer idHopital, BillingDraftLineDTO line) {
+        Number owned = jdbcTemplate.queryForObject(
+                "SELECT COUNT(*) FROM factures WHERE id_facture = ? AND id_hopital = ?",
+                Number.class,
+                idFacture,
+                idHopital);
+        if (owned == null || owned.intValue() == 0) {
+            throw new IllegalArgumentException("Facture introuvable pour cet établissement");
+        }
         jdbcTemplate.update(
                 """
                 INSERT INTO facture_items (
@@ -417,14 +433,16 @@ public class BillingCompositionRepositoryImpl implements BillingCompositionRepos
     }
 
     @Override
-    public BigDecimal sumFactureItems(Integer idFacture) {
+    public BigDecimal sumFactureItems(Integer idFacture, Integer idHopital) {
         try {
             BigDecimal sum = jdbcTemplate.queryForObject(
                     """
-                    SELECT COALESCE(SUM(quantite * prix_unitaire), 0)
-                    FROM facture_items WHERE id_facture = ?
+                    SELECT COALESCE(SUM(fi.quantite * fi.prix_unitaire), 0)
+                    FROM facture_items fi
+                    INNER JOIN factures f ON f.id_facture = fi.id_facture
+                    WHERE fi.id_facture = ? AND f.id_hopital = ?
                     """,
-                    BigDecimal.class, idFacture);
+                    BigDecimal.class, idFacture, idHopital);
             return sum != null ? sum : BigDecimal.ZERO;
         } catch (Exception e) {
             return BigDecimal.ZERO;

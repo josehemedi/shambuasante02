@@ -81,7 +81,7 @@ public class RestExceptionHandler extends ResponseEntityExceptionHandler {
     protected ResponseEntity<Object> handleIllegalState(IllegalStateException ex) {
         if (ex.getMessage() != null && ex.getMessage().contains("Tenant context not initialized")) {
             ApiError apiError = new ApiError(HttpStatus.BAD_REQUEST.value(), "Bad Request",
-                    "Le tenant courant est introuvable. Veuillez fournir l'en-tête X-Hopital-Id ou initialiser le contexte de tenant.");
+                    "Le tenant courant est introuvable. Staff : reconnectez-vous (JWT idHopital). SUPER_ADMIN : fournissez X-Hopital-Id.");
             return new ResponseEntity<>(apiError, HttpStatus.BAD_REQUEST);
         }
 

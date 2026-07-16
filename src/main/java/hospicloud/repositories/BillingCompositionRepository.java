@@ -13,7 +13,7 @@ public interface BillingCompositionRepository {
 
     Optional<Integer> findFacturePatientId(Integer idFacture, Integer idHopital);
 
-    BigDecimal findPatientInsuranceRate(Integer idPatient);
+    BigDecimal findPatientInsuranceRate(Integer idPatient, Integer idHopital);
 
     BigDecimal findDefaultConsultationPrice(Integer idHopital);
 
@@ -31,18 +31,18 @@ public interface BillingCompositionRepository {
 
     BigDecimal sumUnappliedAdvances(Integer idPatient, Integer idHopital);
 
-    BigDecimal sumAdvancesForFacture(Integer idFacture);
+    BigDecimal sumAdvancesForFacture(Integer idFacture, Integer idHopital);
 
     Optional<BigDecimal> findFactureRemise(Integer idFacture, Integer idHopital);
 
     int insertFacture(Integer idPatient, Integer idHopital, String numero, BigDecimal ht, BigDecimal tva,
                       BigDecimal ttc, Integer idCaissier);
 
-    void deleteAutoLines(Integer idFacture);
+    void deleteAutoLines(Integer idFacture, Integer idHopital);
 
-    void insertFactureItem(Integer idFacture, BillingDraftLineDTO line);
+    void insertFactureItem(Integer idFacture, Integer idHopital, BillingDraftLineDTO line);
 
-    BigDecimal sumFactureItems(Integer idFacture);
+    BigDecimal sumFactureItems(Integer idFacture, Integer idHopital);
 
     void updateFactureComposition(
             Integer idFacture,

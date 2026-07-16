@@ -246,7 +246,7 @@ public class DashboardServiceImpl implements DashboardService {
         } catch (IllegalStateException e) {
             logger.warn("Aucun tenant détecté pour le dashboard: {}", e.getMessage());
             throw new IllegalStateException(
-                    "Le tenant courant est introuvable. Veuillez fournir l'en-tête X-Hopital-Id.");
+                    "Le tenant courant est introuvable. SUPER_ADMIN : fournissez X-Hopital-Id.");
         }
     }
 

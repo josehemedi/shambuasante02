@@ -52,15 +52,8 @@ public class TenantResolverFilter extends OncePerRequestFilter {
             return hopitalId;
         }
 
-        String headerId = request.getHeader("X-Hopital-Id");
-        if (headerId != null && !headerId.isBlank()) {
-            try {
-                return Integer.parseInt(headerId);
-            } catch (NumberFormatException e) {
-                throw new IllegalArgumentException("Invalid X-Hopital-Id header: " + headerId);
-            }
-        }
-
+        // SaaS multi-tenant : sans JWT, jamais initialiser le tenant via X-Hopital-Id
+        // (endpoints publics utilisent subdomain / paramètres validés côté service).
         return null;
     }
 }
