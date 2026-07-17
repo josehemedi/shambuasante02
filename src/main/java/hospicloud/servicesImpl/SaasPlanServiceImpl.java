@@ -93,12 +93,11 @@ public class SaasPlanServiceImpl implements SaasPlanService {
         Integer count = jdbcTemplate.queryForObject(
                 """
                         SELECT COUNT(*)
-                        FROM rendez_vous r
-                        INNER JOIN medecins m ON m.id_medecin = r.id_medecin
-                        WHERE m.id_hopital = ?
-                          AND UPPER(r.canal) = 'TELECONSULTATION'
-                          AND YEAR(r.date_heure) = YEAR(CURRENT_DATE)
-                          AND MONTH(r.date_heure) = MONTH(CURRENT_DATE)
+                        FROM rendez_vous01 r
+                        WHERE r.id_hopital = ?
+                          AND UPPER(COALESCE(r.canal, '')) = 'TELECONSULTATION'
+                          AND YEAR(r.date_heure_rdv) = YEAR(CURRENT_DATE)
+                          AND MONTH(r.date_heure_rdv) = MONTH(CURRENT_DATE)
                         """,
                 Integer.class,
                 hopitalId);
