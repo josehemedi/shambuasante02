@@ -81,7 +81,7 @@ public class PatientDashboardRepositoryImpl implements PatientDashboardRepositor
         Integer hopitalId = TenantContext.getRequiredHopitalId();
 
         String sql = """
-                SELECT r.id_rdv, r.date_heure_rdv, r.motif_visite, r.canal, r.statut_rdv,
+                SELECT r.id_rdv, r.id_hopital, r.date_heure_rdv, r.motif_visite, r.canal, r.statut_rdv,
                        TRIM(CONCAT(COALESCE(m.prenom, ''), ' ', COALESCE(m.nom, ''))) AS nom_medecin
                 FROM rendez_vous01 r
                 LEFT JOIN medecin m ON r.id_medecin = m.id_medecin AND r.id_hopital = m.id_hopital
@@ -101,6 +101,7 @@ public class PatientDashboardRepositoryImpl implements PatientDashboardRepositor
 
         return jdbcTemplate.query(sql, (rs, rowNum) -> new UpcomingAppointmentDTO(
                 rs.getInt("id_rdv"),
+                rs.getInt("id_hopital"),
                 toLocalDateTime(rs.getTimestamp("date_heure_rdv")),
                 rs.getString("motif_visite"),
                 rs.getString("nom_medecin"),
