@@ -3,7 +3,7 @@ name: Deploy Shambua Sante Backend
 on:
   push:
     branches:
-      - main # ou master selon sa branche par défaut
+      - main # ou master selon sa branche par défaut 
 
 jobs:
   deploy:
