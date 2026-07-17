@@ -178,8 +178,26 @@ public class ReceptionDashboardServiceImpl implements ReceptionDashboardService 
 
         receptionRepository.mettreAJourStatutAdmission(idAdmission, tenantId, nouveauStatut);
 
-        // Notify over websocket for real-time board updates
-        messagingTemplate.convertAndSend("/topic/reception/" + tenantId, "STATUS_UPDATED");
+        // Notify reception board + médecin concerné (file / afficheur en temps réel)
+        messagingTemplate.convertAndSend(ReceptionLiveTopics.destination(tenantId), "STATUS_UPDATED");
+        if (existante.getIdMedecin() != null) {
+            String nomPatient = existante.getIdPatient() != null
+                    ? patientRepository.trouverPatientParId(existante.getIdPatient().longValue())
+                        .map(this::responseNomPatient)
+                        .orElse("Patient")
+                    : "Patient";
+            Map<String, Object> payload = new HashMap<>();
+            payload.put("type", "STATUS_UPDATED");
+            payload.put("idHopital", tenantId);
+            payload.put("idMedecin", existante.getIdMedecin());
+            payload.put("idAdmission", idAdmission);
+            payload.put("idRendezVous", existante.getIdRendezVous());
+            payload.put("patientNom", nomPatient);
+            payload.put("statut", nouveauStatut);
+            payload.put("numeroPassage", existante.getNumeroPassage());
+            messagingTemplate.convertAndSend(
+                    MedecinQueueTopics.destination(tenantId, existante.getIdMedecin()), payload);
+        }
     }
 
     @Override

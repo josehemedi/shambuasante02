@@ -43,4 +43,42 @@ public class EmailServiceImpl implements EmailService {
             throw new RuntimeException("Erreur envoi email HTML", e);
         }
     }
+
+    @Override
+    public void envoyerEmailHtmlAvecPieceJointe(
+            String destinataire,
+            String sujet,
+            String contenuHtml,
+            String nomFichier,
+            byte[] pieceJointe,
+            String mimeType) {
+        try {
+            MimeMessage message = mailSender.createMimeMessage();
+            MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
+
+            helper.setTo(destinataire);
+            helper.setSubject(sujet);
+            helper.setText(contenuHtml, true);
+            helper.setFrom(fromEmail);
+
+            if (pieceJointe != null && pieceJointe.length > 0 && nomFichier != null) {
+                String type = (mimeType == null || mimeType.isBlank())
+                        ? "application/octet-stream"
+                        : mimeType;
+                helper.addAttachment(
+                        nomFichier,
+                        new org.springframework.core.io.ByteArrayResource(pieceJointe) {
+                            @Override
+                            public String getFilename() {
+                                return nomFichier;
+                            }
+                        },
+                        type);
+            }
+
+            mailSender.send(message);
+        } catch (Exception e) {
+            throw new RuntimeException("Erreur envoi email avec pièce jointe", e);
+        }
+    }
 }

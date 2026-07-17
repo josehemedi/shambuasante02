@@ -16,6 +16,12 @@ public interface ConsultationMedicaleRepository {
     // Historique des fiches finalisées pour un médecin
     List<ConsultationMedicale> findByMedecin(Integer idMedecin);
 
+    /**
+     * Consultations du médecin pour patients qui lui sont attribués
+     * et encore en gérance (pas SORTI / SORTIE_AUTORISEE).
+     */
+    List<ConsultationMedicale> findEnGeranceParMedecin(Integer idMedecin);
+
     /** Toutes les consultations de l'établissement (continuité des soins). */
     List<ConsultationMedicale> findByHopital(Integer idHopital);
     

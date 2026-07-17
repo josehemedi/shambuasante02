@@ -186,11 +186,22 @@
     <artifactId>jasperreports</artifactId>
     <version>6.20.0</version> </dependency>
 
-<dependency>
-    <groupId>net.sf.jasperreports</groupId>
-    <artifactId>jasperreports-fonts</artifactId>
-    <version>6.20.0</version>
-</dependency>
+		<dependency>
+			<groupId>net.sf.jasperreports</groupId>
+			<artifactId>jasperreports-fonts</artifactId>
+			<version>6.20.0</version>
+		</dependency>
+		<!-- Export archives : PDF optimisé, PNG, TIFF lossless -->
+		<dependency>
+			<groupId>org.apache.pdfbox</groupId>
+			<artifactId>pdfbox</artifactId>
+			<version>3.0.3</version>
+		</dependency>
+		<dependency>
+			<groupId>com.twelvemonkeys.imageio</groupId>
+			<artifactId>imageio-tiff</artifactId>
+			<version>3.12.0</version>
+		</dependency>
 		<!-- <dependency>
 			<groupId>com.example</groupId>
 			<artifactId>SmartFinger05</artifactId>

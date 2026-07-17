@@ -408,6 +408,43 @@ public class RealtimeNotificationServiceImpl implements RealtimeNotificationServ
         publish(hopitalId, userId.get(), dto);
     }
 
+    @Override
+    public void notifyOrdonnanceEnvoyeeAuPatient(
+            Integer hopitalId,
+            Integer idPatient,
+            Long idOrdonnance,
+            String numeroOrdonnance,
+            String nomMedecin) {
+        if (hopitalId == null || idPatient == null) {
+            return;
+        }
+
+        Optional<Integer> userId = utilisateurRepository.findUtilisateurIdByPatient(idPatient, hopitalId);
+        if (userId.isEmpty()) {
+            log.debug("Aucun compte utilisateur patient pour id_patient={} (ordonnance)", idPatient);
+            return;
+        }
+
+        String ref = StringUtils.hasText(numeroOrdonnance)
+                ? numeroOrdonnance
+                : (idOrdonnance != null ? "ORD-" + idOrdonnance : "Ordonnance");
+        String medecinLabel = StringUtils.hasText(nomMedecin) ? nomMedecin : "votre médecin";
+
+        LiveNotificationDTO dto = new LiveNotificationDTO();
+        dto.setId(UUID.randomUUID().toString());
+        dto.setType("ORDONNANCE_ENVOYEE");
+        dto.setIdHopital(hopitalId);
+        dto.setCreatedAt(LocalDateTime.now());
+        dto.setTitle("New prescription received");
+        dto.setTitleFr("Nouvelle ordonnance reçue");
+        dto.setMessage(medecinLabel + " sent you prescription " + ref + ".");
+        dto.setMessageFr(medecinLabel + " vous a transmis l'ordonnance " + ref + ".");
+        dto.setLink("/records");
+        dto.setTone("success");
+
+        publish(hopitalId, userId.get(), dto);
+    }
+
     private String formatTypeEpisode(String typeEpisode) {
         if (!StringUtils.hasText(typeEpisode)) {
             return "épisode de soins";

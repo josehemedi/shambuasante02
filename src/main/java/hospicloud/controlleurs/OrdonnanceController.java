@@ -2,9 +2,12 @@ package hospicloud.controlleurs;
 
 import hospicloud.async.AsyncJobResponse;
 import hospicloud.async.AsyncJobType;
+import hospicloud.dtos.OrdonnanceEnvoiResponse;
 import hospicloud.dtos.OrdonnanceRequest;
 import hospicloud.dtos.OrdonnanceResponse;
+import hospicloud.exceptions.ForbiddenException;
 import hospicloud.model.Ordonnance;
+import hospicloud.security.CurrentUserService;
 import hospicloud.services.AsyncReportGateway;
 import hospicloud.services.OrdonnanceService;
 
@@ -26,11 +29,15 @@ public class OrdonnanceController {
 
     private final OrdonnanceService ordonnanceService;
     private final AsyncReportGateway asyncReportGateway;
+    private final CurrentUserService currentUserService;
 
     @Autowired
-    public OrdonnanceController(OrdonnanceService ordonnanceService, AsyncReportGateway asyncReportGateway) {
+    public OrdonnanceController(OrdonnanceService ordonnanceService,
+                                AsyncReportGateway asyncReportGateway,
+                                CurrentUserService currentUserService) {
         this.ordonnanceService = ordonnanceService;
         this.asyncReportGateway = asyncReportGateway;
+        this.currentUserService = currentUserService;
     }
 
     @PostMapping
@@ -43,9 +50,6 @@ public class OrdonnanceController {
     @PostMapping("/{id}/pdf/async")
     public ResponseEntity<AsyncJobResponse> telechargerPdfAsync(@PathVariable Long id) {
         Map<String, Object> params = Map.of("reportName", "Ordonnance.jasper", "idOrdonnance", id);
-        // Prépare les params via génération sync légère : on laisse le listener utiliser Jasper
-        // avec un payload minimal ; pour Ordonnance le listener REPORT_GENERIC a besoin des params.
-        // On bascule sur type ORDONNANCE + entityId et on enrichit dans le gate si besoin.
         return asyncReportGateway.submit(AsyncJobType.REPORT_ORDONNANCE, id, params);
     }
 
@@ -63,35 +67,38 @@ public class OrdonnanceController {
                 .body(pdf);
     }
 
-    // =========================
-    // LIST BY PATIENT (DTO + QR via controller)
-    // =========================
     @GetMapping("/patient/{idPatient}")
     public ResponseEntity<List<OrdonnanceResponse>> listerParPatient(@PathVariable Integer idPatient) {
-
         List<OrdonnanceResponse> response = ordonnanceService.listerParPatient(idPatient)
                 .stream()
                 .map(this::mapToResponse)
                 .collect(Collectors.toList());
-
         return ResponseEntity.ok(response);
     }
 
-    // =========================
-    // GET BY ID (DTO + QR)
-    // =========================
+    /** Ordonnances prescrites par le médecin connecté. */
+    @GetMapping("/medecin/me")
+    public ResponseEntity<List<OrdonnanceResponse>> listerPourMedecinConnecte() {
+        Integer idMedecin = currentUserService.getCurrentMedecinId();
+        if (idMedecin == null) {
+            throw new ForbiddenException(
+                    "Aucun profil médecin n'est associé à votre compte. Contactez l'administrateur.");
+        }
+        List<OrdonnanceResponse> response = ordonnanceService.listerParMedecin(idMedecin)
+                .stream()
+                .map(this::mapToResponse)
+                .collect(Collectors.toList());
+        return ResponseEntity.ok(response);
+    }
+
     @GetMapping("/{id}")
     public ResponseEntity<OrdonnanceResponse> obtenirParId(@PathVariable Long id) {
-
         return ordonnanceService.trouverParId(id)
                 .map(this::mapToResponse)
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
     }
 
-    // =========================
-    // RENOUVELER
-    // =========================
     @PostMapping("/{id}/renouveler")
     public ResponseEntity<String> renouveler(@PathVariable Long id,
                                              @Valid @RequestBody OrdonnanceRequest request) {
@@ -99,25 +106,31 @@ public class OrdonnanceController {
         return ResponseEntity.ok("Ordonnance renouvelée avec succès.");
     }
 
-    // =========================
-    // ANNULER
-    // =========================
     @PatchMapping("/{id}/annuler")
     public ResponseEntity<String> annuler(@PathVariable Long id) {
         ordonnanceService.annulerOrdonnance(id);
         return ResponseEntity.ok("Ordonnance annulée avec succès.");
     }
 
-    // =========================
-    // MAPPING ENTITY → DTO
-    // =========================
+    /**
+     * Envoie l'ordonnance PDF au patient concerné (e-mail professionnel + pièce jointe).
+     */
+    @PostMapping("/{id}/envoyer-patient")
+    public ResponseEntity<OrdonnanceEnvoiResponse> envoyerAuPatient(@PathVariable Long id) {
+        Integer idMedecin = currentUserService.getCurrentMedecinId();
+        if (idMedecin == null) {
+            throw new ForbiddenException(
+                    "Aucun profil médecin n'est associé à votre compte. Contactez l'administrateur.");
+        }
+        return ResponseEntity.ok(ordonnanceService.envoyerAuPatient(id, idMedecin));
+    }
+
     private OrdonnanceResponse mapToResponse(Ordonnance o) {
-
         OrdonnanceResponse r = new OrdonnanceResponse();
-
         r.setIdOrdonnance(o.getIdOrdonnance());
         r.setNumeroOrdonnance(o.getNumeroOrdonnance());
         r.setIdPatient(o.getIdPatient());
+        r.setNomPatient(o.getNomPatient());
         r.setIdMedecin(o.getIdMedecin());
         r.setDatePrescription(o.getDatePrescription());
         r.setDiagnostic(o.getDiagnostic());
@@ -129,7 +142,6 @@ public class OrdonnanceController {
         String qrPayload = "SHAMBUA|ORD|" + o.getHospitalId() + "|" + o.getIdOrdonnance()
                 + "|ORD-" + o.getHospitalId() + "-" + o.getIdOrdonnance();
         r.setQrCodeImage(hospicloud.utils.QrCodeService.generateQrCodeBytes(qrPayload));
-
         return r;
     }
 }

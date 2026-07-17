@@ -20,6 +20,9 @@ public class Ordonnance {
 
     private Integer idPatient;
 
+    /** Nom affiché (jointure lecture seule, non persisté). */
+    private String nomPatient;
+
     /**
      * Isolation Multi-Tenant
      */
@@ -100,6 +103,14 @@ public class Ordonnance {
 
 	public void setIdPatient(Integer idPatient) {
 		this.idPatient = idPatient;
+	}
+
+	public String getNomPatient() {
+		return nomPatient;
+	}
+
+	public void setNomPatient(String nomPatient) {
+		this.nomPatient = nomPatient;
 	}
 
 	public Integer getHospitalId() {

@@ -81,6 +81,32 @@ public class OrdonnanceRepositoryImpl implements OrdonnanceRepository {
     }
 
     @Override
+    public List<Ordonnance> listerParMedecin(Integer idMedecin) {
+        Integer hopitalId = TenantContext.getRequiredHopitalId();
+        if (idMedecin == null) {
+            return List.of();
+        }
+        try {
+            String sql = """
+                SELECT o.*,
+                       TRIM(CONCAT(COALESCE(p.prenom, ''), ' ', COALESCE(p.nom, ''))) AS nom_patient
+                FROM ordonnances_medicales o
+                LEFT JOIN patients p ON o.id_patient = p.id_patient AND o.hospital_id = p.id_hopital
+                WHERE o.id_medecin = ? AND o.hospital_id = ?
+                ORDER BY o.date_prescription DESC, o.id_ordonnance DESC
+                """;
+            return jdbcTemplate.query(sql, new OrdonnanceWithPatientRowMapper(), idMedecin, hopitalId);
+        } catch (Exception ex) {
+            String sql = """
+                SELECT o.* FROM ordonnances_medicales o
+                WHERE o.id_medecin = ? AND o.hospital_id = ?
+                ORDER BY o.id_ordonnance DESC
+                """;
+            return jdbcTemplate.query(sql, new OrdonnanceRowMapper(), idMedecin, hopitalId);
+        }
+    }
+
+    @Override
     public Optional<Ordonnance> trouverParId(Long idOrdonnance) {
         String cacheKey = CACHE_PREFIX + TenantContext.getRequiredHopitalId() + ":" + idOrdonnance;
         
@@ -151,6 +177,23 @@ public class OrdonnanceRepositoryImpl implements OrdonnanceRepository {
             try {
                 if (rs.getTimestamp("date_prescription") != null) {
                     o.setDatePrescription(rs.getTimestamp("date_prescription").toLocalDateTime());
+                }
+            } catch (SQLException ignored) {
+            }
+            return o;
+        }
+    }
+
+    private static class OrdonnanceWithPatientRowMapper implements RowMapper<Ordonnance> {
+        private final OrdonnanceRowMapper base = new OrdonnanceRowMapper();
+
+        @Override
+        public Ordonnance mapRow(ResultSet rs, int rowNum) throws SQLException {
+            Ordonnance o = base.mapRow(rs, rowNum);
+            try {
+                String nom = rs.getString("nom_patient");
+                if (nom != null && !nom.isBlank()) {
+                    o.setNomPatient(nom.trim());
                 }
             } catch (SQLException ignored) {
             }

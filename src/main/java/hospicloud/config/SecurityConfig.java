@@ -154,6 +154,7 @@ public class SecurityConfig {
                 .requestMatchers("/api/reports/**").hasAnyRole("TENANT_ADMIN", "LABORANTIN")
 
                 .requestMatchers("/api/ai/**").hasAnyRole("SUPER_ADMIN", "TENANT_ADMIN", "MEDECIN")
+                .requestMatchers("/api/rag/**").hasAnyRole("SUPER_ADMIN", "TENANT_ADMIN")
 
                 .requestMatchers("/api/archives/**").hasAnyRole(
                         "ARCHIVISTE", "TENANT_ADMIN", "MEDECIN", "RECEPTION")

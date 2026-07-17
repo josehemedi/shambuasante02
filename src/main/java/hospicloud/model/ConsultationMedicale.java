@@ -34,6 +34,7 @@ public class ConsultationMedicale {
 
     /** Champs enrichis (jointures SQL, non persistés) */
     private String nomMedecin;
+    private String nomPatient;
     private String nomHopital;
 
     // Constructeur vide
@@ -100,6 +101,9 @@ public class ConsultationMedicale {
 
     public String getNomMedecin() { return nomMedecin; }
     public void setNomMedecin(String nomMedecin) { this.nomMedecin = nomMedecin; }
+
+    public String getNomPatient() { return nomPatient; }
+    public void setNomPatient(String nomPatient) { this.nomPatient = nomPatient; }
 
     public String getNomHopital() { return nomHopital; }
     public void setNomHopital(String nomHopital) { this.nomHopital = nomHopital; }

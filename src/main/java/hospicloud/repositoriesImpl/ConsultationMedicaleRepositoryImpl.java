@@ -222,14 +222,44 @@ public class ConsultationMedicaleRepositoryImpl implements ConsultationMedicaleR
         String sql = """
             SELECT c.*,
                    TRIM(CONCAT(COALESCE(m.prenom, ''), ' ', COALESCE(m.nom, ''))) AS nom_medecin,
+                   TRIM(CONCAT(COALESCE(p.prenom, ''), ' ', COALESCE(p.nom, ''))) AS nom_patient,
                    h.nom AS nom_hopital
             FROM consultations_medicales c
             LEFT JOIN medecin m ON c.id_medecin = m.id_medecin AND c.id_hopital = m.id_hopital
+            LEFT JOIN patients p ON c.id_patient = p.id_patient AND c.id_hopital = p.id_hopital
             LEFT JOIN hopitaux h ON c.id_hopital = h.id_hopital
             WHERE c.id_medecin = ? AND c.id_hopital = ? AND c.statut = 'SIGNEE'
             ORDER BY c.date_consultation DESC
             """;
         return jdbcTemplate.query(sql, this::mapRowToConsultationWithJoin, idMedecin, TenantContext.getRequiredHopitalId());
+    }
+
+    @Override
+    public List<ConsultationMedicale> findEnGeranceParMedecin(Integer idMedecin) {
+        ensureSchemaOnce();
+        if (idMedecin == null) {
+            return List.of();
+        }
+        Integer hopitalId = TenantContext.getRequiredHopitalId();
+        String sql = """
+            SELECT c.*,
+                   TRIM(CONCAT(COALESCE(m.prenom, ''), ' ', COALESCE(m.nom, ''))) AS nom_medecin,
+                   TRIM(CONCAT(COALESCE(p.prenom, ''), ' ', COALESCE(p.nom, ''))) AS nom_patient,
+                   h.nom AS nom_hopital
+            FROM consultations_medicales c
+            INNER JOIN medecin_patient mp
+                    ON mp.id_patient = c.id_patient AND mp.id_medecin = c.id_medecin
+            INNER JOIN patients p
+                    ON p.id_patient = c.id_patient AND p.id_hopital = c.id_hopital
+            LEFT JOIN medecin m ON c.id_medecin = m.id_medecin AND c.id_hopital = m.id_hopital
+            LEFT JOIN hopitaux h ON c.id_hopital = h.id_hopital
+            WHERE c.id_medecin = ?
+              AND c.id_hopital = ?
+              AND (c.statut IS NULL OR c.statut <> 'ANNULEE')
+              AND UPPER(COALESCE(p.statut_clinique, 'AMBULATOIRE')) NOT IN ('SORTI', 'SORTIE_AUTORISEE')
+            ORDER BY c.date_consultation DESC
+            """;
+        return jdbcTemplate.query(sql, this::mapRowToConsultationWithJoin, idMedecin, hopitalId);
     }
 
     @Override
@@ -362,6 +392,14 @@ public class ConsultationMedicaleRepositoryImpl implements ConsultationMedicaleR
             String nomHopital = rs.getString("nom_hopital");
             if (nomHopital != null && !nomHopital.isBlank()) {
                 c.setNomHopital(nomHopital.trim());
+            }
+            try {
+                String nomPatient = rs.getString("nom_patient");
+                if (nomPatient != null && !nomPatient.isBlank()) {
+                    c.setNomPatient(nomPatient.trim());
+                }
+            } catch (SQLException ignored) {
+                // colonne absente sur certaines requêtes
             }
         } catch (SQLException ignored) {
             // colonnes absentes sur requêtes sans jointure

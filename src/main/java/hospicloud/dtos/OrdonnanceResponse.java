@@ -15,6 +15,7 @@ public class OrdonnanceResponse {
     private Long idOrdonnance;
     private String numeroOrdonnance;
     private Integer idPatient;
+    private String nomPatient;
     private Integer idMedecin;
     private LocalDateTime datePrescription;
     private String diagnostic;
@@ -61,6 +62,14 @@ public class OrdonnanceResponse {
 
     public void setIdPatient(Integer idPatient) {
         this.idPatient = idPatient;
+    }
+
+    public String getNomPatient() {
+        return nomPatient;
+    }
+
+    public void setNomPatient(String nomPatient) {
+        this.nomPatient = nomPatient;
     }
 
     public Integer getIdMedecin() {

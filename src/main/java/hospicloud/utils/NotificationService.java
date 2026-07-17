@@ -94,4 +94,17 @@ public interface NotificationService {
             String dateRdv,
             String lienTeleconsultation,
             int minutesAvant);
+
+    /**
+     * Envoie l'ordonnance médicale au patient (e-mail HTML + PDF joint).
+     */
+    void notifierOrdonnancePatient(
+            String emailPatient,
+            String nomPatient,
+            String nomMedecin,
+            String nomHopital,
+            String numeroOrdonnance,
+            String datePrescription,
+            String diagnostic,
+            byte[] pdfOrdonnance);
 }

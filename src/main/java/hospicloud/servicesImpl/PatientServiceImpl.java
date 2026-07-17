@@ -5,6 +5,7 @@ import hospicloud.exceptions.ForbiddenException;
 import hospicloud.exceptions.patient.PatientNotFoundException;
 import hospicloud.model.Patient;
 import hospicloud.repositories.AntecedentRepository;
+import hospicloud.repositories.OrdonnanceRepository;
 import hospicloud.repositories.PatientRepository;
 import hospicloud.repositories.RendezVousRepository;
 import hospicloud.security.CurrentUserContext;
@@ -27,6 +28,7 @@ public class PatientServiceImpl implements PatientService {
     private final RendezVousRepository rendezVousRepository;
     private final ConsultationMedicaleService consultationMedicaleService;
     private final AntecedentRepository antecedentRepository;
+    private final OrdonnanceRepository ordonnanceRepository;
     private final CurrentUserService currentUserService;
 
     @Autowired
@@ -35,11 +37,13 @@ public class PatientServiceImpl implements PatientService {
             RendezVousRepository rendezVousRepository,
             ConsultationMedicaleService consultationMedicaleService,
             AntecedentRepository antecedentRepository,
+            OrdonnanceRepository ordonnanceRepository,
             CurrentUserService currentUserService) {
         this.patientRepository = patientRepository;
         this.rendezVousRepository = rendezVousRepository;
         this.consultationMedicaleService = consultationMedicaleService;
         this.antecedentRepository = antecedentRepository;
+        this.ordonnanceRepository = ordonnanceRepository;
         this.currentUserService = currentUserService;
     }
 
@@ -111,7 +115,18 @@ public class PatientServiceImpl implements PatientService {
     @Transactional(readOnly = true)
     public Optional<Patient> trouverPatientParId(Long idPatient) {
         if (idPatient == null) return Optional.empty();
-        return patientRepository.trouverPatientParId(idPatient);
+        Optional<Patient> patient = patientRepository.trouverPatientParId(idPatient);
+        if (patient.isEmpty()) {
+            return patient;
+        }
+        if (currentUserService.isMedecin()) {
+            Integer medecinId = currentUserService.getCurrentMedecinId();
+            if (medecinId == null
+                    || !patientRepository.estPatientAssigneAuMedecin(medecinId, idPatient)) {
+                return Optional.empty();
+            }
+        }
+        return patient;
     }
 
     @Override
@@ -128,10 +143,8 @@ public class PatientServiceImpl implements PatientService {
             if (medecinId == null) {
                 return List.of();
             }
-            if (Boolean.TRUE.equals(mine)) {
-                return patientRepository.listerPatientsParMedecin(medecinId);
-            }
-            return patientRepository.trouverTousLesPatients();
+            // Le médecin ne voit jamais toute la file hôpital — uniquement ses patients attribués.
+            return patientRepository.listerPatientsParMedecin(medecinId);
         }
         if (Boolean.TRUE.equals(mine)) {
             Integer creePar = currentUserService.getCurrentUtilisateurId();
@@ -231,6 +244,7 @@ public class PatientServiceImpl implements PatientService {
             throw new IllegalArgumentException("L'identifiant du patient est obligatoire.");
         }
         TenantAuthorization.assertStaffRole();
+        ensureMedecinCanAccessPatient(idPatient);
 
         Patient patient = trouverPatientParId(idPatient)
                 .orElseThrow(() -> new PatientNotFoundException(idPatient.intValue()));
@@ -246,6 +260,15 @@ public class PatientServiceImpl implements PatientService {
         dossier.setRendezVous(rendezVousRepository.listerParPatient(patientId));
         dossier.setConsultations(consultationMedicaleService.obtenirHistoriquePatient(patientId));
         dossier.setAntecedents(antecedentRepository.listerParPatient(patientId, 0, 50));
+
+        List<hospicloud.model.Ordonnance> ordonnances = ordonnanceRepository.listerParPatient(patientId);
+        if (ordonnances != null) {
+            for (hospicloud.model.Ordonnance o : ordonnances) {
+                // Évite d'envoyer les QR binaires dans le JSON dossier.
+                o.setQrCodeImage(null);
+            }
+        }
+        dossier.setOrdonnances(ordonnances);
         return dossier;
     }
 
@@ -253,11 +276,15 @@ public class PatientServiceImpl implements PatientService {
         if (!currentUserService.isMedecin() || idPatient == null) {
             return;
         }
-        if (currentUserService.getCurrentMedecinId() == null) {
+        Integer medecinId = currentUserService.getCurrentMedecinId();
+        if (medecinId == null) {
             throw new ForbiddenException("Accès refusé : profil médecin incomplet.");
         }
         Patient patient = patientRepository.trouverPatientParId(idPatient)
                 .orElseThrow(() -> new ForbiddenException("Patient introuvable dans votre établissement."));
         TenantAuthorization.assertSameTenant(patient.getIdHopital());
+        if (!patientRepository.estPatientAssigneAuMedecin(medecinId, idPatient)) {
+            throw new ForbiddenException("Accès refusé : ce patient ne vous est pas attribué.");
+        }
     }
 }

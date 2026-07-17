@@ -34,7 +34,8 @@ public class PlanFeatureEnforcementFilter extends OncePerRequestFilter {
             new PathRule("/api/v1/factures", SaasPlanFeature.BILLING),
             new PathRule("/api/tenant-admin/reports", SaasPlanFeature.REPORTS),
             new PathRule("/api/consultations/teleconsultation", SaasPlanFeature.TELECONSULTATION),
-            new PathRule("/api/ai", SaasPlanFeature.AI_ASSISTANT)
+            new PathRule("/api/ai", SaasPlanFeature.AI_ASSISTANT),
+            new PathRule("/api/rag", SaasPlanFeature.AI_ASSISTANT)
     );
 
     private final SaasPlanService saasPlanService;

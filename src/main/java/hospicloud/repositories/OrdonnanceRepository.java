@@ -21,6 +21,11 @@ public interface OrdonnanceRepository {
     List<Ordonnance> listerParPatient(Integer idPatient);
 
     /**
+     * Ordonnances prescrites par un médecin du tenant courant (avec nom patient).
+     */
+    List<Ordonnance> listerParMedecin(Integer idMedecin);
+
+    /**
      * Trouve une ordonnance par son ID.
      */
     Optional<Ordonnance> trouverParId(Long idOrdonnance);

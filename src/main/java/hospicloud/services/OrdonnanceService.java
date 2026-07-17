@@ -1,5 +1,6 @@
 package hospicloud.services;
 
+import hospicloud.dtos.OrdonnanceEnvoiResponse;
 import hospicloud.dtos.OrdonnanceRequest;
 import hospicloud.model.Ordonnance;
 import java.util.List;
@@ -21,6 +22,9 @@ public interface OrdonnanceService {
      * Récupère toutes les ordonnances d'un patient donné.
      */
     List<Ordonnance> listerParPatient(Integer idPatient);
+
+    /** Ordonnances du médecin connecté (tenant courant). */
+    List<Ordonnance> listerParMedecin(Integer idMedecin);
 
     /**
      * Récupère une ordonnance spécifique par son ID.
@@ -55,4 +59,11 @@ public interface OrdonnanceService {
      * Génère le PDF professionnel JasperReports (avec QR) pour une ordonnance du tenant courant.
      */
     byte[] genererPdfOrdonnance(Long idOrdonnance);
+
+    /**
+     * Envoie l'ordonnance PDF au patient concerné (e-mail professionnel).
+     * @param idOrdonnance identifiant de l'ordonnance
+     * @param idMedecinConnecte médecin connecté (doit être le prescripteur)
+     */
+    OrdonnanceEnvoiResponse envoyerAuPatient(Long idOrdonnance, Integer idMedecinConnecte);
 }

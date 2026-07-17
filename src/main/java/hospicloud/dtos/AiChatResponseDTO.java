@@ -11,6 +11,9 @@ public class AiChatResponseDTO {
     private boolean configured;
     private List<String> sources = new ArrayList<>();
     private Integer confidence;
+    private String ragScope;
+    private List<String> warnings = new ArrayList<>();
+    private List<String> missingFields = new ArrayList<>();
 
     public String getRole() {
         return role;
@@ -58,5 +61,29 @@ public class AiChatResponseDTO {
 
     public void setConfidence(Integer confidence) {
         this.confidence = confidence;
+    }
+
+    public String getRagScope() {
+        return ragScope;
+    }
+
+    public void setRagScope(String ragScope) {
+        this.ragScope = ragScope;
+    }
+
+    public List<String> getWarnings() {
+        return warnings;
+    }
+
+    public void setWarnings(List<String> warnings) {
+        this.warnings = warnings != null ? warnings : new ArrayList<>();
+    }
+
+    public List<String> getMissingFields() {
+        return missingFields;
+    }
+
+    public void setMissingFields(List<String> missingFields) {
+        this.missingFields = missingFields != null ? missingFields : new ArrayList<>();
     }
 }

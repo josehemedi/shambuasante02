@@ -31,6 +31,9 @@ public interface PatientRepository {
 
     /** Alias explicite pour le filtre « mes patients attribués ». */
     List<Patient> listerPatientsAssignesAuMedecin(Integer idMedecin);
+
+    /** True si le patient est lié au médecin via medecin_patient (tenant courant). */
+    boolean estPatientAssigneAuMedecin(Integer idMedecin, Long idPatient);
     
     // 🔍 Recherche de patients parmi les patients suivis par CE médecin
     List<Patient> rechercherPatientsDuMedecin(Integer idMedecin, String nom, String prenom);

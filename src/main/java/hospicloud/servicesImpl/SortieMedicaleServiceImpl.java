@@ -362,6 +362,10 @@ public class SortieMedicaleServiceImpl implements SortieMedicaleService {
                                                Integer idPatient,
                                                ConsultationMedicale consultation,
                                                Admission admission) {
+        // Règle métier : le médecin ne gère que les patients qui lui sont attribués
+        if (!patientRepository.estPatientAssigneAuMedecin(idMedecin, idPatient.longValue())) {
+            return false;
+        }
         if (consultation != null && idMedecin.equals(consultation.getIdMedecin())) {
             return true;
         }
@@ -369,6 +373,7 @@ public class SortieMedicaleServiceImpl implements SortieMedicaleService {
                 && idMedecin.equals(admission.getIdMedecin())) {
             return true;
         }
+        // Patient attribué et encore présent dans le tenant = autorisé à clôturer
         return patientRepository.trouverPatientParId(idPatient.longValue()).isPresent();
     }
 

@@ -57,6 +57,7 @@ public class ArchivePdfServiceImpl implements ArchivePdfService {
             "image/png",
             "image/webp",
             "image/gif",
+            "image/tiff",
             "text/plain",
             "application/msword",
             "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
@@ -67,7 +68,7 @@ public class ArchivePdfServiceImpl implements ArchivePdfService {
             "application/octet-stream"
     );
     private static final Set<String> ALLOWED_EXT = Set.of(
-            "pdf", "jpg", "jpeg", "png", "webp", "gif", "txt",
+            "pdf", "jpg", "jpeg", "png", "webp", "gif", "tif", "tiff", "txt",
             "doc", "docx", "xls", "xlsx", "zip"
     );
 
@@ -483,6 +484,7 @@ public class ArchivePdfServiceImpl implements ArchivePdfService {
             case "pdf" -> "application/pdf";
             case "jpg", "jpeg" -> "image/jpeg";
             case "png" -> "image/png";
+            case "tif", "tiff" -> "image/tiff";
             case "webp" -> "image/webp";
             case "gif" -> "image/gif";
             case "txt" -> "text/plain";

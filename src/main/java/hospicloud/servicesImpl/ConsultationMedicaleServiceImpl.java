@@ -141,8 +141,11 @@ public class ConsultationMedicaleServiceImpl implements ConsultationMedicaleServ
     public List<ConsultationResponseDTO> obtenirHistoriqueMedecin(Integer idMedecin) {
         TenantAuthorization.assertStaffRole();
         TenantAuthorization.assertMedecinScope(idMedecin);
-        Integer hopitalId = TenantContext.getRequiredHopitalId();
-        return repository.findByHopital(hopitalId).stream()
+        if (idMedecin == null) {
+            return List.of();
+        }
+        // Uniquement patients attribués au médecin et encore en gérance clinique
+        return repository.findEnGeranceParMedecin(idMedecin).stream()
                 .map(this::toResponseDTO)
                 .collect(Collectors.toList());
     }
@@ -344,7 +347,9 @@ public class ConsultationMedicaleServiceImpl implements ConsultationMedicaleServ
                 dto.setNomMedecin(nom.isBlank() ? null : nom);
             });
         }
-        if (c.getIdPatient() != null) {
+        if (c.getNomPatient() != null && !c.getNomPatient().isBlank()) {
+            dto.setNomPatient(c.getNomPatient());
+        } else if (c.getIdPatient() != null) {
             patientRepository.trouverPatientParId(c.getIdPatient().longValue()).ifPresent(p -> {
                 String nom = Stream.of(p.getPrenom(), p.getNom())
                         .filter(Objects::nonNull)

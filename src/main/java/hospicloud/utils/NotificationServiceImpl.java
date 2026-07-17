@@ -498,4 +498,74 @@ public class NotificationServiceImpl implements NotificationService {
                 .formatted(etablissement, minutesAvant, nomPatient, dateRdv, lienTeleconsultation);
         smsService.envoyerSms(telephoneMedecin, message);
     }
+
+    @Override
+    public void notifierOrdonnancePatient(
+            String emailPatient,
+            String nomPatient,
+            String nomMedecin,
+            String nomHopital,
+            String numeroOrdonnance,
+            String datePrescription,
+            String diagnostic,
+            byte[] pdfOrdonnance
+    ) {
+        String etablissement = nomHopital != null && !nomHopital.isBlank() ? nomHopital : "Shambua Santé";
+        String ref = numeroOrdonnance != null && !numeroOrdonnance.isBlank() ? numeroOrdonnance : "Ordonnance";
+        String diag = diagnostic != null && !diagnostic.isBlank() ? diagnostic : "Selon prescription jointe";
+        String dateLabel = datePrescription != null && !datePrescription.isBlank() ? datePrescription : "—";
+        String sujet = "Votre ordonnance médicale — " + etablissement;
+
+        String html = """
+        <!DOCTYPE html>
+        <html>
+        <body style="margin:0;padding:0;background:#eef3f9;font-family:'Segoe UI',Arial,sans-serif;color:#0b1f4a;">
+          <div style="max-width:640px;margin:24px auto;background:#ffffff;border-radius:16px;overflow:hidden;box-shadow:0 8px 28px rgba(15,40,80,0.12);">
+            <div style="background:linear-gradient(120deg,#0f2850,#1753a0,#2563eb);padding:28px 32px;color:#fff;">
+              <p style="margin:0;font-size:11px;letter-spacing:0.22em;text-transform:uppercase;color:#bae6fd;font-weight:600;">Shambua Santé</p>
+              <h1 style="margin:10px 0 0;font-size:24px;font-weight:600;">Ordonnance médicale</h1>
+              <p style="margin:8px 0 0;font-size:14px;color:rgba(255,255,255,0.82);">Document confidentiel transmis par votre médecin</p>
+            </div>
+            <div style="padding:28px 32px;">
+              <p style="margin:0 0 16px;font-size:15px;">Bonjour <b>%s</b>,</p>
+              <p style="margin:0 0 20px;font-size:14px;line-height:1.55;color:#334155;">
+                <b>%s</b> vous a transmis une ordonnance depuis <b>%s</b>.
+                Le PDF authentifié est joint à cet e-mail — conservez-le précieusement.
+              </p>
+              <table style="width:100%%;border-collapse:collapse;background:#f8fafc;border-radius:12px;overflow:hidden;">
+                <tr>
+                  <td style="padding:12px 16px;border-bottom:1px solid #e2e8f0;font-size:12px;color:#64748b;text-transform:uppercase;letter-spacing:0.06em;">Référence</td>
+                  <td style="padding:12px 16px;border-bottom:1px solid #e2e8f0;font-size:14px;font-weight:600;text-align:right;">%s</td>
+                </tr>
+                <tr>
+                  <td style="padding:12px 16px;border-bottom:1px solid #e2e8f0;font-size:12px;color:#64748b;text-transform:uppercase;letter-spacing:0.06em;">Date</td>
+                  <td style="padding:12px 16px;border-bottom:1px solid #e2e8f0;font-size:14px;font-weight:600;text-align:right;">%s</td>
+                </tr>
+                <tr>
+                  <td style="padding:12px 16px;font-size:12px;color:#64748b;text-transform:uppercase;letter-spacing:0.06em;">Diagnostic</td>
+                  <td style="padding:12px 16px;font-size:14px;font-weight:600;text-align:right;">%s</td>
+                </tr>
+              </table>
+              <p style="margin:22px 0 0;font-size:13px;line-height:1.5;color:#64748b;">
+                Ce document est strictement confidentiel et réservé au patient nommé.
+                En cas de question, contactez votre établissement de soins.
+              </p>
+            </div>
+            <div style="padding:16px 32px 24px;border-top:1px solid #e2e8f0;background:#f8fafc;">
+              <p style="margin:0;font-size:11px;color:#94a3b8;">%s — Notification sécurisée multi-tenant</p>
+            </div>
+          </div>
+        </body>
+        </html>
+        """.formatted(nomPatient, nomMedecin, etablissement, ref, dateLabel, diag, etablissement);
+
+        String fileName = "ordonnance_" + ref.replaceAll("[^A-Za-z0-9_-]", "_") + ".pdf";
+        emailService.envoyerEmailHtmlAvecPieceJointe(
+                emailPatient,
+                sujet,
+                html,
+                fileName,
+                pdfOrdonnance,
+                "application/pdf");
+    }
 }

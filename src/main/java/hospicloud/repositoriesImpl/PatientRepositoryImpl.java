@@ -430,6 +430,25 @@ public class PatientRepositoryImpl implements PatientRepository {
     }
 
     @Override
+    public boolean estPatientAssigneAuMedecin(Integer idMedecin, Long idPatient) {
+        if (idMedecin == null || idPatient == null) {
+            return false;
+        }
+        Integer hopitalId = TenantContext.getRequiredHopitalId();
+        Integer count = jdbcTemplate.queryForObject(
+                """
+                SELECT COUNT(*) FROM medecin_patient mp
+                INNER JOIN patients p ON p.id_patient = mp.id_patient
+                WHERE mp.id_medecin = ? AND mp.id_patient = ? AND p.id_hopital = ?
+                """,
+                Integer.class,
+                idMedecin,
+                idPatient,
+                hopitalId);
+        return count != null && count > 0;
+    }
+
+    @Override
     public List<Patient> rechercherPatientsDuMedecin(Integer idMedecin, String nom, String prenom) {
         if (idMedecin == null) return Collections.emptyList();
         return rechercherParNomEtPrenom(nom, prenom);

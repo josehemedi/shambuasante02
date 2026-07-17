@@ -5,6 +5,7 @@ import hospicloud.model.archive.ReglesArchivageHopital;
 import hospicloud.model.archive.StatutArchive;
 import hospicloud.model.archive.TypeEpisode;
 import hospicloud.services.archive.ArchivageService;
+import hospicloud.services.archive.ArchiveExportService;
 import hospicloud.services.archive.DemandeAccesArchiveService;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpHeaders;
@@ -22,11 +23,14 @@ public class ArchiveController {
 
     private final ArchivageService archivageService;
     private final DemandeAccesArchiveService demandeAccesService;
+    private final ArchiveExportService archiveExportService;
 
     public ArchiveController(ArchivageService archivageService,
-                             DemandeAccesArchiveService demandeAccesService) {
+                             DemandeAccesArchiveService demandeAccesService,
+                             ArchiveExportService archiveExportService) {
         this.archivageService = archivageService;
         this.demandeAccesService = demandeAccesService;
+        this.archiveExportService = archiveExportService;
     }
 
     @GetMapping
@@ -177,6 +181,35 @@ public class ArchiveController {
     @PostMapping("/{id}/fichiers/pdf")
     public ArchiveFichierDto regenererPdf(@PathVariable Long id) {
         return archivageService.regenererPdf(id);
+    }
+
+    /**
+     * Compression / export professionnel du dossier patient archivé.
+     * Formats : ZIP (pack complet), PDF_OPTIMIZED, PNG (page unique ou pack ZIP), TIFF (LZW sans perte).
+     */
+    @GetMapping("/{id}/export")
+    public ResponseEntity<byte[]> exporterDossier(
+            @PathVariable Long id,
+            @RequestParam("format") ArchiveExportFormat format) {
+        ArchiveExportResultDto export = archiveExportService.exporter(id, format);
+        String filename = export.getFilename() != null ? export.getFilename() : ("archive_" + id + ".bin");
+        MediaType mediaType = MediaType.APPLICATION_OCTET_STREAM;
+        try {
+            if (export.getContentType() != null && !export.getContentType().isBlank()) {
+                mediaType = MediaType.parseMediaType(export.getContentType());
+            }
+        } catch (Exception ignored) {
+            mediaType = MediaType.APPLICATION_OCTET_STREAM;
+        }
+        return ResponseEntity.ok()
+                .header(HttpHeaders.CONTENT_DISPOSITION,
+                        "attachment; filename=\"" + filename.replace("\"", "") + "\"")
+                .header("X-Export-Format", format.name())
+                .header("X-Export-Pages", String.valueOf(export.getPageCount()))
+                .header("X-Export-Size", String.valueOf(export.getSizeBytes()))
+                .contentType(mediaType)
+                .contentLength(export.getContent() != null ? export.getContent().length : 0)
+                .body(export.getContent());
     }
 
     @PostMapping(value = "/{id}/fichiers/upload", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)

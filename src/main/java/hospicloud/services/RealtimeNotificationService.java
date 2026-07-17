@@ -34,4 +34,12 @@ public interface RealtimeNotificationService {
             String nomPatient,
             String motif,
             Integer numeroPassage);
+
+    /** Notifie le patient qu'une ordonnance vient de lui être transmise. */
+    void notifyOrdonnanceEnvoyeeAuPatient(
+            Integer hopitalId,
+            Integer idPatient,
+            Long idOrdonnance,
+            String numeroOrdonnance,
+            String nomMedecin);
 }

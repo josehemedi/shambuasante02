@@ -1,6 +1,7 @@
 package hospicloud.dtos;
 
 import hospicloud.model.Antecedent;
+import hospicloud.model.Ordonnance;
 import hospicloud.model.Patient;
 import hospicloud.model.RendezVous;
 
@@ -13,6 +14,7 @@ public class PatientDossierDTO {
     private List<RendezVous> rendezVous = new ArrayList<>();
     private List<ConsultationResponseDTO> consultations = new ArrayList<>();
     private List<Antecedent> antecedents = new ArrayList<>();
+    private List<Ordonnance> ordonnances = new ArrayList<>();
 
     public Patient getPatient() {
         return patient;
@@ -44,5 +46,13 @@ public class PatientDossierDTO {
 
     public void setAntecedents(List<Antecedent> antecedents) {
         this.antecedents = antecedents != null ? antecedents : new ArrayList<>();
+    }
+
+    public List<Ordonnance> getOrdonnances() {
+        return ordonnances;
+    }
+
+    public void setOrdonnances(List<Ordonnance> ordonnances) {
+        this.ordonnances = ordonnances != null ? ordonnances : new ArrayList<>();
     }
 }
