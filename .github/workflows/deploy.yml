@@ -34,6 +34,16 @@ jobs:
               echo "ATTENTION: LIVEKIT_API_KEY manquant dans .env — la teleconsultation ne fonctionnera pas."
             fi
 
+            # Assistant IA : AI_ENABLED=true + vraie OPENAI_API_KEY (pas dummy)
+            if [ ! -f .env ]; then
+              echo "ATTENTION: fichier .env manquant — l'assistant IA ne fonctionnera pas."
+            elif grep -qE '^AI_ENABLED=false' .env 2>/dev/null; then
+              echo "ATTENTION: AI_ENABLED=false dans .env — l'assistant IA est désactivé en cloud."
+            elif ! grep -qE '^OPENAI_API_KEY=sk-' .env 2>/dev/null \
+              || grep -qiE '^OPENAI_API_KEY=.*(dummy|change_me|placeholder|your-openai)' .env 2>/dev/null; then
+              echo "ATTENTION: OPENAI_API_KEY manquante ou dummy dans .env — l'assistant IA ne fonctionnera pas."
+            fi
+
             docker compose up -d --build
             
             # Nettoyer les anciennes images

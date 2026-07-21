@@ -5,9 +5,32 @@
 ```bash
 cd Hospicloud
 cp .env.example .env
-# Éditer les secrets (JWT, mots de passe MySQL/RabbitMQ)
+# Éditer les secrets (JWT, mots de passe MySQL/RabbitMQ, OpenAI, LiveKit)
 docker compose up -d --build
 ```
+
+## Assistant IA (OpenAI)
+
+En local IDE, la clé peut être dans `application-local.properties` (gitignored).  
+En **Docker / VPS**, seule la section OpenAI du fichier **`.env`** est lue :
+
+```env
+AI_ENABLED=true
+OPENAI_API_KEY=sk-proj-votre_vraie_cle
+OPENAI_MODEL=gpt-4o-mini
+```
+
+Puis :
+
+```bash
+docker compose up -d backend
+curl -H "Authorization: Bearer <token>" http://localhost:8082/api/ai/status
+# → "available": true
+```
+
+- Ne pas laisser `AI_ENABLED=false` ni une clé `sk-dummy-...` en production.
+- L’assistant est réservé au forfait SaaS **Entreprise**.
+- Le frontend n’a pas besoin de clé OpenAI (tout passe par l’API).
 
 Services :
 

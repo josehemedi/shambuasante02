@@ -64,7 +64,10 @@ public class AiClinicalAssistantServiceImpl implements AiClinicalAssistantServic
         this.objectMapper = objectMapper;
         this.chatClient = chatClientBuilder != null && isConfigured() ? chatClientBuilder.build() : null;
         if (!isConfigured()) {
-            logger.warn("Assistant IA désactivé : OPENAI_API_KEY absente ou invalide.");
+            logger.warn(
+                    "Assistant IA désactivé : AI_ENABLED={} ou OPENAI_API_KEY absente/invalide/dummy. "
+                            + "En Docker, définir ces variables dans le .env du serveur (pas application-local.properties).",
+                    enabled);
         } else {
             logger.info("Assistant IA OpenAI + RAG prêt (modèle {}).", model);
         }
@@ -209,8 +212,17 @@ public class AiClinicalAssistantServiceImpl implements AiClinicalAssistantServic
 
     private boolean isConfigured() {
         if (!enabled || apiKey == null || apiKey.isBlank()) return false;
-        String normalized = apiKey.toLowerCase(Locale.ROOT);
-        return !normalized.contains("your-openai") && !normalized.equals("sk-xxx") && apiKey.startsWith("sk-");
+        String normalized = apiKey.toLowerCase(Locale.ROOT).trim();
+        if (!apiKey.startsWith("sk-")) return false;
+        if (normalized.equals("sk-xxx")
+                || normalized.contains("your-openai")
+                || normalized.contains("dummy")
+                || normalized.contains("change_me")
+                || normalized.contains("placeholder")) {
+            return false;
+        }
+        // Clés OpenAI réelles : sk-... ou sk-proj-... (longueur minimale)
+        return apiKey.length() >= 40;
     }
 
     private String normalizeAnalysisType(String analysisType) {
