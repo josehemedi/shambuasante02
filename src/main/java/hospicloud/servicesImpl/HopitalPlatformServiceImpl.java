@@ -12,9 +12,12 @@ import hospicloud.repositories.AbonnementRepository;
 import hospicloud.repositories.HopitalPlatformRepository;
 import hospicloud.repositories.HopitalRepository;
 import hospicloud.repositories.UtilisateurRepository;
+import hospicloud.services.AccountInvitationService;
 import hospicloud.services.HopitalPlatformService;
 import hospicloud.services.HospitalService;
 import hospicloud.services.SaasPlanService;
+import hospicloud.dtos.InviteHospitalAdminRequest;
+import hospicloud.model.Utilisateur;
 import hospicloud.saas.SaasPlanRegistry;
 import hospicloud.exceptions.ResourceNotFoundException;
 import org.springframework.stereotype.Service;
@@ -44,19 +47,22 @@ public class HopitalPlatformServiceImpl implements HopitalPlatformService {
     private final AbonnementRepository abonnementRepository;
     private final HospitalService hospitalService;
     private final SaasPlanService saasPlanService;
+    private final AccountInvitationService accountInvitationService;
 
     public HopitalPlatformServiceImpl(HopitalPlatformRepository platformRepository,
                                       HopitalRepository hopitalRepository,
                                       UtilisateurRepository utilisateurRepository,
                                       AbonnementRepository abonnementRepository,
                                       HospitalService hospitalService,
-                                      SaasPlanService saasPlanService) {
+                                      SaasPlanService saasPlanService,
+                                      AccountInvitationService accountInvitationService) {
         this.platformRepository = platformRepository;
         this.hopitalRepository = hopitalRepository;
         this.utilisateurRepository = utilisateurRepository;
         this.abonnementRepository = abonnementRepository;
         this.hospitalService = hospitalService;
         this.saasPlanService = saasPlanService;
+        this.accountInvitationService = accountInvitationService;
     }
 
     @Override
@@ -184,10 +190,32 @@ public class HopitalPlatformServiceImpl implements HopitalPlatformService {
 
         abonnementRepository.creerAbonnement(hopital.getIdHopital(), planNom, planPrice);
 
+        // Invite l'administrateur d'hôpital (compte inactif + email d'activation).
+        accountInvitationService.inviteHospitalAdmin(
+                hopital.getIdHopital(),
+                dto.getAdminPrenom(),
+                dto.getAdminNom(),
+                dto.getAdminEmail(),
+                dto.getAdminTelephone());
+
         return platformRepository.listOverview().stream()
                 .filter(h -> hopital.getIdHopital().equals(h.getIdHopital()))
                 .findFirst()
                 .orElseThrow(() -> new IllegalStateException("Hôpital créé mais introuvable dans la liste."));
+    }
+
+    @Override
+    @Transactional(readOnly = false)
+    public Utilisateur inviteHospitalAdmin(Integer idHopital, InviteHospitalAdminRequest request) {
+        if (hopitalRepository.rechercherhopitalParId(idHopital.longValue()) == null) {
+            throw new ResourceNotFoundException("Hôpital introuvable pour id=" + idHopital);
+        }
+        return accountInvitationService.inviteHospitalAdmin(
+                idHopital,
+                request.getAdminPrenom(),
+                request.getAdminNom(),
+                request.getAdminEmail(),
+                request.getAdminTelephone());
     }
 
     @Override

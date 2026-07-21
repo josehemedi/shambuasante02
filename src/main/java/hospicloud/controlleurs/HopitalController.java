@@ -9,6 +9,7 @@ import hospicloud.dtos.HospitalPlanCatalogDTO;
 import hospicloud.dtos.HospitalPlatformStatsDTO;
 import hospicloud.dtos.HospitalStatusUpdateDTO;
 import hospicloud.dtos.HospitalUpdateDTO;
+import hospicloud.dtos.InviteHospitalAdminRequest;
 import hospicloud.dtos.mappers.HopitalMapper;
 import hospicloud.model.Hopital;
 import hospicloud.services.HospitalService;
@@ -26,6 +27,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.net.URI;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @RestController
@@ -58,7 +60,38 @@ public class HopitalController {
             return ResponseEntity.badRequest().body(e.getMessage());
         } catch (Exception e) {
             logger.error("Erreur inscription hôpital", e);
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Erreur lors de l'inscription de l'hôpital.");
+            String msg = e.getMessage() != null ? e.getMessage() : "Erreur lors de l'inscription de l'hôpital.";
+            if (e.getClass().getSimpleName().contains("Conflict") || msg.toLowerCase().contains("existe déjà")) {
+                return ResponseEntity.status(HttpStatus.CONFLICT).body(msg);
+            }
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(msg);
+        }
+    }
+
+    /** SUPER_ADMIN : invite un administrateur d'hôpital (email d'activation). */
+    @PostMapping(path = "/{id}/invite-admin", consumes = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<?> inviteHospitalAdmin(@PathVariable("id") Integer id,
+                                                 @Valid @RequestBody InviteHospitalAdminRequest request) {
+        try {
+            var user = hopitalPlatformService.inviteHospitalAdmin(id, request);
+            return ResponseEntity.status(HttpStatus.CREATED).body(Map.of(
+                    "idUtilisateur", user.getIdUtilisateur(),
+                    "email", user.getEmail(),
+                    "role", user.getRole().name(),
+                    "estActif", user.isEstActif(),
+                    "message", "Invitation envoyée. L'administrateur doit confirmer son email et créer son mot de passe."
+            ));
+        } catch (ResourceNotFoundException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        } catch (Exception e) {
+            logger.error("Erreur invitation admin hôpital {}", id, e);
+            String msg = e.getMessage() != null ? e.getMessage() : "Erreur lors de l'invitation.";
+            if (msg.toLowerCase().contains("existe déjà")) {
+                return ResponseEntity.status(HttpStatus.CONFLICT).body(msg);
+            }
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(msg);
         }
     }
 

@@ -7,6 +7,8 @@ import hospicloud.dtos.HospitalOverviewDTO;
 import hospicloud.dtos.HospitalPlanCatalogDTO;
 import hospicloud.dtos.HospitalPlatformStatsDTO;
 import hospicloud.dtos.HospitalUpdateDTO;
+import hospicloud.dtos.InviteHospitalAdminRequest;
+import hospicloud.model.Utilisateur;
 
 import java.util.List;
 
@@ -22,6 +24,8 @@ public interface HopitalPlatformService {
     List<HospitalPlanCatalogDTO> listPlansCatalog();
 
     HospitalOverviewDTO createHospital(HospitalCreateDTO dto);
+
+    Utilisateur inviteHospitalAdmin(Integer idHopital, InviteHospitalAdminRequest request);
 
     HospitalDetailDTO updateHospital(Integer idHopital, HospitalUpdateDTO dto);
 

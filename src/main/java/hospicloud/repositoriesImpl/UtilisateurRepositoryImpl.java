@@ -374,6 +374,16 @@ public class UtilisateurRepositoryImpl implements UtilisateurRepository {
     }
 
     @Override
+    public boolean setActiveById(Integer id, boolean active) {
+        int updated = jdbcTemplate.update(
+                "UPDATE utilisateurs SET est_actif = ? WHERE id_utilisateur = ?",
+                active,
+                id
+        );
+        return updated > 0;
+    }
+
+    @Override
     public Long countAllActive() {
         return jdbcTemplate.queryForObject(
                 "SELECT COUNT(1) FROM utilisateurs WHERE est_actif = TRUE", Long.class);

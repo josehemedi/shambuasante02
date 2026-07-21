@@ -34,6 +34,9 @@ public interface UtilisateurRepository {
 
     boolean setActive(Integer id, Integer idHopital, boolean active);
 
+    /** Active / désactive un compte sans filtre hôpital (activation d'invitation). */
+    boolean setActiveById(Integer id, boolean active);
+
     void ensureSchema();
 
     void seedIfEmpty();

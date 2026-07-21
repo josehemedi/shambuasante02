@@ -50,6 +50,24 @@ public class HospitalCreateDTO {
     /** Forfait SaaS — table abonnements (hors hopitaux). */
     private String planNom = "Starter";
 
+    // ——— Administrateur d'hôpital (invitation par e-mail) ———
+
+    @NotBlank(message = "Le prénom de l'administrateur est requis")
+    @Size(max = 100)
+    private String adminPrenom;
+
+    @NotBlank(message = "Le nom de l'administrateur est requis")
+    @Size(max = 100)
+    private String adminNom;
+
+    @NotBlank(message = "L'email de l'administrateur est requis")
+    @Email(message = "Format d'email administrateur invalide")
+    @Size(max = 150)
+    private String adminEmail;
+
+    @Size(max = 30)
+    private String adminTelephone;
+
     public String getNom() { return nom; }
     public void setNom(String nom) { this.nom = nom; }
 
@@ -88,4 +106,16 @@ public class HospitalCreateDTO {
 
     public String getPlanNom() { return planNom; }
     public void setPlanNom(String planNom) { this.planNom = planNom; }
+
+    public String getAdminPrenom() { return adminPrenom; }
+    public void setAdminPrenom(String adminPrenom) { this.adminPrenom = adminPrenom; }
+
+    public String getAdminNom() { return adminNom; }
+    public void setAdminNom(String adminNom) { this.adminNom = adminNom; }
+
+    public String getAdminEmail() { return adminEmail; }
+    public void setAdminEmail(String adminEmail) { this.adminEmail = adminEmail; }
+
+    public String getAdminTelephone() { return adminTelephone; }
+    public void setAdminTelephone(String adminTelephone) { this.adminTelephone = adminTelephone; }
 }
