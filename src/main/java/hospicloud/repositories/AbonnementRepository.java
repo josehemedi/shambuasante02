@@ -55,5 +55,8 @@ public interface AbonnementRepository {
 
     List<SubscriptionInvoiceDTO> listRecentInvoices(int limit);
 
+    /** Toutes les factures d'abonnement de tous les hôpitaux (historique complet). */
+    List<SubscriptionInvoiceDTO> listAllPlatformInvoices(int limit);
+
     List<SubscriptionTimelineEventDTO> listRecentTimeline(int limit);
 }

@@ -428,6 +428,40 @@ public class AbonnementRepositoryImpl implements AbonnementRepository {
     }
 
     @Override
+    public List<SubscriptionInvoiceDTO> listAllPlatformInvoices(int limit) {
+        int safeLimit = Math.max(1, Math.min(limit, 5000));
+        String sql = """
+                SELECT a.id_abonnement, h.nom AS tenant, a.plan_nom, a.montant_mensuel,
+                       a.statut, a.date_debut, a.date_fin, h.est_actif, h.date_creation
+                FROM abonnements a
+                INNER JOIN hopitaux h ON h.id_hopital = a.id_hopital
+                ORDER BY a.date_debut DESC, a.id_abonnement DESC
+                LIMIT ?
+                """;
+        return jdbcTemplate.query(sql, (rs, rowNum) -> {
+            SubscriptionInvoiceDTO invoice = new SubscriptionInvoiceDTO();
+            int idAbonnement = rs.getInt("id_abonnement");
+            invoice.setId("INV-" + String.format("%04d", idAbonnement));
+            invoice.setTenant(rs.getString("tenant"));
+            String plan = rs.getString("plan_nom");
+            invoice.setPlan(plan == null || plan.isBlank() ? "Starter" : plan);
+            BigDecimal amount = rs.getBigDecimal("montant_mensuel");
+            invoice.setAmount(amount != null ? amount : BigDecimal.ZERO);
+            Timestamp dateDebut = rs.getTimestamp("date_debut");
+            Timestamp dateFin = rs.getTimestamp("date_fin");
+            invoice.setDate(formatDate(dateDebut));
+            invoice.setDueDate(formatDueDate(dateDebut, dateFin));
+            invoice.setStatus(resolveInvoiceStatus(
+                    rs.getBoolean("est_actif"),
+                    rs.getString("statut"),
+                    invoice.getAmount(),
+                    rs.getTimestamp("date_creation"),
+                    dateFin));
+            return invoice;
+        }, safeLimit);
+    }
+
+    @Override
     public List<SubscriptionTimelineEventDTO> listRecentTimeline(int limit) {
         int safeLimit = Math.max(1, Math.min(limit, 100));
         String sql = """

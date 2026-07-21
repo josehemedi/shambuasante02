@@ -1,0 +1,260 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports"
+              xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+              xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd"
+              name="Factures_Abonnements_Plateforme"
+              pageWidth="595"
+              pageHeight="842"
+              columnWidth="555"
+              leftMargin="20"
+              rightMargin="20"
+              topMargin="20"
+              bottomMargin="20"
+              uuid="c3000001-0001-4001-8001-000000000001">
+
+    <parameter name="NOM_PLATEFORME" class="java.lang.String"/>
+    <parameter name="DATE_GENERATION" class="java.util.Date"/>
+    <parameter name="REFERENCE_RAPPORT" class="java.lang.String"/>
+    <parameter name="GENERE_PAR" class="java.lang.String"/>
+    <parameter name="NB_FACTURES" class="java.lang.String"/>
+    <parameter name="NB_HOPITAUX" class="java.lang.String"/>
+    <parameter name="TOTAL_MONTANT" class="java.lang.String"/>
+    <parameter name="PERIODE_RAPPORT" class="java.lang.String"/>
+
+    <field name="numero" class="java.lang.String"/>
+    <field name="hopital" class="java.lang.String"/>
+    <field name="reference" class="java.lang.String"/>
+    <field name="planNom" class="java.lang.String"/>
+    <field name="montant" class="java.lang.String"/>
+    <field name="statut" class="java.lang.String"/>
+    <field name="dateFacture" class="java.lang.String"/>
+    <field name="dateEcheance" class="java.lang.String"/>
+
+    <title>
+        <band height="88" splitType="Stretch">
+            <line>
+                <reportElement x="0" y="0" width="555" height="1" forecolor="#374151" uuid="c3000002-0002-4002-8002-000000000002"/>
+            </line>
+            <textField>
+                <reportElement x="0" y="10" width="555" height="20" forecolor="#111827" uuid="c3000003-0003-4003-8003-000000000003"/>
+                <textElement verticalAlignment="Middle"><font size="14" isBold="true"/></textElement>
+                <textFieldExpression><![CDATA[$P{NOM_PLATEFORME}]]></textFieldExpression>
+            </textField>
+            <staticText>
+                <reportElement x="0" y="32" width="555" height="16" forecolor="#374151" uuid="c3000004-0004-4004-8004-000000000004"/>
+                <textElement><font size="10" isBold="true"/></textElement>
+                <text><![CDATA[Export des factures d'abonnement — tous les hôpitaux]]></text>
+            </staticText>
+            <textField>
+                <reportElement x="0" y="50" width="555" height="12" forecolor="#6B7280" uuid="c3000005-0005-4005-8005-000000000005"/>
+                <textElement><font size="7"/></textElement>
+                <textFieldExpression><![CDATA[$P{PERIODE_RAPPORT}]]></textFieldExpression>
+            </textField>
+            <textField>
+                <reportElement x="0" y="64" width="555" height="12" forecolor="#9CA3AF" uuid="c3000006-0006-4006-8006-000000000006"/>
+                <textElement><font size="7" isItalic="true"/></textElement>
+                <textFieldExpression><![CDATA["Réf. " + $P{REFERENCE_RAPPORT} + " · Généré le " + new java.text.SimpleDateFormat("dd/MM/yyyy HH:mm").format($P{DATE_GENERATION}) + " · Par " + $P{GENERE_PAR}]]></textFieldExpression>
+            </textField>
+            <line>
+                <reportElement x="0" y="82" width="555" height="1" forecolor="#E5E7EB" uuid="c3000007-0007-4007-8007-000000000007"/>
+            </line>
+        </band>
+    </title>
+
+    <pageHeader>
+        <band height="52" splitType="Stretch">
+            <rectangle>
+                <reportElement mode="Transparent" x="0" y="4" width="180" height="40" uuid="c3000008-0008-4008-8008-000000000008"/>
+                <graphicElement><pen lineWidth="0.5" lineColor="#D1D5DB"/></graphicElement>
+            </rectangle>
+            <staticText>
+                <reportElement x="8" y="10" width="164" height="12" forecolor="#6B7280" uuid="c3000009-0009-4009-8009-000000000009"/>
+                <textElement><font size="7" isBold="true"/></textElement>
+                <text><![CDATA[NOMBRE DE FACTURES]]></text>
+            </staticText>
+            <textField>
+                <reportElement x="8" y="24" width="164" height="14" forecolor="#111827" uuid="c3000010-0010-4010-8010-000000000010"/>
+                <textElement><font size="10" isBold="true"/></textElement>
+                <textFieldExpression><![CDATA[$P{NB_FACTURES}]]></textFieldExpression>
+            </textField>
+
+            <rectangle>
+                <reportElement mode="Transparent" x="188" y="4" width="180" height="40" uuid="c3000011-0011-4011-8011-000000000011"/>
+                <graphicElement><pen lineWidth="0.5" lineColor="#D1D5DB"/></graphicElement>
+            </rectangle>
+            <staticText>
+                <reportElement x="196" y="10" width="164" height="12" forecolor="#6B7280" uuid="c3000012-0012-4012-8012-000000000012"/>
+                <textElement><font size="7" isBold="true"/></textElement>
+                <text><![CDATA[HÔPITAUX CONCERNÉS]]></text>
+            </staticText>
+            <textField>
+                <reportElement x="196" y="24" width="164" height="14" forecolor="#111827" uuid="c3000013-0013-4013-8013-000000000013"/>
+                <textElement><font size="10" isBold="true"/></textElement>
+                <textFieldExpression><![CDATA[$P{NB_HOPITAUX}]]></textFieldExpression>
+            </textField>
+
+            <rectangle>
+                <reportElement mode="Transparent" x="376" y="4" width="179" height="40" uuid="c3000014-0014-4014-8014-000000000014"/>
+                <graphicElement><pen lineWidth="0.5" lineColor="#D1D5DB"/></graphicElement>
+            </rectangle>
+            <staticText>
+                <reportElement x="384" y="10" width="163" height="12" forecolor="#6B7280" uuid="c3000015-0015-4015-8015-000000000015"/>
+                <textElement><font size="7" isBold="true"/></textElement>
+                <text><![CDATA[TOTAL MONTANTS]]></text>
+            </staticText>
+            <textField>
+                <reportElement x="384" y="24" width="163" height="14" forecolor="#111827" uuid="c3000016-0016-4016-8016-000000000016"/>
+                <textElement><font size="10" isBold="true"/></textElement>
+                <textFieldExpression><![CDATA[$P{TOTAL_MONTANT}]]></textFieldExpression>
+            </textField>
+        </band>
+    </pageHeader>
+
+    <columnHeader>
+        <band height="28">
+            <staticText>
+                <reportElement mode="Opaque" x="0" y="0" width="555" height="12" backcolor="#F9FAFB" forecolor="#374151" uuid="c3000017-0017-4017-8017-000000000017"/>
+                <box leftPadding="4"><pen lineWidth="0.25" lineColor="#E5E7EB"/></box>
+                <textElement verticalAlignment="Middle"><font size="8" isBold="true"/></textElement>
+                <text><![CDATA[Factures d'abonnement de tous les hôpitaux]]></text>
+            </staticText>
+            <staticText>
+                <reportElement mode="Opaque" x="0" y="12" width="22" height="14" backcolor="#F9FAFB" forecolor="#374151" uuid="c3000018-0018-4018-8018-000000000018"/>
+                <box><pen lineWidth="0.25" lineColor="#D1D5DB"/></box>
+                <textElement textAlignment="Center" verticalAlignment="Middle"><font size="7" isBold="true"/></textElement>
+                <text><![CDATA[#]]></text>
+            </staticText>
+            <staticText>
+                <reportElement mode="Opaque" x="22" y="12" width="120" height="14" backcolor="#F9FAFB" forecolor="#374151" uuid="c3000019-0019-4019-8019-000000000019"/>
+                <box><pen lineWidth="0.25" lineColor="#D1D5DB"/></box>
+                <textElement verticalAlignment="Middle"><font size="7" isBold="true"/></textElement>
+                <text><![CDATA[ Hôpital]]></text>
+            </staticText>
+            <staticText>
+                <reportElement mode="Opaque" x="142" y="12" width="58" height="14" backcolor="#F9FAFB" forecolor="#374151" uuid="c3000020-0020-4020-8020-000000000020"/>
+                <box><pen lineWidth="0.25" lineColor="#D1D5DB"/></box>
+                <textElement verticalAlignment="Middle"><font size="7" isBold="true"/></textElement>
+                <text><![CDATA[ Réf.]]></text>
+            </staticText>
+            <staticText>
+                <reportElement mode="Opaque" x="200" y="12" width="70" height="14" backcolor="#F9FAFB" forecolor="#374151" uuid="c3000021-0021-4021-8021-000000000021"/>
+                <box><pen lineWidth="0.25" lineColor="#D1D5DB"/></box>
+                <textElement verticalAlignment="Middle"><font size="7" isBold="true"/></textElement>
+                <text><![CDATA[ Forfait]]></text>
+            </staticText>
+            <staticText>
+                <reportElement mode="Opaque" x="270" y="12" width="70" height="14" backcolor="#F9FAFB" forecolor="#374151" uuid="c3000022-0022-4022-8022-000000000022"/>
+                <box><pen lineWidth="0.25" lineColor="#D1D5DB"/></box>
+                <textElement verticalAlignment="Middle"><font size="7" isBold="true"/></textElement>
+                <text><![CDATA[ Montant]]></text>
+            </staticText>
+            <staticText>
+                <reportElement mode="Opaque" x="340" y="12" width="65" height="14" backcolor="#F9FAFB" forecolor="#374151" uuid="c3000023-0023-4023-8023-000000000023"/>
+                <box><pen lineWidth="0.25" lineColor="#D1D5DB"/></box>
+                <textElement verticalAlignment="Middle"><font size="7" isBold="true"/></textElement>
+                <text><![CDATA[ Statut]]></text>
+            </staticText>
+            <staticText>
+                <reportElement mode="Opaque" x="405" y="12" width="75" height="14" backcolor="#F9FAFB" forecolor="#374151" uuid="c3000024-0024-4024-8024-000000000024"/>
+                <box><pen lineWidth="0.25" lineColor="#D1D5DB"/></box>
+                <textElement verticalAlignment="Middle"><font size="7" isBold="true"/></textElement>
+                <text><![CDATA[ Date]]></text>
+            </staticText>
+            <staticText>
+                <reportElement mode="Opaque" x="480" y="12" width="75" height="14" backcolor="#F9FAFB" forecolor="#374151" uuid="c3000025-0025-4025-8025-000000000025"/>
+                <box><pen lineWidth="0.25" lineColor="#D1D5DB"/></box>
+                <textElement verticalAlignment="Middle"><font size="7" isBold="true"/></textElement>
+                <text><![CDATA[ Échéance]]></text>
+            </staticText>
+        </band>
+    </columnHeader>
+
+    <detail>
+        <band height="16" splitType="Stretch">
+            <textField>
+                <reportElement x="0" y="0" width="22" height="14" forecolor="#374151" uuid="c3000026-0026-4026-8026-000000000026"/>
+                <box leftPadding="2"><pen lineWidth="0.25" lineColor="#E5E7EB"/></box>
+                <textElement textAlignment="Center" verticalAlignment="Top"><font size="7"/></textElement>
+                <textFieldExpression><![CDATA[$F{numero}]]></textFieldExpression>
+            </textField>
+            <textField textAdjust="StretchHeight">
+                <reportElement x="22" y="0" width="120" height="14" forecolor="#111827" uuid="c3000027-0027-4027-8027-000000000027"/>
+                <box leftPadding="2"><pen lineWidth="0.25" lineColor="#E5E7EB"/></box>
+                <textElement verticalAlignment="Top"><font size="7"/></textElement>
+                <textFieldExpression><![CDATA[$F{hopital}]]></textFieldExpression>
+            </textField>
+            <textField textAdjust="StretchHeight">
+                <reportElement x="142" y="0" width="58" height="14" forecolor="#374151" uuid="c3000028-0028-4028-8028-000000000028"/>
+                <box leftPadding="2"><pen lineWidth="0.25" lineColor="#E5E7EB"/></box>
+                <textElement verticalAlignment="Top"><font size="7"/></textElement>
+                <textFieldExpression><![CDATA[$F{reference}]]></textFieldExpression>
+            </textField>
+            <textField textAdjust="StretchHeight">
+                <reportElement x="200" y="0" width="70" height="14" forecolor="#374151" uuid="c3000029-0029-4029-8029-000000000029"/>
+                <box leftPadding="2"><pen lineWidth="0.25" lineColor="#E5E7EB"/></box>
+                <textElement verticalAlignment="Top"><font size="7"/></textElement>
+                <textFieldExpression><![CDATA[$F{planNom}]]></textFieldExpression>
+            </textField>
+            <textField textAdjust="StretchHeight">
+                <reportElement x="270" y="0" width="70" height="14" forecolor="#111827" uuid="c3000030-0030-4030-8030-000000000030"/>
+                <box leftPadding="2"><pen lineWidth="0.25" lineColor="#E5E7EB"/></box>
+                <textElement verticalAlignment="Top"><font size="7" isBold="true"/></textElement>
+                <textFieldExpression><![CDATA[$F{montant}]]></textFieldExpression>
+            </textField>
+            <textField textAdjust="StretchHeight">
+                <reportElement x="340" y="0" width="65" height="14" forecolor="#374151" uuid="c3000031-0031-4031-8031-000000000031"/>
+                <box leftPadding="2"><pen lineWidth="0.25" lineColor="#E5E7EB"/></box>
+                <textElement verticalAlignment="Top"><font size="7"/></textElement>
+                <textFieldExpression><![CDATA[$F{statut}]]></textFieldExpression>
+            </textField>
+            <textField textAdjust="StretchHeight">
+                <reportElement x="405" y="0" width="75" height="14" forecolor="#374151" uuid="c3000032-0032-4032-8032-000000000032"/>
+                <box leftPadding="2"><pen lineWidth="0.25" lineColor="#E5E7EB"/></box>
+                <textElement verticalAlignment="Top"><font size="7"/></textElement>
+                <textFieldExpression><![CDATA[$F{dateFacture}]]></textFieldExpression>
+            </textField>
+            <textField textAdjust="StretchHeight">
+                <reportElement x="480" y="0" width="75" height="14" forecolor="#374151" uuid="c3000033-0033-4033-8033-000000000033"/>
+                <box leftPadding="2"><pen lineWidth="0.25" lineColor="#E5E7EB"/></box>
+                <textElement verticalAlignment="Top"><font size="7"/></textElement>
+                <textFieldExpression><![CDATA[$F{dateEcheance}]]></textFieldExpression>
+            </textField>
+        </band>
+    </detail>
+
+    <pageFooter>
+        <band height="18">
+            <line>
+                <reportElement x="0" y="0" width="555" height="1" forecolor="#E5E7EB" uuid="c3000034-0034-4034-8034-000000000034"/>
+            </line>
+            <textField>
+                <reportElement x="0" y="4" width="555" height="12" forecolor="#9CA3AF" uuid="c3000035-0035-4035-8035-000000000035"/>
+                <textElement textAlignment="Center"><font size="7"/></textElement>
+                <textFieldExpression><![CDATA["Page " + $V{PAGE_NUMBER} + " / " + $V{PAGE_COUNT} + " · " + $P{NOM_PLATEFORME}]]></textFieldExpression>
+            </textField>
+        </band>
+    </pageFooter>
+
+    <summary>
+        <band height="44" splitType="Stretch">
+            <line>
+                <reportElement x="285" y="8" width="270" height="1" forecolor="#D1D5DB" uuid="c3000036-0036-4036-8036-000000000036"/>
+            </line>
+            <staticText>
+                <reportElement x="295" y="14" width="120" height="12" forecolor="#6B7280" uuid="c3000037-0037-4037-8037-000000000037"/>
+                <textElement><font size="8" isBold="true"/></textElement>
+                <text><![CDATA[Total des montants]]></text>
+            </staticText>
+            <textField>
+                <reportElement x="420" y="14" width="125" height="12" forecolor="#111827" uuid="c3000038-0038-4038-8038-000000000038"/>
+                <textElement textAlignment="Right"><font size="9" isBold="true"/></textElement>
+                <textFieldExpression><![CDATA[$P{TOTAL_MONTANT}]]></textFieldExpression>
+            </textField>
+            <staticText>
+                <reportElement x="0" y="32" width="555" height="12" forecolor="#9CA3AF" uuid="c3000039-0039-4039-8039-000000000039"/>
+                <textElement textAlignment="Center"><font size="7" isItalic="true"/></textElement>
+                <text><![CDATA[Document confidentiel — export plateforme des factures d'abonnement SaaS Shambua Santé.]]></text>
+            </staticText>
+        </band>
+    </summary>
+</jasperReport>
