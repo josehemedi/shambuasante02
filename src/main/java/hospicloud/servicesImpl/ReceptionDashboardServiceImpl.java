@@ -170,15 +170,31 @@ public class ReceptionDashboardServiceImpl implements ReceptionDashboardService 
     public void changerStatutAdmission(Integer idAdmission, String nouveauStatut) {
         Integer tenantId = getTenantId();
         
-        // Validate existence & tenant isolation
         Admission existante = receptionRepository.trouverAdmissionParId(idAdmission, tenantId);
         if (existante == null) {
             throw new IllegalArgumentException("Admission introuvable");
         }
 
-        receptionRepository.mettreAJourStatutAdmission(idAdmission, tenantId, nouveauStatut);
+        String normalized = nouveauStatut != null ? nouveauStatut.trim().toUpperCase() : "";
+        // Alias métier réception → codes internes
+        if ("RECU".equals(normalized) || "RECEIVED".equals(normalized)) {
+            normalized = "ENREGISTRE";
+        } else if ("WAITING".equals(normalized) || "ATTENTE".equals(normalized)) {
+            normalized = "EN_ATTENTE";
+        } else if ("WAITING_TRIAGE".equals(normalized) || "TRIAGE".equals(normalized)) {
+            normalized = "ATTENTE_TRIAGE";
+        } else if ("ORIENTED".equals(normalized)) {
+            normalized = "ORIENTE";
+        }
+        java.util.Set<String> allowed = java.util.Set.of(
+                "ATTENTE_TRIAGE", "EN_ATTENTE", "ORIENTE", "ENREGISTRE", "APPELE", "EN_CONSULTATION", "TERMINE", "ABSENT");
+        if (!allowed.contains(normalized)) {
+            throw new BadRequestException(
+                    "Statut invalide. Valeurs: ATTENTE_TRIAGE, EN_ATTENTE, ORIENTE, ENREGISTRE (reçu), ABSENT.");
+        }
 
-        // Notify reception board + médecin concerné (file / afficheur en temps réel)
+        receptionRepository.mettreAJourStatutAdmission(idAdmission, tenantId, normalized);
+
         messagingTemplate.convertAndSend(ReceptionLiveTopics.destination(tenantId), "STATUS_UPDATED");
         if (existante.getIdMedecin() != null) {
             String nomPatient = existante.getIdPatient() != null
@@ -193,7 +209,7 @@ public class ReceptionDashboardServiceImpl implements ReceptionDashboardService 
             payload.put("idAdmission", idAdmission);
             payload.put("idRendezVous", existante.getIdRendezVous());
             payload.put("patientNom", nomPatient);
-            payload.put("statut", nouveauStatut);
+            payload.put("statut", normalized);
             payload.put("numeroPassage", existante.getNumeroPassage());
             messagingTemplate.convertAndSend(
                     MedecinQueueTopics.destination(tenantId, existante.getIdMedecin()), payload);
@@ -262,10 +278,13 @@ public class ReceptionDashboardServiceImpl implements ReceptionDashboardService 
         Integer userId = currentUserService.getCurrentUtilisateurId();
 
         if (!StringUtils.hasText(request.getMotifConsultation())) {
-            throw new BadRequestException("Le motif de consultation est obligatoire.");
+            throw new BadRequestException("Le motif général est obligatoire.");
         }
         if (!StringUtils.hasText(request.getServiceDemande())) {
             throw new BadRequestException("Le service demandé est obligatoire.");
+        }
+        if (!StringUtils.hasText(request.getTypeVisite())) {
+            throw new BadRequestException("Le type de visite est obligatoire.");
         }
 
         Patient patient = resolveOrCreatePatient(request);
@@ -275,67 +294,137 @@ public class ReceptionDashboardServiceImpl implements ReceptionDashboardService 
                 ? request.getSpecialite().trim()
                 : request.getServiceDemande().trim();
 
-        MedecinDisponibleDTO choix = resolveMedecin(request, filtre);
-        Integer idMedecin = choix.getIdMedecin();
+        MedecinDisponibleDTO choix = resolveMedecinOptional(request, filtre);
+        Integer idMedecin = choix != null ? choix.getIdMedecin() : null;
 
-        patientRepository.lierPatientAMedecin(idMedecin, patient.getIdPatient());
+        if (idMedecin != null) {
+            patientRepository.lierPatientAMedecin(idMedecin, patient.getIdPatient());
+        }
 
-        int priorite = mapUrgenceToPriorite(request.getNiveauUrgence());
-        String motif = request.getMotifConsultation().trim()
-                + " — Service : " + request.getServiceDemande().trim();
+        // Priorité clinique : triage uniquement (réception = normale)
+        int priorite = 3;
+        LocalDateTime arrivee = LocalDateTime.now();
+        String motif = request.getMotifConsultation().trim();
+        String typeVisite = request.getTypeVisite().trim();
+        String service = request.getServiceDemande().trim();
+        String motifRdv = typeVisite + " — " + motif + " — Service : " + service;
 
-        RendezVous rdv = new RendezVous();
-        rdv.setIdHopital(tenantId);
-        rdv.setIdPatient(idPatient);
-        rdv.setIdMedecin(idMedecin);
-        rdv.setDateHeureRdv(LocalDateTime.now().plusMinutes(5));
-        rdv.setDureeEstimee(30);
-        rdv.setMotifVisite(motif);
-        rdv.setCanal("PHYSIQUE");
-        rdv.setStatutRdv("PROGRAMME");
-        rdv.setCreePar(userId);
-        RendezVous savedRdv = rendezVousService.creerEtPublier(rdv);
+        Integer idRdv = null;
+        if (idMedecin != null) {
+            RendezVous rdv = new RendezVous();
+            rdv.setIdHopital(tenantId);
+            rdv.setIdPatient(idPatient);
+            rdv.setIdMedecin(idMedecin);
+            rdv.setDateHeureRdv(arrivee.plusMinutes(5));
+            rdv.setDureeEstimee(30);
+            rdv.setMotifVisite(motifRdv);
+            rdv.setCanal("PHYSIQUE");
+            rdv.setStatutRdv("PROGRAMME");
+            rdv.setCreePar(userId);
+            RendezVous savedRdv = rendezVousService.creerEtPublier(rdv);
+            idRdv = savedRdv.getIdRdv();
+        }
 
         Admission admission = new Admission();
         admission.setIdHopital(tenantId);
         admission.setIdPatient(idPatient);
         admission.setIdMedecin(idMedecin);
-        admission.setIdRendezVous(savedRdv.getIdRdv());
+        admission.setIdRendezVous(idRdv);
         admission.setNiveauPriorite(priorite);
-        admission.setTempsArrivee(LocalDateTime.now());
-        admission.setStatut("EN_ATTENTE");
+        admission.setTempsArrivee(arrivee);
+        admission.setStatut("ATTENTE_TRIAGE");
         admission.setCreePar(userId);
         admission.setCheckInPar(userId);
+        admission.setTypeVisite(typeVisite);
+        admission.setMotifGeneral(motif);
+        admission.setServiceDemande(service);
+        admission.setObservationsAdmin(StringUtils.hasText(request.getObservationsAdministratives())
+                ? request.getObservationsAdministratives().trim() : null);
+        admission.setModePaiement(StringUtils.hasText(request.getModePaiement())
+                ? request.getModePaiement().trim() : null);
+
         Integer idAdmission = receptionRepository.creerAdmissionRetourId(admission);
         Integer numeroPassage = idAdmission != null
                 ? receptionRepository.allouerNumeroPassage(idAdmission, tenantId)
                 : null;
 
-        publierFileMedecin(tenantId, idMedecin, idAdmission, savedRdv.getIdRdv(),
-                responseNomPatient(patient), request.getMotifConsultation().trim(), numeroPassage);
+        String nomPatient = responseNomPatient(patient);
+        publierNouvelleVisite(tenantId, idMedecin, idAdmission, idRdv, nomPatient, motif, service, numeroPassage);
 
         WalkInRegistrationResponseDTO response = new WalkInRegistrationResponseDTO();
         response.setIdPatient(idPatient);
         response.setCodePatient(patient.getCodePatient());
-        response.setNomPatient(responseNomPatient(patient));
+        response.setNomPatient(nomPatient);
         response.setIdMedecin(idMedecin);
-        response.setNomMedecin(choix.getNomComplet());
-        response.setSpecialiteMedecin(choix.getSpecialite());
+        response.setNomMedecin(choix != null ? choix.getNomComplet() : null);
+        response.setSpecialiteMedecin(choix != null ? choix.getSpecialite() : null);
         response.setIdAdmission(idAdmission);
-        response.setIdRendezVous(savedRdv.getIdRdv());
+        response.setIdRendezVous(idRdv);
         response.setNiveauPriorite(priorite);
-        response.setMotifConsultation(request.getMotifConsultation());
-        response.setServiceDemande(request.getServiceDemande());
-        response.setMessage("Patient enregistré et orienté vers Dr " + choix.getNomComplet()
-                + " (" + (choix.getSpecialite() != null ? choix.getSpecialite() : filtre) + ")"
-                + (numeroPassage != null ? " — ticket " + String.format("%03d", numeroPassage) : "")
-                + ".");
+        response.setMotifConsultation(motif);
+        response.setServiceDemande(service);
+        response.setNumeroPassage(numeroPassage);
+        response.setStatut("ATTENTE_TRIAGE");
+
+        String ticketPart = numeroPassage != null ? " — ticket " + String.format("%03d", numeroPassage) : "";
+        if (choix != null) {
+            response.setMessage("Visite créée · " + service + " · Dr " + choix.getNomComplet()
+                    + " · en attente de triage" + ticketPart + ".");
+        } else {
+            response.setMessage("Visite créée · orientée vers « " + service
+                    + " » · en attente de triage" + ticketPart + ".");
+        }
         return response;
     }
 
-    private String responseNomPatient(Patient patient) {
-        return ((patient.getPrenom() != null ? patient.getPrenom() : "") + " "
-                + (patient.getNom() != null ? patient.getNom() : "")).trim();
+    private void publierNouvelleVisite(Integer tenantId,
+                                       Integer idMedecin,
+                                       Integer idAdmission,
+                                       Integer idRdv,
+                                       String nomPatient,
+                                       String motif,
+                                       String service,
+                                       Integer numeroPassage) {
+        Map<String, Object> receptionPayload = new HashMap<>();
+        receptionPayload.put("type", "NOUVELLE_VISITE");
+        receptionPayload.put("idHopital", tenantId);
+        receptionPayload.put("idAdmission", idAdmission);
+        receptionPayload.put("idRendezVous", idRdv);
+        receptionPayload.put("idMedecin", idMedecin);
+        receptionPayload.put("patientNom", nomPatient);
+        receptionPayload.put("motif", motif);
+        receptionPayload.put("service", service);
+        receptionPayload.put("numeroPassage", numeroPassage);
+        receptionPayload.put("statut", "ATTENTE_TRIAGE");
+
+        messagingTemplate.convertAndSend(ReceptionLiveTopics.destination(tenantId), "NEW_ADMISSION");
+        messagingTemplate.convertAndSend(ReceptionLiveTopics.destination(tenantId), receptionPayload);
+
+        if (idMedecin != null) {
+            messagingTemplate.convertAndSend(ReceptionLiveTopics.destination(tenantId), "NEW_RDV");
+            Map<String, Object> payload = new HashMap<>();
+            payload.put("type", "PATIENT_EN_FILE");
+            payload.put("idHopital", tenantId);
+            payload.put("idMedecin", idMedecin);
+            payload.put("idAdmission", idAdmission);
+            payload.put("idRendezVous", idRdv);
+            payload.put("patientNom", nomPatient);
+            payload.put("motif", motif);
+            payload.put("service", service);
+            payload.put("numeroPassage", numeroPassage);
+            messagingTemplate.convertAndSend(MedecinQueueTopics.destination(tenantId, idMedecin), payload);
+
+            try {
+                realtimeNotificationService.notifyPatientAjouteFileMedecin(
+                        tenantId, idMedecin, idAdmission, idRdv, nomPatient, motif, numeroPassage);
+            } catch (Exception ex) {
+                log.warn("Notification médecin file d'attente ignorée: {}", ex.getMessage());
+            }
+        } else {
+            // Le tableau de bord réception est déjà notifié via STOMP (NEW_ADMISSION).
+            log.info("Visite sans médecin — service « {} » informé via canal réception (admission #{})",
+                    service, idAdmission);
+        }
     }
 
     private void publierFileMedecin(Integer tenantId,
@@ -345,26 +434,16 @@ public class ReceptionDashboardServiceImpl implements ReceptionDashboardService 
                                     String nomPatient,
                                     String motif,
                                     Integer numeroPassage) {
-        messagingTemplate.convertAndSend(ReceptionLiveTopics.destination(tenantId), "NEW_ADMISSION");
-        messagingTemplate.convertAndSend(ReceptionLiveTopics.destination(tenantId), "NEW_RDV");
-
-        Map<String, Object> payload = new HashMap<>();
-        payload.put("type", "PATIENT_EN_FILE");
-        payload.put("idHopital", tenantId);
-        payload.put("idMedecin", idMedecin);
-        payload.put("idAdmission", idAdmission);
-        payload.put("idRendezVous", idRdv);
-        payload.put("patientNom", nomPatient);
-        payload.put("motif", motif);
-        payload.put("numeroPassage", numeroPassage);
-        messagingTemplate.convertAndSend(MedecinQueueTopics.destination(tenantId, idMedecin), payload);
-
-        try {
-            realtimeNotificationService.notifyPatientAjouteFileMedecin(
-                    tenantId, idMedecin, idAdmission, idRdv, nomPatient, motif, numeroPassage);
-        } catch (Exception ex) {
-            log.warn("Notification médecin file d'attente ignorée: {}", ex.getMessage());
+        if (idMedecin == null) {
+            messagingTemplate.convertAndSend(ReceptionLiveTopics.destination(tenantId), "NEW_ADMISSION");
+            return;
         }
+        publierNouvelleVisite(tenantId, idMedecin, idAdmission, idRdv, nomPatient, motif, null, numeroPassage);
+    }
+
+    private String responseNomPatient(Patient patient) {
+        return ((patient.getPrenom() != null ? patient.getPrenom() : "") + " "
+                + (patient.getNom() != null ? patient.getNom() : "")).trim();
     }
 
     private Patient resolveOrCreatePatient(WalkInRegistrationRequestDTO request) {
@@ -413,7 +492,7 @@ public class ReceptionDashboardServiceImpl implements ReceptionDashboardService 
         throw new BadRequestException("Sexe invalide (attendu : M ou F).");
     }
 
-    private MedecinDisponibleDTO resolveMedecin(WalkInRegistrationRequestDTO request, String filtre) {
+    private MedecinDisponibleDTO resolveMedecinOptional(WalkInRegistrationRequestDTO request, String filtre) {
         if (request.getIdMedecin() != null) {
             Medecin medecin = medecinRepository.trouverParId(request.getIdMedecin())
                     .orElseThrow(() -> new BadRequestException("Médecin introuvable pour cet établissement."));
@@ -429,18 +508,16 @@ public class ReceptionDashboardServiceImpl implements ReceptionDashboardService 
         }
 
         if (!request.isAffectationAutomatique()) {
-            throw new BadRequestException("Veuillez sélectionner un médecin ou activer l'affectation automatique.");
+            return null;
         }
 
         List<MedecinDisponibleDTO> candidats = receptionRepository.listerMedecinsDisponibles(
                 getTenantId(), filtre, false);
         if (candidats.isEmpty()) {
-            // Relâche le filtre spécialité si aucun match : rester dans le tenant, dispo seulement
             candidats = receptionRepository.listerMedecinsDisponibles(getTenantId(), null, false);
         }
         if (candidats.isEmpty()) {
-            throw new BadRequestException(
-                    "Aucun médecin disponible pour ce service dans votre établissement.");
+            return null;
         }
 
         return candidats.stream()

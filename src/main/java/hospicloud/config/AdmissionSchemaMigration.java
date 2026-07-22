@@ -39,6 +39,11 @@ public class AdmissionSchemaMigration {
             ensureColumn("appele_a", "DATETIME NULL");
             ensureColumn("cree_par", "INT NULL");
             ensureColumn("check_in_par", "INT NULL");
+            ensureColumn("type_visite", "VARCHAR(80) NULL");
+            ensureColumn("motif_general", "VARCHAR(255) NULL");
+            ensureColumn("service_demande", "VARCHAR(120) NULL");
+            ensureColumn("observations_admin", "VARCHAR(500) NULL");
+            ensureColumn("mode_paiement", "VARCHAR(80) NULL");
             log.info("Table admission prête");
         } catch (Exception e) {
             log.warn("Migration admission ignorée: {}", e.getMessage());

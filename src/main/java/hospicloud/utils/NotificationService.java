@@ -107,4 +107,19 @@ public interface NotificationService {
             String datePrescription,
             String diagnostic,
             byte[] pdfOrdonnance);
+
+    /**
+     * Notifie le patient qu'un document clinique (labo, consultation, fichier) lui a été transmis.
+     */
+    void notifierDocumentCliniquePatient(
+            String emailPatient,
+            String nomPatient,
+            String nomMedecin,
+            String nomHopital,
+            String typeDocument,
+            String titre,
+            String resume,
+            String attachmentFileName,
+            byte[] attachmentBytes,
+            String contentType);
 }

@@ -10,7 +10,7 @@
               rightMargin="20"
               topMargin="18"
               bottomMargin="18"
-              uuid="c3000001-ord1-4a01-9f01-ordonnancepro01">
+              uuid="c3000001-0001-4a01-9f01-000000000001">
 
     <parameter name="NOM_HOPITAL" class="java.lang.String"/>
     <parameter name="LOGO_HOPITAL" class="java.io.InputStream"/>
@@ -376,7 +376,7 @@
                 <reportElement x="12" y="112" width="531" height="118" uuid="c3000044-0044-4044-8044-000000000044" positionType="Float"/>
                 <textElement markup="none">
                     <font size="10"/>
-                    <paragraph lineSpacing="OneAndHalf"/>
+                    <paragraph lineSpacing="1_1_2"/>
                 </textElement>
                 <textFieldExpression><![CDATA[$P{contenuOrdonnance} != null && $P{contenuOrdonnance}.trim().length() > 0 ? $P{contenuOrdonnance} : "Aucune prescription renseignée."]]></textFieldExpression>
             </textField>

@@ -92,9 +92,13 @@ public class RendezVousController {
     // =====================================================
     @GetMapping("/disponibilite")
     public ResponseEntity<Boolean> verifierCreneau(
-            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime dateHeure) {
-        Integer idMedecin = currentUserService.getCurrentMedecinId();
-        boolean libre = rendezVousService.verifierCreneau(idMedecin, dateHeure);
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime dateHeure,
+            @RequestParam(required = false) Integer idMedecin) {
+        Integer medecinId = idMedecin != null ? idMedecin : currentUserService.getCurrentMedecinId();
+        if (medecinId == null) {
+            throw new ForbiddenException("Médecin requis pour vérifier la disponibilité");
+        }
+        boolean libre = rendezVousService.verifierCreneau(medecinId, dateHeure);
         return ResponseEntity.ok(libre);
     }
 
@@ -129,6 +133,20 @@ public class RendezVousController {
         return ResponseEntity.ok().build();
     }
 
+    /** Médecin : accepter une demande patient (EN_ATTENTE → CONFIRME). */
+    @PatchMapping("/{id}/accepter-demande")
+    public ResponseEntity<RendezVous> accepterDemande(@PathVariable Integer id) {
+        return ResponseEntity.ok(rendezVousService.accepterDemandePatient(id));
+    }
+
+    /** Médecin : refuser une demande patient. */
+    @PatchMapping("/{id}/refuser-demande")
+    public ResponseEntity<RendezVous> refuserDemande(
+            @PathVariable Integer id,
+            @RequestParam(required = false) String motif) {
+        return ResponseEntity.ok(rendezVousService.refuserDemandePatient(id, motif));
+    }
+
     @PatchMapping("/{id}/annuler")
     public ResponseEntity<Void> annuler(@PathVariable Integer id) {
         rendezVousService.annulerRendezVous(id);
@@ -144,6 +162,12 @@ public class RendezVousController {
     @PatchMapping("/{id}/terminer")
     public ResponseEntity<Void> terminer(@PathVariable Integer id) {
         rendezVousService.marquerCommeTermine(id);
+        return ResponseEntity.ok().build();
+    }
+
+    @PostMapping("/{id}/renvoyer-confirmation")
+    public ResponseEntity<Void> renvoyerConfirmation(@PathVariable Integer id) {
+        rendezVousService.renvoyerConfirmation(id);
         return ResponseEntity.ok().build();
     }
 }

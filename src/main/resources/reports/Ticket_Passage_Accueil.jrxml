@@ -1,0 +1,184 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports"
+              xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+              xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd"
+              name="Ticket_Passage_Accueil"
+              pageWidth="298"
+              pageHeight="420"
+              columnWidth="266"
+              leftMargin="16"
+              rightMargin="16"
+              topMargin="14"
+              bottomMargin="14"
+              whenNoDataType="AllSectionsNoDetail"
+              uuid="d4000001-0001-4001-8001-000000000001">
+
+    <parameter name="NOM_HOPITAL" class="java.lang.String"/>
+    <parameter name="LOGO_HOPITAL" class="java.io.InputStream"/>
+    <parameter name="INFOS_ETABLISSEMENT" class="java.lang.String"/>
+    <parameter name="DATE_GENERATION" class="java.util.Date"/>
+    <parameter name="GENERE_PAR" class="java.lang.String"/>
+    <parameter name="REFERENCE_TICKET" class="java.lang.String"/>
+    <parameter name="NUMERO_PASSAGE" class="java.lang.String"/>
+    <parameter name="NOM_PATIENT" class="java.lang.String"/>
+    <parameter name="CODE_PATIENT" class="java.lang.String"/>
+    <parameter name="NOM_MEDECIN" class="java.lang.String"/>
+    <parameter name="SPECIALITE" class="java.lang.String"/>
+    <parameter name="SERVICE" class="java.lang.String"/>
+    <parameter name="MOTIF_VISITE" class="java.lang.String"/>
+    <parameter name="PRIORITE" class="java.lang.String"/>
+    <parameter name="STATUT" class="java.lang.String"/>
+    <parameter name="HEURE_ARRIVEE" class="java.lang.String"/>
+    <parameter name="DATE_JOUR" class="java.lang.String"/>
+    <parameter name="QR_CODE_IMAGE" class="java.awt.image.BufferedImage"/>
+
+    <title>
+        <band height="392" splitType="Stretch">
+            <!-- Cadre extérieur -->
+            <rectangle>
+                <reportElement x="0" y="0" width="266" height="392" forecolor="#1E3A5F" uuid="d4000002-0002-4002-8002-000000000002"/>
+                <graphicElement><pen lineWidth="1.25" lineColor="#1E3A5F"/></graphicElement>
+            </rectangle>
+            <rectangle>
+                <reportElement x="4" y="4" width="258" height="384" forecolor="#94A3B8" uuid="d4000003-0003-4003-8003-000000000003"/>
+                <graphicElement><pen lineWidth="0.4" lineColor="#94A3B8"/></graphicElement>
+            </rectangle>
+
+            <!-- Bandeau haut -->
+            <rectangle>
+                <reportElement mode="Opaque" x="8" y="8" width="250" height="58" backcolor="#1E56A0" forecolor="#1E56A0" uuid="d4000004-0004-4004-8004-000000000004"/>
+                <graphicElement><pen lineWidth="0.0"/></graphicElement>
+            </rectangle>
+            <image onErrorType="Blank" scaleImage="RetainShape">
+                <reportElement x="14" y="14" width="36" height="36" uuid="d4000005-0005-4005-8005-000000000005"/>
+                <imageExpression><![CDATA[$P{LOGO_HOPITAL}]]></imageExpression>
+            </image>
+            <textField textAdjust="StretchHeight">
+                <reportElement x="56" y="14" width="194" height="18" forecolor="#FFFFFF" uuid="d4000006-0006-4006-8006-000000000006"/>
+                <textElement verticalAlignment="Middle"><font size="10" isBold="true" pdfFontName="Helvetica-Bold"/></textElement>
+                <textFieldExpression><![CDATA[$P{NOM_HOPITAL} != null ? $P{NOM_HOPITAL} : "Shambua Santé"]]></textFieldExpression>
+            </textField>
+            <staticText>
+                <reportElement x="56" y="34" width="194" height="14" forecolor="#DBEAFE" uuid="d4000007-0007-4007-8007-000000000007"/>
+                <textElement><font size="8" isBold="true" pdfFontName="Helvetica-Bold"/></textElement>
+                <text><![CDATA[TICKET D'ACCUEIL — ORDRE DE PASSAGE]]></text>
+            </staticText>
+            <textField>
+                <reportElement x="56" y="48" width="194" height="12" forecolor="#BFDBFE" uuid="d4000008-0008-4008-8008-000000000008"/>
+                <textElement><font size="6"/></textElement>
+                <textFieldExpression><![CDATA[$P{INFOS_ETABLISSEMENT} != null ? $P{INFOS_ETABLISSEMENT} : ""]]></textFieldExpression>
+            </textField>
+
+            <!-- Libellé numéro -->
+            <staticText>
+                <reportElement x="8" y="76" width="250" height="12" forecolor="#64748B" uuid="d4000009-0009-4009-8009-000000000009"/>
+                <textElement textAlignment="Center"><font size="7" isBold="true" pdfFontName="Helvetica-Bold"/></textElement>
+                <text><![CDATA[NUMÉRO DE PASSAGE]]></text>
+            </staticText>
+
+            <!-- Grand numéro -->
+            <rectangle>
+                <reportElement mode="Opaque" x="48" y="92" width="170" height="64" backcolor="#F8FAFC" forecolor="#1E56A0" uuid="d4000010-0010-4010-8010-000000000010"/>
+                <graphicElement><pen lineWidth="1.5" lineColor="#1E56A0"/></graphicElement>
+            </rectangle>
+            <textField>
+                <reportElement x="48" y="96" width="170" height="56" forecolor="#0F172A" uuid="d4000011-0011-4011-8011-000000000011"/>
+                <textElement textAlignment="Center" verticalAlignment="Middle"><font size="36" isBold="true" pdfFontName="Helvetica-Bold"/></textElement>
+                <textFieldExpression><![CDATA[$P{NUMERO_PASSAGE} != null ? $P{NUMERO_PASSAGE} : "—"]]></textFieldExpression>
+            </textField>
+
+            <!-- Date / heure / priorité -->
+            <textField>
+                <reportElement x="12" y="164" width="120" height="12" forecolor="#334155" uuid="d4000012-0012-4012-8012-000000000012"/>
+                <textElement><font size="7"/></textElement>
+                <textFieldExpression><![CDATA[($P{DATE_JOUR} != null ? $P{DATE_JOUR} : "") + "  " + ($P{HEURE_ARRIVEE} != null ? $P{HEURE_ARRIVEE} : "")]]></textFieldExpression>
+            </textField>
+            <textField>
+                <reportElement x="140" y="164" width="114" height="12" forecolor="#1E56A0" uuid="d4000013-0013-4013-8013-000000000013"/>
+                <textElement textAlignment="Right"><font size="7" isBold="true" pdfFontName="Helvetica-Bold"/></textElement>
+                <textFieldExpression><![CDATA[$P{PRIORITE} != null ? $P{PRIORITE} : "Priorité normale"]]></textFieldExpression>
+            </textField>
+
+            <line>
+                <reportElement x="12" y="180" width="242" height="1" forecolor="#E2E8F0" uuid="d4000014-0014-4014-8014-000000000014"/>
+            </line>
+
+            <!-- Patient -->
+            <staticText>
+                <reportElement x="12" y="188" width="242" height="11" forecolor="#64748B" uuid="d4000015-0015-4015-8015-000000000015"/>
+                <textElement><font size="6" isBold="true" pdfFontName="Helvetica-Bold"/></textElement>
+                <text><![CDATA[PATIENT]]></text>
+            </staticText>
+            <textField textAdjust="StretchHeight">
+                <reportElement x="12" y="200" width="242" height="16" forecolor="#0F172A" uuid="d4000016-0016-4016-8016-000000000016"/>
+                <textElement><font size="10" isBold="true" pdfFontName="Helvetica-Bold"/></textElement>
+                <textFieldExpression><![CDATA[$P{NOM_PATIENT} != null ? $P{NOM_PATIENT} : "—"]]></textFieldExpression>
+            </textField>
+            <textField>
+                <reportElement x="12" y="216" width="242" height="11" forecolor="#64748B" uuid="d4000017-0017-4017-8017-000000000017"/>
+                <textElement><font size="7"/></textElement>
+                <textFieldExpression><![CDATA[$P{CODE_PATIENT} != null && !$P{CODE_PATIENT}.isBlank() ? ("Code : " + $P{CODE_PATIENT}) : ""]]></textFieldExpression>
+            </textField>
+
+            <!-- Orientation -->
+            <staticText>
+                <reportElement x="12" y="234" width="242" height="11" forecolor="#64748B" uuid="d4000018-0018-4018-8018-000000000018"/>
+                <textElement><font size="6" isBold="true" pdfFontName="Helvetica-Bold"/></textElement>
+                <text><![CDATA[ORIENTATION]]></text>
+            </staticText>
+            <textField textAdjust="StretchHeight">
+                <reportElement x="12" y="246" width="242" height="14" forecolor="#0F172A" uuid="d4000019-0019-4019-8019-000000000019"/>
+                <textElement><font size="9" isBold="true" pdfFontName="Helvetica-Bold"/></textElement>
+                <textFieldExpression><![CDATA[$P{NOM_MEDECIN} != null ? $P{NOM_MEDECIN} : "—"]]></textFieldExpression>
+            </textField>
+            <textField>
+                <reportElement x="12" y="260" width="242" height="11" forecolor="#475569" uuid="d4000020-0020-4020-8020-000000000020"/>
+                <textElement><font size="7"/></textElement>
+                <textFieldExpression><![CDATA[
+                    (($P{SPECIALITE} != null && !$P{SPECIALITE}.isBlank()) ? $P{SPECIALITE} : "")
+                    + (($P{SERVICE} != null && !$P{SERVICE}.isBlank())
+                        ? ((($P{SPECIALITE} != null && !$P{SPECIALITE}.isBlank()) ? " · " : "") + $P{SERVICE})
+                        : "")
+                ]]></textFieldExpression>
+            </textField>
+
+            <!-- Motif -->
+            <staticText>
+                <reportElement x="12" y="278" width="242" height="11" forecolor="#64748B" uuid="d4000021-0021-4021-8021-000000000021"/>
+                <textElement><font size="6" isBold="true" pdfFontName="Helvetica-Bold"/></textElement>
+                <text><![CDATA[MOTIF DE VISITE]]></text>
+            </staticText>
+            <textField textAdjust="StretchHeight">
+                <reportElement x="12" y="290" width="168" height="28" forecolor="#334155" uuid="d4000022-0022-4022-8022-000000000022"/>
+                <textElement><font size="8"/></textElement>
+                <textFieldExpression><![CDATA[$P{MOTIF_VISITE} != null ? $P{MOTIF_VISITE} : "—"]]></textFieldExpression>
+            </textField>
+
+            <!-- QR -->
+            <image onErrorType="Blank" scaleImage="RetainShape">
+                <reportElement x="188" y="278" width="62" height="62" uuid="d4000023-0023-4023-8023-000000000023"/>
+                <imageExpression><![CDATA[$P{QR_CODE_IMAGE}]]></imageExpression>
+            </image>
+
+            <line>
+                <reportElement x="12" y="348" width="242" height="1" forecolor="#E2E8F0" uuid="d4000024-0024-4024-8024-000000000024"/>
+            </line>
+
+            <textField>
+                <reportElement x="12" y="354" width="160" height="10" forecolor="#64748B" uuid="d4000025-0025-4025-8025-000000000025"/>
+                <textElement><font size="6"/></textElement>
+                <textFieldExpression><![CDATA["Statut : " + ($P{STATUT} != null ? $P{STATUT} : "—")]]></textFieldExpression>
+            </textField>
+            <textField>
+                <reportElement x="12" y="364" width="242" height="10" forecolor="#94A3B8" uuid="d4000026-0026-4026-8026-000000000026"/>
+                <textElement><font size="5.5"/></textElement>
+                <textFieldExpression><![CDATA["Réf. " + ($P{REFERENCE_TICKET} != null ? $P{REFERENCE_TICKET} : "—") + " · Émis par " + ($P{GENERE_PAR} != null ? $P{GENERE_PAR} : "accueil")]]></textFieldExpression>
+            </textField>
+            <staticText>
+                <reportElement x="12" y="376" width="242" height="10" forecolor="#1E56A0" uuid="d4000027-0027-4027-8027-000000000027"/>
+                <textElement textAlignment="Center"><font size="6" isBold="true" isItalic="true" pdfFontName="Helvetica-Oblique"/></textElement>
+                <text><![CDATA[Présentez ce ticket en salle d'attente — Shambua Santé]]></text>
+            </staticText>
+        </band>
+    </title>
+</jasperReport>

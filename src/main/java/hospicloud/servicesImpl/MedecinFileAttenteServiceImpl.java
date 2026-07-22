@@ -30,7 +30,8 @@ import java.util.Set;
 @Service
 public class MedecinFileAttenteServiceImpl implements MedecinFileAttenteService {
 
-    private static final Set<String> STATUTS_APPEABLES = Set.of("EN_ATTENTE", "ENREGISTRE", "APPELE");
+    private static final Set<String> STATUTS_APPEABLES = Set.of(
+            "ATTENTE_TRIAGE", "EN_ATTENTE", "ORIENTE", "ENREGISTRE", "APPELE");
 
     private final MedecinFileAttenteRepository fileRepository;
     private final RendezVousRepository rendezVousRepository;

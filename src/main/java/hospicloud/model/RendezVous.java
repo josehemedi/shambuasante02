@@ -48,7 +48,7 @@ public class RendezVous {
     private String canal;
 
     // --- Workflow ---
-    @Pattern(regexp = "PROGRAMME|CONFIRME|ANNULE|VALIDE|ABSENT",
+    @Pattern(regexp = "PROGRAMME|EN_ATTENTE|CONFIRME|ANNULE|VALIDE|ABSENT|REFUSE",
             message = "Le statut est invalide")
     private String statutRdv;
 

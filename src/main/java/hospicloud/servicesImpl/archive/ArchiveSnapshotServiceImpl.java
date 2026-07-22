@@ -122,11 +122,12 @@ public class ArchiveSnapshotServiceImpl implements ArchiveSnapshotService {
         Integer patientIdInt = archive.getPatientId().intValue();
         Integer hopitalId = archive.getHopitalId();
 
+        // Isolation stricte : exclure toute ressource hors hôpital (y compris hopital_id NULL).
         List<BonSortie> bons = safeList(() -> bonSortieRepository.findByPatientId(patientIdInt)).stream()
-                .filter(b -> b.getIdHopital() == null || Objects.equals(b.getIdHopital(), hopitalId))
+                .filter(b -> Objects.equals(b.getIdHopital(), hopitalId))
                 .toList();
         List<Ordonnance> ordo = safeList(() -> ordonnanceRepository.listerParPatient(patientIdInt)).stream()
-                .filter(o -> o.getHospitalId() == null || Objects.equals(o.getHospitalId(), hopitalId))
+                .filter(o -> Objects.equals(o.getHospitalId(), hopitalId))
                 .toList();
         List<Map<String, Object>> admissions = loadAdmissions(patientIdInt, hopitalId);
 

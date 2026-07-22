@@ -10,6 +10,7 @@ import hospicloud.model.archive.*;
 import hospicloud.repositories.archive.ArchiveDossierRepository;
 import hospicloud.repositories.archive.HistoriqueArchivageRepository;
 import hospicloud.security.CurrentUserService;
+import hospicloud.security.TenantAuthorization;
 import hospicloud.security.TenantContext;
 import hospicloud.security.archive.ArchivePermissionService;
 import hospicloud.services.archive.ArchivageService;
@@ -106,11 +107,15 @@ public class ArchivageServiceImpl implements ArchivageService {
     @Transactional(readOnly = true)
     public List<ArchiveDossierResponseDto> listerParPatient(Long patientId) {
         permissionService.require(ArchivePermissionService.ARCHIVE_VOIR);
+        if (permissionService.isSuperAdminTechnicalOnly()) {
+            throw new ForbiddenException("Le super administrateur n'a pas accès au contenu médical des archives.");
+        }
+        Integer hopitalId = TenantContext.getRequiredHopitalId();
+        assertPatientBelongsToTenant(patientId, hopitalId);
         ArchiveSearchFilter filter = new ArchiveSearchFilter();
         filter.setPatientId(patientId);
         filter.setSize(100);
         applyMedecinScope(filter);
-        Integer hopitalId = TenantContext.getRequiredHopitalId();
         return archiveRepository.search(hopitalId, filter).stream()
                 .map(a -> ArchiveMapper.toDto(a, permissionService))
                 .collect(Collectors.toList());
@@ -150,6 +155,7 @@ public class ArchivageServiceImpl implements ArchivageService {
 
         EpisodeMetadata meta = resolveEpisodeMetadata(hopitalId, request.getTypeEpisode(),
                 request.getEpisodeId(), request.getPatientId());
+        assertPatientBelongsToTenant(meta.patientId(), hopitalId);
 
         ArchiveDossier archive = new ArchiveDossier();
         archive.setHopitalId(hopitalId);
@@ -437,8 +443,27 @@ public class ArchivageServiceImpl implements ArchivageService {
     }
 
     private ArchiveDossier loadArchive(Long id) {
-        return archiveRepository.findById(TenantContext.getRequiredHopitalId(), id)
+        Integer hopitalId = TenantContext.getRequiredHopitalId();
+        ArchiveDossier archive = archiveRepository.findById(hopitalId, id)
                 .orElseThrow(() -> new ResourceNotFoundException("Archive introuvable: " + id));
+        TenantAuthorization.assertSameTenant(archive.getHopitalId());
+        return archive;
+    }
+
+    private void assertPatientBelongsToTenant(Long patientId, Integer hopitalId) {
+        if (patientId == null) {
+            throw new BadRequestException("Identifiant patient requis.");
+        }
+        Integer count = jdbcTemplate.queryForObject(
+                """
+                SELECT COUNT(1) FROM patients
+                WHERE id_patient = ? AND id_hopital = ?
+                """,
+                Integer.class, patientId, hopitalId);
+        if (count == null || count == 0) {
+            throw new ForbiddenException(
+                    "Violation de périmètre SaaS : ce patient n'appartient pas à votre établissement.");
+        }
     }
 
     private ArchiveDossier loadArchiveScoped(Long id) {

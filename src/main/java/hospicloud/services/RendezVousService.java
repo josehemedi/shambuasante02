@@ -30,11 +30,20 @@ public interface RendezVousService {
 
     void confirmerPresence(Integer idRdv);
 
+    /** Le médecin accepte une demande patient (EN_ATTENTE → CONFIRME). */
+    RendezVous accepterDemandePatient(Integer idRdv);
+
+    /** Le médecin refuse une demande patient (EN_ATTENTE → REFUSE). */
+    RendezVous refuserDemandePatient(Integer idRdv, String motif);
+
     void annulerRendezVous(Integer idRdv);
 
     void marquerCommeAbsent(Integer idRdv);
 
     void marquerCommeTermine(Integer idRdv);
+
+    /** Renvoie la confirmation / notification de rendez-vous au patient (et médecin). */
+    void renvoyerConfirmation(Integer idRdv);
 
     List<RendezVous> listerParHopital();
 

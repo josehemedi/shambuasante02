@@ -63,8 +63,13 @@ public class MedecinFileAttenteRepositoryImpl implements MedecinFileAttenteRepos
             WHERE a.id_hopital = ?
               AND a.id_medecin = ?
               AND DATE(a.temps_arrivee) = CURRENT_DATE
-              AND a.statut IN ('EN_ATTENTE', 'ENREGISTRE', 'APPELE')
-            ORDER BY CASE a.statut WHEN 'APPELE' THEN 0 WHEN 'ENREGISTRE' THEN 1 ELSE 2 END,
+              AND a.statut IN ('ATTENTE_TRIAGE', 'EN_ATTENTE', 'ORIENTE', 'ENREGISTRE', 'APPELE')
+            ORDER BY CASE a.statut
+                       WHEN 'APPELE' THEN 0
+                       WHEN 'ENREGISTRE' THEN 1
+                       WHEN 'ORIENTE' THEN 2
+                       WHEN 'ATTENTE_TRIAGE' THEN 3
+                       ELSE 4 END,
                      a.niveau_priorite ASC,
                      a.temps_arrivee ASC
             """;
@@ -102,7 +107,7 @@ public class MedecinFileAttenteRepositoryImpl implements MedecinFileAttenteRepos
                     WHERE a.id_hopital = ?
                       AND a.id_medecin = ?
                       AND DATE(a.temps_arrivee) = CURRENT_DATE
-                      AND a.statut IN ('EN_ATTENTE', 'ENREGISTRE', 'APPELE')
+                      AND a.statut IN ('ATTENTE_TRIAGE', 'EN_ATTENTE', 'ORIENTE', 'ENREGISTRE', 'APPELE')
                     ORDER BY a.niveau_priorite ASC, a.temps_arrivee ASC
                     """;
                 return jdbcTemplate.query(fallbackSql, (rs, rowNum) -> {
@@ -173,7 +178,12 @@ public class MedecinFileAttenteRepositoryImpl implements MedecinFileAttenteRepos
 
     private void applyActions(MedecinFileItemDTO dto) {
         String statut = dto.getStatut() == null ? "" : dto.getStatut().toUpperCase();
-        dto.setCanCall("EN_ATTENTE".equals(statut) || "ENREGISTRE".equals(statut) || "APPELE".equals(statut));
+        dto.setCanCall(
+                "ATTENTE_TRIAGE".equals(statut)
+                        || "EN_ATTENTE".equals(statut)
+                        || "ORIENTE".equals(statut)
+                        || "ENREGISTRE".equals(statut)
+                        || "APPELE".equals(statut));
         dto.setCanStart("APPELE".equals(statut));
     }
 
@@ -205,7 +215,7 @@ public class MedecinFileAttenteRepositoryImpl implements MedecinFileAttenteRepos
         String sql = """
             SELECT * FROM admission
             WHERE id_hopital = ? AND id_rendez_vous = ?
-              AND statut IN ('EN_ATTENTE', 'ENREGISTRE', 'APPELE')
+              AND statut IN ('ATTENTE_TRIAGE', 'EN_ATTENTE', 'ORIENTE', 'ENREGISTRE', 'APPELE')
             ORDER BY id_admission DESC
             LIMIT 1
             """;

@@ -264,6 +264,29 @@
 				</configuration>
 			</plugin>
 
+			<!-- Compile tous les .jrxml → .jasper (après compilation Java) -->
+			<plugin>
+				<groupId>org.codehaus.mojo</groupId>
+				<artifactId>exec-maven-plugin</artifactId>
+				<version>3.1.0</version>
+				<executions>
+					<execution>
+						<id>compile-jasper-reports</id>
+						<phase>process-classes</phase>
+						<goals>
+							<goal>java</goal>
+						</goals>
+						<configuration>
+							<mainClass>hospicloud.tools.CompileJasperReports</mainClass>
+							<classpathScope>compile</classpathScope>
+							<arguments>
+								<argument>${project.basedir}/src/main/resources/reports</argument>
+							</arguments>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
+
 			<plugin>
 				<groupId>org.springframework.boot</groupId>
 				<artifactId>spring-boot-maven-plugin</artifactId>

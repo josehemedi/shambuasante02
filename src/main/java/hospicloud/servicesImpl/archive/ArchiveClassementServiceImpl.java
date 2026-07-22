@@ -9,6 +9,7 @@ import hospicloud.model.archive.ArchiveDossierVirtuel;
 import hospicloud.repositories.archive.ArchiveDossierRepository;
 import hospicloud.repositories.archive.ArchiveDossierVirtuelRepository;
 import hospicloud.security.CurrentUserService;
+import hospicloud.security.TenantAuthorization;
 import hospicloud.security.TenantContext;
 import hospicloud.security.archive.ArchivePermissionService;
 import hospicloud.services.archive.ArchiveClassementService;
@@ -189,10 +190,12 @@ public class ArchiveClassementServiceImpl implements ArchiveClassementService {
         Integer hopitalId = TenantContext.getRequiredHopitalId();
         ArchiveDossier archive = archiveRepository.findById(hopitalId, archiveId)
                 .orElseThrow(() -> new ResourceNotFoundException("Dossier d'archivage introuvable"));
+        TenantAuthorization.assertSameTenant(archive.getHopitalId());
         Long targetFolderId = request.getDossierVirtuelId();
         if (targetFolderId != null) {
-            folderRepository.findById(hopitalId, targetFolderId)
+            ArchiveDossierVirtuel folder = folderRepository.findById(hopitalId, targetFolderId)
                     .orElseThrow(() -> new ResourceNotFoundException("Dossier destination introuvable"));
+            TenantAuthorization.assertSameTenant(folder.getHopitalId());
         }
         archiveRepository.updateDossierVirtuelId(hopitalId, archiveId, targetFolderId);
         return ArchiveMapper.toDto(

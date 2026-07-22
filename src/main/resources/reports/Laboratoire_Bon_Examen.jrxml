@@ -1,0 +1,178 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports"
+              xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+              xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd"
+              name="Laboratoire_Bon_Examen"
+              pageWidth="595"
+              pageHeight="842"
+              columnWidth="555"
+              leftMargin="20"
+              rightMargin="20"
+              topMargin="18"
+              bottomMargin="18"
+              whenNoDataType="AllSectionsNoDetail"
+              uuid="9b264f61-17d0-4ea0-b595-60f5e75981f6">
+
+    <parameter name="NOM_HOPITAL" class="java.lang.String"/>
+    <parameter name="LOGO_HOPITAL" class="java.io.InputStream"/>
+    <parameter name="INFOS_ETABLISSEMENT" class="java.lang.String"/>
+    <parameter name="ID_TENANT" class="java.lang.String"/>
+    <parameter name="NOM_PATIENT" class="java.lang.String"/>
+    <parameter name="CODE_PATIENT" class="java.lang.String"/>
+    <parameter name="NOM_MEDECIN" class="java.lang.String"/>
+    <parameter name="REF_ANALYSE" class="java.lang.String"/>
+    <parameter name="NOM_EXAMEN" class="java.lang.String"/>
+    <parameter name="DATE_DEMANDE" class="java.lang.String"/>
+    <parameter name="STATUT" class="java.lang.String"/>
+    <parameter name="PRIORITE" class="java.lang.String"/>
+    <parameter name="RESULTAT" class="java.lang.String"/>
+    <parameter name="VALEURS_REFERENCE" class="java.lang.String"/>
+    <parameter name="INTERPRETATION" class="java.lang.String"/>
+    <parameter name="OBSERVATIONS" class="java.lang.String"/>
+    <parameter name="NOTES" class="java.lang.String"/>
+    <parameter name="DATE_GENERATION" class="java.util.Date"/>
+
+    <title>
+        <band height="120" splitType="Stretch">
+            <rectangle>
+                <reportElement mode="Opaque" x="0" y="0" width="555" height="52" backcolor="#0F4C81" forecolor="#0F4C81" uuid="81fedd7b-c007-460d-9a14-990bc9c959ad"/>
+                <graphicElement><pen lineWidth="0.0"/></graphicElement>
+            </rectangle>
+            <image onErrorType="Blank" scaleImage="RetainShape">
+                <reportElement x="12" y="8" width="36" height="36" uuid="da30376b-bab2-406d-8c50-7e688c3b0e2b"/>
+                <imageExpression><![CDATA[$P{LOGO_HOPITAL}]]></imageExpression>
+            </image>
+            <textField textAdjust="StretchHeight">
+                <reportElement x="56" y="8" width="360" height="18" forecolor="#FFFFFF" uuid="b1056995-c23a-45f1-92b2-c77092dc5426"/>
+                <textElement verticalAlignment="Middle"><font size="12" isBold="true" pdfFontName="Helvetica-Bold"/></textElement>
+                <textFieldExpression><![CDATA[$P{NOM_HOPITAL} != null ? $P{NOM_HOPITAL} : "Shambua Santé"]]></textFieldExpression>
+            </textField>
+            <staticText>
+                <reportElement x="56" y="28" width="360" height="14" forecolor="#DBEAFE" uuid="2cd2a828-255b-420b-8b9e-a6faed03716a"/>
+                <textElement><font size="9" isBold="true" pdfFontName="Helvetica-Bold"/></textElement>
+                <text><![CDATA[RÉSULTAT D'EXAMEN DE LABORATOIRE]]></text>
+            </staticText>
+            <textField>
+                <reportElement x="420" y="12" width="125" height="28" forecolor="#BFDBFE" uuid="63f4e2e6-e1a0-4ac5-9a7e-d5301de4b3d2"/>
+                <textElement textAlignment="Right"><font size="7"/></textElement>
+                <textFieldExpression><![CDATA[$P{REF_ANALYSE} != null ? $P{REF_ANALYSE} : ""]]></textFieldExpression>
+            </textField>
+            <textField>
+                <reportElement x="0" y="60" width="555" height="14" forecolor="#64748B" uuid="b5f2b3f7-a919-4069-8124-33ee46afc833"/>
+                <textElement><font size="8"/></textElement>
+                <textFieldExpression><![CDATA[$P{INFOS_ETABLISSEMENT} != null ? $P{INFOS_ETABLISSEMENT} : ""]]></textFieldExpression>
+            </textField>
+            <line>
+                <reportElement x="0" y="80" width="555" height="1" forecolor="#CBD5E1" uuid="9b549c34-eb95-404c-84a1-60d758661606"/>
+            </line>
+            <textField>
+                <reportElement x="0" y="88" width="270" height="14" forecolor="#0F172A" uuid="6a81710a-a32d-41b8-9f84-fbb136c080e6"/>
+                <textElement><font size="9" isBold="true" pdfFontName="Helvetica-Bold"/></textElement>
+                <textFieldExpression><![CDATA["Patient : " + ($P{NOM_PATIENT} != null ? $P{NOM_PATIENT} : "—")]]></textFieldExpression>
+            </textField>
+            <textField>
+                <reportElement x="280" y="88" width="275" height="14" forecolor="#0F172A" uuid="aacb0d03-eeb9-41b7-b50c-6fd65e367a0b"/>
+                <textElement textAlignment="Right"><font size="9"/></textElement>
+                <textFieldExpression><![CDATA["Code : " + ($P{CODE_PATIENT} != null ? $P{CODE_PATIENT} : "—")]]></textFieldExpression>
+            </textField>
+            <textField>
+                <reportElement x="0" y="104" width="270" height="14" forecolor="#334155" uuid="d3525dab-96ec-4cd2-82cf-8fcf406b72a8"/>
+                <textElement><font size="8"/></textElement>
+                <textFieldExpression><![CDATA["Prescripteur : " + ($P{NOM_MEDECIN} != null ? $P{NOM_MEDECIN} : "—")]]></textFieldExpression>
+            </textField>
+            <textField>
+                <reportElement x="280" y="104" width="275" height="14" forecolor="#334155" uuid="e1b3b9a3-ee60-4f97-9712-f4455e1c25b6"/>
+                <textElement textAlignment="Right"><font size="8"/></textElement>
+                <textFieldExpression><![CDATA["Demande : " + ($P{DATE_DEMANDE} != null ? $P{DATE_DEMANDE} : "—")]]></textFieldExpression>
+            </textField>
+        </band>
+    </title>
+
+    <detail>
+        <band height="280" splitType="Stretch">
+            <staticText>
+                <reportElement x="0" y="8" width="555" height="14" forecolor="#0F4C81" uuid="dbf1d8f7-1508-4ef2-a5e5-753566922508"/>
+                <textElement><font size="10" isBold="true" pdfFontName="Helvetica-Bold"/></textElement>
+                <text><![CDATA[EXAMEN]]></text>
+            </staticText>
+            <textField textAdjust="StretchHeight">
+                <reportElement x="0" y="24" width="555" height="20" forecolor="#0F172A" uuid="3e36d3da-5cf6-4583-b04e-47b9caa2ec46"/>
+                <textElement><font size="11" isBold="true" pdfFontName="Helvetica-Bold"/></textElement>
+                <textFieldExpression><![CDATA[$P{NOM_EXAMEN} != null ? $P{NOM_EXAMEN} : "Analyse de laboratoire"]]></textFieldExpression>
+            </textField>
+            <textField>
+                <reportElement x="0" y="48" width="270" height="14" forecolor="#475569" uuid="fdf1b55e-8e7b-4744-9788-d2e4a9860c4d"/>
+                <textElement><font size="8"/></textElement>
+                <textFieldExpression><![CDATA["Statut : " + ($P{STATUT} != null ? $P{STATUT} : "—")]]></textFieldExpression>
+            </textField>
+            <textField>
+                <reportElement x="280" y="48" width="275" height="14" forecolor="#475569" uuid="0cb918ee-b3bf-4bf3-889a-a9e56a1bc87f"/>
+                <textElement textAlignment="Right"><font size="8"/></textElement>
+                <textFieldExpression><![CDATA["Priorité : " + ($P{PRIORITE} != null ? $P{PRIORITE} : "Normale")]]></textFieldExpression>
+            </textField>
+
+            <staticText>
+                <reportElement x="0" y="74" width="555" height="14" forecolor="#0F4C81" uuid="41c51845-edd8-4ec8-8d27-f69824e5b098"/>
+                <textElement><font size="10" isBold="true" pdfFontName="Helvetica-Bold"/></textElement>
+                <text><![CDATA[RÉSULTAT]]></text>
+            </staticText>
+            <rectangle>
+                <reportElement mode="Opaque" x="0" y="90" width="555" height="70" backcolor="#F8FAFC" forecolor="#CBD5E1" uuid="65cef962-af8a-4887-ad04-b97de06e426c"/>
+                <graphicElement><pen lineWidth="0.5" lineColor="#CBD5E1"/></graphicElement>
+            </rectangle>
+            <textField textAdjust="StretchHeight">
+                <reportElement x="8" y="96" width="539" height="58" forecolor="#0F172A" uuid="c99ac110-683b-42f6-84dd-97a9d867b60c"/>
+                <textElement><font size="9"/></textElement>
+                <textFieldExpression><![CDATA[$P{RESULTAT} != null ? $P{RESULTAT} : "Résultat non renseigné."]]></textFieldExpression>
+            </textField>
+
+            <staticText>
+                <reportElement x="0" y="172" width="555" height="14" forecolor="#0F4C81" uuid="4239edc4-ddc1-4c61-bc67-54d8631d0955"/>
+                <textElement><font size="10" isBold="true" pdfFontName="Helvetica-Bold"/></textElement>
+                <text><![CDATA[VALEURS DE RÉFÉRENCE]]></text>
+            </staticText>
+            <textField textAdjust="StretchHeight">
+                <reportElement x="0" y="188" width="555" height="28" forecolor="#334155" uuid="4517cd65-37b4-4323-a617-7faf1f9132e2"/>
+                <textElement><font size="8"/></textElement>
+                <textFieldExpression><![CDATA[$P{VALEURS_REFERENCE} != null ? $P{VALEURS_REFERENCE} : "—"]]></textFieldExpression>
+            </textField>
+
+            <staticText>
+                <reportElement x="0" y="224" width="555" height="14" forecolor="#0F4C81" uuid="419b6db6-4e9d-400f-b91c-596ed6d13eb3"/>
+                <textElement><font size="10" isBold="true" pdfFontName="Helvetica-Bold"/></textElement>
+                <text><![CDATA[INTERPRÉTATION / OBSERVATIONS]]></text>
+            </staticText>
+            <textField textAdjust="StretchHeight">
+                <reportElement x="0" y="240" width="555" height="30" forecolor="#334155" uuid="a2e8ea02-4896-4e32-84c8-f82e5ac239a6"/>
+                <textElement><font size="8"/></textElement>
+                <textFieldExpression><![CDATA[
+                    (($P{INTERPRETATION} != null ? $P{INTERPRETATION} : "")
+                    + (($P{OBSERVATIONS} != null && !$P{OBSERVATIONS}.isBlank()) ? "\n" + $P{OBSERVATIONS} : "")
+                    + (($P{NOTES} != null && !$P{NOTES}.isBlank()) ? "\n" + $P{NOTES} : "")).trim().isEmpty()
+                    ? "—"
+                    : (($P{INTERPRETATION} != null ? $P{INTERPRETATION} : "")
+                    + (($P{OBSERVATIONS} != null && !$P{OBSERVATIONS}.isBlank()) ? "\n" + $P{OBSERVATIONS} : "")
+                    + (($P{NOTES} != null && !$P{NOTES}.isBlank()) ? "\n" + $P{NOTES} : "")).trim()
+                ]]></textFieldExpression>
+            </textField>
+        </band>
+    </detail>
+
+    <pageFooter>
+        <band height="36">
+            <line>
+                <reportElement x="0" y="4" width="555" height="1" forecolor="#CBD5E1" uuid="7ac9901d-ae27-47fc-bf45-9259a04a086f"/>
+            </line>
+            <staticText>
+                <reportElement x="0" y="10" width="360" height="20" forecolor="#64748B" uuid="db4d1d1c-8618-44fe-acea-df04e8ce9cab"/>
+                <textElement><font size="7"/></textElement>
+                <text><![CDATA[Document médical confidentiel généré via JasperReports — Shambua Santé]]></text>
+            </staticText>
+            <textField pattern="dd/MM/yyyy HH:mm">
+                <reportElement x="370" y="10" width="185" height="20" forecolor="#64748B" uuid="bbe94fdd-e3e0-4a50-9838-6889ad0d7281"/>
+                <textElement textAlignment="Right"><font size="7"/></textElement>
+                <textFieldExpression><![CDATA[$P{DATE_GENERATION}]]></textFieldExpression>
+            </textField>
+        </band>
+    </pageFooter>
+</jasperReport>

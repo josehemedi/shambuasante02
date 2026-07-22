@@ -84,7 +84,7 @@ public class SecurityConfig {
                 .requestMatchers("/api/monitoring/**").hasRole("SUPER_ADMIN")
                 .requestMatchers(HttpMethod.GET, "/api/audit/**").hasRole("SUPER_ADMIN")
                 .requestMatchers(HttpMethod.POST, "/api/support/tickets").hasAnyRole(
-                        "TENANT_ADMIN", "MEDECIN", "RECEPTION", "CAISSIER", "LABORANTIN")
+                        "TENANT_ADMIN", "MEDECIN", "RECEPTION", "CAISSIER", "LABORANTIN", "PATIENT")
                 .requestMatchers(HttpMethod.GET, "/api/support/tickets").hasAnyRole(
                         "SUPER_ADMIN", "TENANT_ADMIN", "MEDECIN", "RECEPTION", "CAISSIER", "LABORANTIN")
                 .requestMatchers(HttpMethod.PATCH, "/api/support/tickets/**").hasRole("SUPER_ADMIN")
@@ -106,19 +106,22 @@ public class SecurityConfig {
                 .requestMatchers("/api/v1/lab/**").hasAnyRole("LABORANTIN", "TENANT_ADMIN")
 
                 .requestMatchers("/api/patients/**").hasAnyRole("TENANT_ADMIN", "MEDECIN", "RECEPTION")
-                .requestMatchers(HttpMethod.GET, "/api/medecins/**").hasAnyRole("TENANT_ADMIN", "MEDECIN", "RECEPTION")
+                .requestMatchers(HttpMethod.GET, "/api/medecins/**").hasAnyRole("TENANT_ADMIN", "MEDECIN", "RECEPTION", "PATIENT")
                 .requestMatchers("/api/medecins/**").hasAnyRole("TENANT_ADMIN", "MEDECIN")
                 .requestMatchers("/api/medecins/patients/**").hasAnyRole("TENANT_ADMIN", "MEDECIN")
                 .requestMatchers("/api/medecin/consultations/**").hasRole("MEDECIN")
                 .requestMatchers("/api/medecin/laboratoire/**").hasRole("MEDECIN")
+                .requestMatchers("/api/medecin/partages/**").hasRole("MEDECIN")
                 .requestMatchers("/api/medecin/file-attente/**").hasRole("MEDECIN")
 
-                .requestMatchers(HttpMethod.GET, "/api/rendezvous/jour", "/api/rendezvous/medecin", "/api/rendezvous/medecin/historique", "/api/rendezvous/disponibilite").hasAnyRole("TENANT_ADMIN", "MEDECIN")
+                .requestMatchers(HttpMethod.GET, "/api/rendezvous/jour", "/api/rendezvous/medecin", "/api/rendezvous/medecin/historique").hasAnyRole("TENANT_ADMIN", "MEDECIN")
+                .requestMatchers(HttpMethod.GET, "/api/rendezvous/disponibilite").hasAnyRole("TENANT_ADMIN", "MEDECIN", "RECEPTION", "PATIENT")
                 .requestMatchers(HttpMethod.GET, "/api/rendezvous").hasAnyRole("TENANT_ADMIN", "MEDECIN", "RECEPTION")
                 .requestMatchers(HttpMethod.GET, "/api/rendezvous/*").hasAnyRole("TENANT_ADMIN", "MEDECIN", "RECEPTION", "PATIENT")
                 .requestMatchers(HttpMethod.POST, "/api/rendezvous").hasAnyRole("TENANT_ADMIN", "MEDECIN", "RECEPTION")
                 .requestMatchers(HttpMethod.PUT, "/api/rendezvous/**").hasAnyRole("TENANT_ADMIN", "MEDECIN", "RECEPTION")
                 .requestMatchers(HttpMethod.PATCH, "/api/rendezvous/**").hasAnyRole("TENANT_ADMIN", "MEDECIN", "RECEPTION")
+                .requestMatchers(HttpMethod.POST, "/api/rendezvous/*/renvoyer-confirmation").hasAnyRole("TENANT_ADMIN", "MEDECIN", "RECEPTION")
 
                 .requestMatchers(HttpMethod.POST, "/api/consultations/teleconsultation/token")
                     .hasAnyRole("MEDECIN", "PATIENT")
@@ -157,7 +160,7 @@ public class SecurityConfig {
                 .requestMatchers("/api/rag/**").hasAnyRole("SUPER_ADMIN", "TENANT_ADMIN")
 
                 .requestMatchers("/api/archives/**").hasAnyRole(
-                        "ARCHIVISTE", "TENANT_ADMIN", "MEDECIN", "RECEPTION")
+                        "SUPER_ADMIN", "ARCHIVISTE", "TENANT_ADMIN", "MEDECIN")
 
                 .anyRequest().authenticated()
             );

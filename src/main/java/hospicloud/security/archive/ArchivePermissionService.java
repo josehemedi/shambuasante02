@@ -3,6 +3,7 @@ package hospicloud.security.archive;
 import hospicloud.exceptions.ForbiddenException;
 import hospicloud.model.Role;
 import hospicloud.security.CurrentUserService;
+import hospicloud.security.TenantContext;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -35,6 +36,11 @@ public class ArchivePermissionService {
         if (role == null) {
             return false;
         }
+        // Super Admin SaaS : stats d'un hôpital uniquement (X-Hopital-Id), jamais le contenu médical.
+        if (role == Role.SUPER_ADMIN) {
+            return TenantContext.getHopitalId() != null
+                    && ARCHIVE_VOIR_STATISTIQUES.equals(permission);
+        }
         return switch (permission) {
             case ARCHIVE_VOIR, ARCHIVE_RECHERCHER -> hasViewAccess(role);
             case ARCHIVE_VERIFIER -> role == Role.ARCHIVISTE || role == Role.TENANT_ADMIN;
@@ -50,12 +56,20 @@ public class ArchivePermissionService {
         };
     }
 
+    /**
+     * Contenu médical (PDF, export, snapshot détaillé) : jamais pour SUPER_ADMIN,
+     * même en impersonation tenant.
+     */
     public boolean canViewMedicalContent() {
         Role role = currentUserService.getCurrentRole();
         if (role == null) return false;
         return role != Role.RECEPTION && role != Role.SUPER_ADMIN;
     }
 
+    /**
+     * SUPER_ADMIN reste « technique only » pour le contenu médical,
+     * mais peut consulter les stats / listes métadonnées d'un hôpital via X-Hopital-Id.
+     */
     public boolean isSuperAdminTechnicalOnly() {
         return currentUserService.getCurrentRole() == Role.SUPER_ADMIN;
     }

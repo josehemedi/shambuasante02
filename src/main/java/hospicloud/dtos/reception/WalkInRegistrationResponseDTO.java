@@ -14,6 +14,8 @@ public class WalkInRegistrationResponseDTO {
     private String motifConsultation;
     private String serviceDemande;
     private String message;
+    private Integer numeroPassage;
+    private String statut;
 
     public Integer getIdPatient() { return idPatient; }
     public void setIdPatient(Integer idPatient) { this.idPatient = idPatient; }
@@ -50,4 +52,10 @@ public class WalkInRegistrationResponseDTO {
 
     public String getMessage() { return message; }
     public void setMessage(String message) { this.message = message; }
+
+    public Integer getNumeroPassage() { return numeroPassage; }
+    public void setNumeroPassage(Integer numeroPassage) { this.numeroPassage = numeroPassage; }
+
+    public String getStatut() { return statut; }
+    public void setStatut(String statut) { this.statut = statut; }
 }

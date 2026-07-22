@@ -166,7 +166,10 @@ public class RealtimeNotificationServiceImpl implements RealtimeNotificationServ
 
             sendToMedecinUser(rdv, nomPatient, nomMedecin, dateFormatee, motif);
 
-            sendConfirmationEmails(rdv, patient, medecin, nomPatient, nomMedecin, nomHopital, dateFormatee, motif);
+            // Emails de confirmation seulement si le RDV n'est pas une simple demande en attente
+            if (!"EN_ATTENTE".equalsIgnoreCase(rdv.getStatutRdv())) {
+                sendConfirmationEmails(rdv, patient, medecin, nomPatient, nomMedecin, nomHopital, dateFormatee, motif);
+            }
 
         } finally {
 
@@ -187,7 +190,77 @@ public class RealtimeNotificationServiceImpl implements RealtimeNotificationServ
 
 
     @Override
+    public void notifyRendezVousAccepted(RendezVous rdv) {
+        notifyRendezVousDecision(rdv, true);
+    }
 
+    @Override
+    public void notifyRendezVousRejected(RendezVous rdv) {
+        notifyRendezVousDecision(rdv, false);
+    }
+
+    private void notifyRendezVousDecision(RendezVous rdv, boolean accepted) {
+        if (rdv == null || rdv.getIdHopital() == null || rdv.getIdPatient() == null) {
+            return;
+        }
+        Integer previousTenant = TenantContext.getHopitalId();
+        TenantContext.setHopitalId(rdv.getIdHopital());
+        try {
+            Patient patient = patientRepository.trouverPatientParId(rdv.getIdPatient().longValue()).orElse(null);
+            Medecin medecin = rdv.getIdMedecin() != null
+                    ? medecinRepository.trouverParId(rdv.getIdMedecin()).orElse(null)
+                    : null;
+            String nomMedecin = formatName(
+                    medecin != null ? medecin.getPrenom() : null,
+                    medecin != null ? medecin.getNom() : null,
+                    "Médecin");
+            String dateFormatee = rdv.getDateHeureRdv() != null ? rdv.getDateHeureRdv().format(DATE_FORMATTER) : "—";
+
+            Optional<Integer> userId = utilisateurRepository.findUtilisateurIdByPatient(
+                    rdv.getIdPatient(), rdv.getIdHopital());
+            if (userId.isEmpty()) {
+                return;
+            }
+
+            LiveNotificationDTO dto = baseNotification(rdv);
+            if (accepted) {
+                dto.setType("RDV_ACCEPTED");
+                dto.setTitle("Appointment accepted");
+                dto.setTitleFr("Rendez-vous accepté");
+                dto.setMessage("Dr " + nomMedecin + " accepted your appointment on " + dateFormatee + ".");
+                dto.setMessageFr("Le Dr " + nomMedecin + " a accepté votre rendez-vous du " + dateFormatee + ".");
+                dto.setTone("success");
+            } else {
+                dto.setType("RDV_REJECTED");
+                dto.setTitle("Appointment declined");
+                dto.setTitleFr("Rendez-vous refusé");
+                dto.setMessage("Dr " + nomMedecin + " could not accept your appointment on " + dateFormatee + ".");
+                dto.setMessageFr("Le Dr " + nomMedecin + " n'a pas pu accepter votre rendez-vous du " + dateFormatee + ".");
+                dto.setTone("warning");
+            }
+            dto.setLink("/appointments");
+            publish(rdv.getIdHopital(), userId.get(), dto);
+
+            if (accepted) {
+                Hopital hopital = hopitalRepository.rechercherhopitalParId(rdv.getIdHopital().longValue());
+                String nomHopital = TenantReportParamsHelper.resolveNomCommercial(hopital, "Shambua Santé");
+                String nomPatient = formatName(
+                        patient != null ? patient.getPrenom() : null,
+                        patient != null ? patient.getNom() : null,
+                        "Patient");
+                String motif = StringUtils.hasText(rdv.getMotifVisite()) ? rdv.getMotifVisite() : "Consultation";
+                sendConfirmationEmails(rdv, patient, medecin, nomPatient, nomMedecin, nomHopital, dateFormatee, motif);
+            }
+        } finally {
+            if (previousTenant != null) {
+                TenantContext.setHopitalId(previousTenant);
+            } else {
+                TenantContext.clear();
+            }
+        }
+    }
+
+    @Override
     public void notifyPaymentRecorded(
 
             Integer hopitalId,
@@ -445,6 +518,49 @@ public class RealtimeNotificationServiceImpl implements RealtimeNotificationServ
         publish(hopitalId, userId.get(), dto);
     }
 
+    @Override
+    public void notifyDocumentCliniqueEnvoyeAuPatient(
+            Integer hopitalId,
+            Integer idPatient,
+            String typeDocument,
+            String titre,
+            String nomMedecin,
+            Integer idDocument) {
+        if (hopitalId == null || idPatient == null) {
+            return;
+        }
+
+        Optional<Integer> userId = utilisateurRepository.findUtilisateurIdByPatient(idPatient, hopitalId);
+        if (userId.isEmpty()) {
+            log.debug("Aucun compte utilisateur patient pour id_patient={} (document clinique)", idPatient);
+            return;
+        }
+
+        String type = typeDocument != null ? typeDocument.toUpperCase(Locale.ROOT) : "DOCUMENT";
+        String typeFr = switch (type) {
+            case "LABO", "LAB_RESULT" -> "Résultat de laboratoire";
+            case "CONSULTATION" -> "Fiche de consultation";
+            case "ORDONNANCE" -> "Ordonnance";
+            default -> "Document médical";
+        };
+        String medecinLabel = StringUtils.hasText(nomMedecin) ? nomMedecin : "votre médecin";
+        String titreLabel = StringUtils.hasText(titre) ? titre : typeFr;
+
+        LiveNotificationDTO dto = new LiveNotificationDTO();
+        dto.setId(UUID.randomUUID().toString());
+        dto.setType("DOCUMENT_CLINIQUE_ENVOYE");
+        dto.setIdHopital(hopitalId);
+        dto.setCreatedAt(LocalDateTime.now());
+        dto.setTitle(typeFr + " received");
+        dto.setTitleFr(typeFr + " reçu");
+        dto.setMessage(medecinLabel + " sent you: " + titreLabel);
+        dto.setMessageFr(medecinLabel + " vous a transmis : " + titreLabel);
+        dto.setLink(type.contains("LAB") ? "/my-lab-results" : "/records");
+        dto.setTone("success");
+
+        publish(hopitalId, userId.get(), dto);
+    }
+
     private String formatTypeEpisode(String typeEpisode) {
         if (!StringUtils.hasText(typeEpisode)) {
             return "épisode de soins";
@@ -483,17 +599,23 @@ public class RealtimeNotificationServiceImpl implements RealtimeNotificationServ
 
         LiveNotificationDTO dto = baseNotification(rdv);
 
-        dto.setTitle("Appointment confirmed");
-
-        dto.setTitleFr("Rendez-vous confirmé");
-
-        dto.setMessage("Your appointment with Dr " + nomMedecin + " is scheduled on " + dateFormatee + ". Reason: " + motif + ".");
-
-        dto.setMessageFr("Votre rendez-vous avec le Dr " + nomMedecin + " est prévu le " + dateFormatee + ". Motif : " + motif + ".");
+        boolean demande = "EN_ATTENTE".equalsIgnoreCase(rdv.getStatutRdv());
+        if (demande) {
+            dto.setType("RDV_DEMANDE");
+            dto.setTitle("Appointment request sent");
+            dto.setTitleFr("Demande de rendez-vous envoyée");
+            dto.setMessage("Your request with Dr " + nomMedecin + " for " + dateFormatee + " is pending approval. Reason: " + motif + ".");
+            dto.setMessageFr("Votre demande avec le Dr " + nomMedecin + " pour le " + dateFormatee + " est en attente d'acceptation. Motif : " + motif + ".");
+            dto.setTone("warning");
+        } else {
+            dto.setTitle("Appointment confirmed");
+            dto.setTitleFr("Rendez-vous confirmé");
+            dto.setMessage("Your appointment with Dr " + nomMedecin + " is scheduled on " + dateFormatee + ". Reason: " + motif + ".");
+            dto.setMessageFr("Votre rendez-vous avec le Dr " + nomMedecin + " est prévu le " + dateFormatee + ". Motif : " + motif + ".");
+            dto.setTone("primary");
+        }
 
         dto.setLink("/appointments");
-
-        dto.setTone("primary");
 
 
 
@@ -527,17 +649,23 @@ public class RealtimeNotificationServiceImpl implements RealtimeNotificationServ
 
         LiveNotificationDTO dto = baseNotification(rdv);
 
-        dto.setTitle("New appointment scheduled");
-
-        dto.setTitleFr("Nouveau rendez-vous planifié");
-
-        dto.setMessage("A new appointment with " + nomPatient + " is scheduled on " + dateFormatee + ". Reason: " + motif + ".");
-
-        dto.setMessageFr("Un nouveau rendez-vous avec " + nomPatient + " est prévu le " + dateFormatee + ". Motif : " + motif + ".");
+        boolean demande = "EN_ATTENTE".equalsIgnoreCase(rdv.getStatutRdv());
+        if (demande) {
+            dto.setType("RDV_DEMANDE");
+            dto.setTitle("New appointment request");
+            dto.setTitleFr("Nouvelle demande de rendez-vous");
+            dto.setMessage(nomPatient + " requested an appointment on " + dateFormatee + ". Reason: " + motif + ".");
+            dto.setMessageFr(nomPatient + " a demandé un rendez-vous le " + dateFormatee + ". Motif : " + motif + ".");
+            dto.setTone("warning");
+        } else {
+            dto.setTitle("New appointment scheduled");
+            dto.setTitleFr("Nouveau rendez-vous planifié");
+            dto.setMessage("A new appointment with " + nomPatient + " is scheduled on " + dateFormatee + ". Reason: " + motif + ".");
+            dto.setMessageFr("Un nouveau rendez-vous avec " + nomPatient + " est prévu le " + dateFormatee + ". Motif : " + motif + ".");
+            dto.setTone("success");
+        }
 
         dto.setLink("/appointments");
-
-        dto.setTone("success");
 
 
 

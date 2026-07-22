@@ -10,8 +10,11 @@ import hospicloud.dtos.reception.WalkInRegistrationResponseDTO;
 import hospicloud.model.RendezVous;
 import hospicloud.model.reception.Admission;
 import hospicloud.services.ReceptionDashboardService;
+import hospicloud.servicesImpl.ReceptionTicketReportService;
 import jakarta.validation.Valid;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -22,9 +25,13 @@ import java.util.List;
 public class ReceptionDashboardController {
 
     private final ReceptionDashboardService receptionService;
+    private final ReceptionTicketReportService receptionTicketReportService;
 
-    public ReceptionDashboardController(ReceptionDashboardService receptionService) {
+    public ReceptionDashboardController(
+            ReceptionDashboardService receptionService,
+            ReceptionTicketReportService receptionTicketReportService) {
         this.receptionService = receptionService;
+        this.receptionTicketReportService = receptionTicketReportService;
     }
 
     @GetMapping("/stats")
@@ -87,5 +94,15 @@ public class ReceptionDashboardController {
             @RequestParam(defaultValue = "false") boolean strictMode) {
         receptionService.inscrirePatientFileAttente(admission, strictMode);
         return ResponseEntity.ok().build();
+    }
+
+    @GetMapping(value = "/admissions/{idAdmission}/ticket.pdf", produces = MediaType.APPLICATION_PDF_VALUE)
+    public ResponseEntity<byte[]> telechargerTicketPassage(@PathVariable Integer idAdmission) {
+        byte[] pdf = receptionTicketReportService.genererPdf(idAdmission);
+        return ResponseEntity.ok()
+                .header(HttpHeaders.CONTENT_DISPOSITION,
+                        "inline; filename=ticket_passage_" + idAdmission + ".pdf")
+                .contentType(MediaType.APPLICATION_PDF)
+                .body(pdf);
     }
 }

@@ -1,0 +1,129 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports"
+              xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+              xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd"
+              name="Certificat_Medical"
+              pageWidth="595"
+              pageHeight="842"
+              columnWidth="555"
+              leftMargin="20"
+              rightMargin="20"
+              topMargin="18"
+              bottomMargin="18"
+              whenNoDataType="AllSectionsNoDetail"
+              uuid="aba7d2be-8684-4c75-9f6e-49fe9d231499">
+
+    <parameter name="NOM_HOPITAL" class="java.lang.String"/>
+    <parameter name="LOGO_HOPITAL" class="java.io.InputStream"/>
+    <parameter name="INFOS_ETABLISSEMENT" class="java.lang.String"/>
+    <parameter name="NOM_PATIENT" class="java.lang.String"/>
+    <parameter name="CODE_PATIENT" class="java.lang.String"/>
+    <parameter name="AGE_PATIENT" class="java.lang.String"/>
+    <parameter name="SEXE_PATIENT" class="java.lang.String"/>
+    <parameter name="NOM_MEDECIN" class="java.lang.String"/>
+    <parameter name="SPECIALITE_MEDECIN" class="java.lang.String"/>
+    <parameter name="NUMERO_ORDRE_MEDECIN" class="java.lang.String"/>
+    <parameter name="TITRE_CERTIFICAT" class="java.lang.String"/>
+    <parameter name="CONTENU_CERTIFICAT" class="java.lang.String"/>
+    <parameter name="DATE_CERTIFICAT" class="java.lang.String"/>
+    <parameter name="LIEU" class="java.lang.String"/>
+    <parameter name="DATE_GENERATION" class="java.util.Date"/>
+
+    <title>
+        <band height="110" splitType="Stretch">
+            <rectangle>
+                <reportElement mode="Opaque" x="0" y="0" width="555" height="52" backcolor="#0F4C81" forecolor="#0F4C81" uuid="ccaebe8d-32ef-4f04-b90c-0c2deb5e7dc1"/>
+                <graphicElement><pen lineWidth="0.0"/></graphicElement>
+            </rectangle>
+            <image onErrorType="Blank" scaleImage="RetainShape">
+                <reportElement x="12" y="8" width="36" height="36" uuid="9ed96711-bea1-4e06-903e-a2d507c6b764"/>
+                <imageExpression><![CDATA[$P{LOGO_HOPITAL}]]></imageExpression>
+            </image>
+            <textField textAdjust="StretchHeight">
+                <reportElement x="56" y="8" width="480" height="18" forecolor="#FFFFFF" uuid="c3f60291-de42-4fff-9398-e13b019f8ac9"/>
+                <textElement verticalAlignment="Middle"><font size="12" isBold="true" pdfFontName="Helvetica-Bold"/></textElement>
+                <textFieldExpression><![CDATA[$P{NOM_HOPITAL} != null ? $P{NOM_HOPITAL} : "Shambua Santé"]]></textFieldExpression>
+            </textField>
+            <staticText>
+                <reportElement x="56" y="28" width="480" height="14" forecolor="#DBEAFE" uuid="bdc033f9-d8cc-4de9-a5e6-e67b64ff659d"/>
+                <textElement><font size="9" isBold="true" pdfFontName="Helvetica-Bold"/></textElement>
+                <text><![CDATA[CERTIFICAT MÉDICAL]]></text>
+            </staticText>
+            <textField>
+                <reportElement x="0" y="62" width="555" height="14" forecolor="#64748B" uuid="5673cadf-974f-4ad0-83ad-04011a3986b1"/>
+                <textElement><font size="8"/></textElement>
+                <textFieldExpression><![CDATA[$P{INFOS_ETABLISSEMENT} != null ? $P{INFOS_ETABLISSEMENT} : ""]]></textFieldExpression>
+            </textField>
+            <textField>
+                <reportElement x="0" y="84" width="555" height="18" forecolor="#0F172A" uuid="c5e9da83-f8d5-46eb-8ecc-fc5b7beb1af4"/>
+                <textElement textAlignment="Center"><font size="14" isBold="true" pdfFontName="Helvetica-Bold"/></textElement>
+                <textFieldExpression><![CDATA[$P{TITRE_CERTIFICAT} != null ? $P{TITRE_CERTIFICAT} : "Certificat médical"]]></textFieldExpression>
+            </textField>
+        </band>
+    </title>
+
+    <detail>
+        <band height="320" splitType="Stretch">
+            <textField>
+                <reportElement x="0" y="10" width="555" height="16" forecolor="#0F172A" uuid="f9297313-c10f-4fdb-97e2-b7c353830352"/>
+                <textElement><font size="10"/></textElement>
+                <textFieldExpression><![CDATA["Je soussigné(e), Dr " + ($P{NOM_MEDECIN} != null ? $P{NOM_MEDECIN} : "—")
+                    + (($P{SPECIALITE_MEDECIN} != null && !$P{SPECIALITE_MEDECIN}.isBlank()) ? (" (" + $P{SPECIALITE_MEDECIN} + ")") : "")
+                    + ", certifie avoir examiné :"]]></textFieldExpression>
+            </textField>
+            <textField>
+                <reportElement x="0" y="40" width="555" height="16" forecolor="#0F172A" uuid="731eb5de-2fcb-459c-a1fc-952ed3daa839"/>
+                <textElement><font size="11" isBold="true" pdfFontName="Helvetica-Bold"/></textElement>
+                <textFieldExpression><![CDATA[$P{NOM_PATIENT} != null ? $P{NOM_PATIENT} : "—"]]></textFieldExpression>
+            </textField>
+            <textField>
+                <reportElement x="0" y="60" width="555" height="14" forecolor="#475569" uuid="996c6358-49e7-433c-841f-82d502a26cd1"/>
+                <textElement><font size="8"/></textElement>
+                <textFieldExpression><![CDATA[
+                    "Code patient : " + ($P{CODE_PATIENT} != null ? $P{CODE_PATIENT} : "—")
+                    + "   ·   Âge : " + ($P{AGE_PATIENT} != null ? $P{AGE_PATIENT} : "—")
+                    + "   ·   Sexe : " + ($P{SEXE_PATIENT} != null ? $P{SEXE_PATIENT} : "—")
+                ]]></textFieldExpression>
+            </textField>
+            <rectangle>
+                <reportElement mode="Opaque" x="0" y="90" width="555" height="140" backcolor="#F8FAFC" forecolor="#CBD5E1" uuid="796ae58d-9859-48a3-a599-6399447ab8fb"/>
+                <graphicElement><pen lineWidth="0.5" lineColor="#CBD5E1"/></graphicElement>
+            </rectangle>
+            <textField textAdjust="StretchHeight">
+                <reportElement x="10" y="98" width="535" height="124" forecolor="#0F172A" uuid="65732c62-0cb6-4d74-a01e-056b41ff6c99"/>
+                <textElement><font size="10"/></textElement>
+                <textFieldExpression><![CDATA[$P{CONTENU_CERTIFICAT} != null ? $P{CONTENU_CERTIFICAT} : "—"]]></textFieldExpression>
+            </textField>
+            <textField>
+                <reportElement x="0" y="250" width="555" height="14" forecolor="#334155" uuid="c229316e-4523-47d4-8e3f-835e41a50b91"/>
+                <textElement><font size="9"/></textElement>
+                <textFieldExpression><![CDATA[
+                    "Fait à " + ($P{LIEU} != null ? $P{LIEU} : "—")
+                    + ", le " + ($P{DATE_CERTIFICAT} != null ? $P{DATE_CERTIFICAT} : "—")
+                ]]></textFieldExpression>
+            </textField>
+            <textField>
+                <reportElement x="300" y="280" width="255" height="30" forecolor="#0F172A" uuid="1237342b-d958-4202-ac94-6e94d5fdef51"/>
+                <textElement textAlignment="Center"><font size="9" isBold="true" pdfFontName="Helvetica-Bold"/></textElement>
+                <textFieldExpression><![CDATA[
+                    "Dr " + ($P{NOM_MEDECIN} != null ? $P{NOM_MEDECIN} : "—")
+                    + (($P{NUMERO_ORDRE_MEDECIN} != null && !$P{NUMERO_ORDRE_MEDECIN}.isBlank())
+                        ? ("\nN° ordre : " + $P{NUMERO_ORDRE_MEDECIN}) : "")
+                ]]></textFieldExpression>
+            </textField>
+        </band>
+    </detail>
+
+    <pageFooter>
+        <band height="30">
+            <line>
+                <reportElement x="0" y="2" width="555" height="1" forecolor="#CBD5E1" uuid="fc558fee-ee29-4eb4-83ff-6c788ff720fd"/>
+            </line>
+            <staticText>
+                <reportElement x="0" y="8" width="555" height="16" forecolor="#64748B" uuid="1639dc49-756c-4a52-9127-0b0e520a8ddc"/>
+                <textElement><font size="7"/></textElement>
+                <text><![CDATA[Document médical confidentiel — généré via JasperReports (.jasper) — Shambua Santé]]></text>
+            </staticText>
+        </band>
+    </pageFooter>
+</jasperReport>

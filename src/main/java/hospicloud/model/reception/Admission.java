@@ -10,12 +10,17 @@ public class Admission {
     private Integer idRendezVous;   // Lien avec le rendez-vous si pertinent
     private Integer niveauPriorite; // 1 = Urgence, 2 = Haute, 3 = Normale
     private LocalDateTime tempsArrivee;
-    private String statut;          // EN_ATTENTE, ENREGISTRE, APPELE, EN_CONSULTATION, TERMINE
+    private String statut;          // ATTENTE_TRIAGE, EN_ATTENTE, ORIENTE, ENREGISTRE, APPELE, EN_CONSULTATION, TERMINE, ABSENT
     private Integer creePar;
     private Integer checkInPar;
     private Integer numeroPassage;
     private String salle;
     private LocalDateTime appeleAt;
+    private String typeVisite;
+    private String motifGeneral;
+    private String serviceDemande;
+    private String observationsAdmin;
+    private String modePaiement;
 
     // Getters and Setters
     public Integer getIdAdmission() { return idAdmission; }
@@ -56,4 +61,19 @@ public class Admission {
 
     public LocalDateTime getAppeleAt() { return appeleAt; }
     public void setAppeleAt(LocalDateTime appeleAt) { this.appeleAt = appeleAt; }
+
+    public String getTypeVisite() { return typeVisite; }
+    public void setTypeVisite(String typeVisite) { this.typeVisite = typeVisite; }
+
+    public String getMotifGeneral() { return motifGeneral; }
+    public void setMotifGeneral(String motifGeneral) { this.motifGeneral = motifGeneral; }
+
+    public String getServiceDemande() { return serviceDemande; }
+    public void setServiceDemande(String serviceDemande) { this.serviceDemande = serviceDemande; }
+
+    public String getObservationsAdmin() { return observationsAdmin; }
+    public void setObservationsAdmin(String observationsAdmin) { this.observationsAdmin = observationsAdmin; }
+
+    public String getModePaiement() { return modePaiement; }
+    public void setModePaiement(String modePaiement) { this.modePaiement = modePaiement; }
 }

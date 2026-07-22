@@ -2,8 +2,11 @@ package hospicloud.controlleurs;
 
 import hospicloud.services.ConsultationMedicaleService;
 import hospicloud.services.OrdonnanceService;
-import hospicloud.servicesImpl.reportingimpl.JasperReportServiceImpl;
+import hospicloud.services.reporting.ReportGenerator;
+import hospicloud.servicesImpl.LaboratoireReportService;
 import net.sf.jasperreports.engine.JRDataSource;
+import net.sf.jasperreports.engine.JREmptyDataSource;
+import net.sf.jasperreports.engine.data.JRBeanCollectionDataSource;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -14,34 +17,40 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * API générique des documents médicaux — tous générés en JasperReports (.jasper).
+ */
 @RestController
 @RequestMapping("/api/reports")
 public class ReportController {
 
-    private final JasperReportServiceImpl jasperService;
+    private final ReportGenerator reportGenerator;
     private final ConsultationMedicaleService consultationService;
     private final OrdonnanceService ordonnanceService;
+    private final LaboratoireReportService laboratoireReportService;
 
-    public ReportController(JasperReportServiceImpl jasperService,
+    public ReportController(ReportGenerator reportGenerator,
                             ConsultationMedicaleService consultationService,
-                            OrdonnanceService ordonnanceService) {
-        this.jasperService = jasperService;
+                            OrdonnanceService ordonnanceService,
+                            LaboratoireReportService laboratoireReportService) {
+        this.reportGenerator = reportGenerator;
         this.consultationService = consultationService;
         this.ordonnanceService = ordonnanceService;
+        this.laboratoireReportService = laboratoireReportService;
     }
 
     @GetMapping("/{type}/{id}")
     public ResponseEntity<byte[]> getReport(@PathVariable String type,
                                             @PathVariable Long id) {
         try {
+            if ("labo".equalsIgnoreCase(type)) {
+                byte[] pdf = laboratoireReportService.genererPdf(id.intValue());
+                return pdfResponse(pdf, "labo_" + id + ".pdf");
+            }
 
-            // 1. Déterminer le fichier Jasper
             String reportName = determineReportName(type);
-
-            // 2. Charger les paramètres Jasper
             Map<String, Object> params = fetchDataForReport(type, id);
 
-            // 3. Créer un DataSource avec le champ contenuOrdonnance (ordonnance uniquement)
             JRDataSource dataSource;
             if ("ordonnance".equalsIgnoreCase(type)) {
                 String contenuOrdonnance = (String) params.get("contenuOrdonnance");
@@ -49,28 +58,26 @@ public class ReportController {
                 fieldData.put("contenuOrdonnance", contenuOrdonnance);
                 List<Map<String, Object>> dataList = new ArrayList<>();
                 dataList.add(fieldData);
-                dataSource = new net.sf.jasperreports.engine.data.JRBeanCollectionDataSource(dataList);
+                dataSource = new JRBeanCollectionDataSource(dataList);
             } else {
-                dataSource = null;
+                dataSource = new JREmptyDataSource();
             }
 
-            // 4. Génération PDF
-            byte[] pdfContent = jasperService.generate(reportName, params, dataSource);
-
-            // 5. Retour HTTP
-            return ResponseEntity.ok()
-                    .contentType(MediaType.APPLICATION_PDF)
-                    .header(HttpHeaders.CONTENT_DISPOSITION,
-                            "inline; filename=" + type + "_" + id + ".pdf")
-                    .body(pdfContent);
+            byte[] pdfContent = reportGenerator.generate(reportName, params, dataSource);
+            return pdfResponse(pdfContent, type + "_" + id + ".pdf");
 
         } catch (IllegalArgumentException e) {
-            return ResponseEntity.badRequest().body(null);
-
+            return ResponseEntity.badRequest().build();
         } catch (Exception e) {
-            e.printStackTrace();
-            return ResponseEntity.internalServerError().body(null);
+            return ResponseEntity.internalServerError().build();
         }
+    }
+
+    private ResponseEntity<byte[]> pdfResponse(byte[] pdf, String filename) {
+        return ResponseEntity.ok()
+                .contentType(MediaType.APPLICATION_PDF)
+                .header(HttpHeaders.CONTENT_DISPOSITION, "inline; filename=" + filename)
+                .body(pdf);
     }
 
     private String determineReportName(String type) {
@@ -79,6 +86,7 @@ public class ReportController {
             case "labo" -> "Laboratoire_Bon_Examen.jasper";
             case "certificat" -> "Certificat_Medical.jasper";
             case "consultation" -> "Fiche_Consultation.jasper";
+            case "bulletin" -> "Bulletin_Sortie.jasper";
             default -> throw new IllegalArgumentException("Type de rapport invalide : " + type);
         };
     }

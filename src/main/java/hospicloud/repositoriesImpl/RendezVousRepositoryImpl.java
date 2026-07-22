@@ -511,6 +511,15 @@ public class RendezVousRepositoryImpl implements RendezVousRepository {
         changerStatutRdv(idRdv, "VALIDE");
     }
 
+    @Override
+    @Transactional
+    public void mettreAJourStatut(Integer idRdv, String statut) {
+        if (statut == null || statut.isBlank()) {
+            throw new IllegalArgumentException("Statut RDV requis");
+        }
+        changerStatutRdv(idRdv, statut.trim().toUpperCase());
+    }
+
     // Facto interne pour éviter la duplication des updates de statut
     private void changerStatutRdv(Integer idRdv, String nouveauStatut) {
         Integer hopitalId = hospicloud.security.TenantContext.getRequiredHopitalId();

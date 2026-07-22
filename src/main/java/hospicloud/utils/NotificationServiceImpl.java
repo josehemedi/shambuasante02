@@ -568,4 +568,73 @@ public class NotificationServiceImpl implements NotificationService {
                 pdfOrdonnance,
                 "application/pdf");
     }
+
+    @Override
+    public void notifierDocumentCliniquePatient(
+            String emailPatient,
+            String nomPatient,
+            String nomMedecin,
+            String nomHopital,
+            String typeDocument,
+            String titre,
+            String resume,
+            String attachmentFileName,
+            byte[] attachmentBytes,
+            String contentType
+    ) {
+        String etablissement = nomHopital != null && !nomHopital.isBlank() ? nomHopital : "Shambua Santé";
+        String typeLabel = switch (typeDocument != null ? typeDocument.toUpperCase() : "") {
+            case "LABO", "LAB_RESULT" -> "Résultat de laboratoire";
+            case "CONSULTATION" -> "Fiche de consultation";
+            case "ORDONNANCE" -> "Ordonnance";
+            default -> "Document médical";
+        };
+        String sujet = typeLabel + " — " + etablissement;
+        String bodyResume = resume != null && !resume.isBlank()
+                ? resume.replace("\n", "<br/>")
+                : "Consultez le détail dans votre espace patient Shambua Santé.";
+
+        String html = """
+        <!DOCTYPE html>
+        <html>
+        <body style="margin:0;padding:0;background:#eef3f9;font-family:'Segoe UI',Arial,sans-serif;color:#0b1f4a;">
+          <div style="max-width:640px;margin:24px auto;background:#ffffff;border-radius:16px;overflow:hidden;box-shadow:0 8px 28px rgba(15,40,80,0.12);">
+            <div style="background:linear-gradient(120deg,#0f2850,#1753a0,#2563eb);padding:28px 32px;color:#fff;">
+              <p style="margin:0;font-size:11px;letter-spacing:0.22em;text-transform:uppercase;color:#bae6fd;font-weight:600;">Shambua Santé</p>
+              <h1 style="margin:10px 0 0;font-size:24px;font-weight:600;">%s</h1>
+              <p style="margin:8px 0 0;font-size:14px;color:rgba(255,255,255,0.82);">Document confidentiel transmis par votre médecin</p>
+            </div>
+            <div style="padding:28px 32px;">
+              <p style="margin:0 0 16px;font-size:15px;">Bonjour <b>%s</b>,</p>
+              <p style="margin:0 0 16px;font-size:14px;line-height:1.55;color:#334155;">
+                <b>%s</b> vous a transmis un document depuis <b>%s</b> :
+              </p>
+              <p style="margin:0 0 12px;font-size:15px;font-weight:600;">%s</p>
+              <div style="padding:14px 16px;background:#f8fafc;border-radius:12px;font-size:13px;line-height:1.55;color:#475569;">
+                %s
+              </div>
+              <p style="margin:22px 0 0;font-size:13px;line-height:1.5;color:#64748b;">
+                Retrouvez également ce document dans votre espace patient (Documents / résultats).
+              </p>
+            </div>
+            <div style="padding:16px 32px 24px;border-top:1px solid #e2e8f0;background:#f8fafc;">
+              <p style="margin:0;font-size:11px;color:#94a3b8;">%s — Notification sécurisée multi-tenant</p>
+            </div>
+          </div>
+        </body>
+        </html>
+        """.formatted(typeLabel, nomPatient, nomMedecin, etablissement, titre, bodyResume, etablissement);
+
+        if (attachmentBytes != null && attachmentBytes.length > 0 && attachmentFileName != null) {
+            emailService.envoyerEmailHtmlAvecPieceJointe(
+                    emailPatient,
+                    sujet,
+                    html,
+                    attachmentFileName,
+                    attachmentBytes,
+                    contentType != null ? contentType : "application/octet-stream");
+        } else {
+            emailService.envoyerEmailHtml(emailPatient, sujet, html);
+        }
+    }
 }

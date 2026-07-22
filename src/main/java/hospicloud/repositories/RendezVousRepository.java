@@ -49,6 +49,8 @@ public interface RendezVousRepository {
 
     void marquerCommeTermine(Integer idRdv);
 
+    void mettreAJourStatut(Integer idRdv, String statut);
+
     List<RendezVous> listerParHopital();
 
     List<RendezVous> listerParHopital(Integer creePar);

@@ -1,5 +1,6 @@
 package hospicloud.servicesImpl;
 
+import hospicloud.exceptions.BadRequestException;
 import hospicloud.exceptions.ForbiddenException;
 import hospicloud.exceptions.rendezvous.RendezVousNotFoundException;
 import hospicloud.model.Medecin;
@@ -99,7 +100,9 @@ public class RendezVousServiceImpl implements RendezVousService {
         // ================= SAVE =================
         RendezVous saved = repository.creer(rdv);
 
-        if ("TELECONSULTATION".equalsIgnoreCase(saved.getCanal())) {
+        // Téléconsultation : lien uniquement après acceptation médecin (pas sur simple demande).
+        if ("TELECONSULTATION".equalsIgnoreCase(saved.getCanal())
+                && !"EN_ATTENTE".equalsIgnoreCase(saved.getStatutRdv())) {
             traiterTeleconsultation(saved);
         }
 
@@ -268,6 +271,64 @@ public class RendezVousServiceImpl implements RendezVousService {
 
     @Override
     @Transactional
+    public RendezVous accepterDemandePatient(Integer idRdv) {
+        TenantAuthorization.assertStaffRole();
+        RendezVous rdv = obtenirParId(idRdv);
+        TenantAuthorization.assertSameTenant(rdv.getIdHopital());
+        assertMedecinPossedeRendezVous(rdv);
+
+        String statut = rdv.getStatutRdv() != null ? rdv.getStatutRdv().toUpperCase() : "";
+        if (!"EN_ATTENTE".equals(statut)) {
+            throw new ForbiddenException("Seule une demande en attente peut être acceptée.");
+        }
+
+        repository.confirmerPresence(idRdv);
+        RendezVous updated = obtenirParId(idRdv);
+
+        if ("TELECONSULTATION".equalsIgnoreCase(updated.getCanal())
+                && (updated.getUrlVisio() == null || updated.getUrlVisio().isBlank())) {
+            traiterTeleconsultation(updated);
+            updated = obtenirParId(idRdv);
+        }
+
+        publierEvenement(updated, "RDV_ACCEPTE");
+        return updated;
+    }
+
+    @Override
+    @Transactional
+    public RendezVous refuserDemandePatient(Integer idRdv, String motif) {
+        TenantAuthorization.assertStaffRole();
+        RendezVous rdv = obtenirParId(idRdv);
+        TenantAuthorization.assertSameTenant(rdv.getIdHopital());
+        assertMedecinPossedeRendezVous(rdv);
+
+        String statut = rdv.getStatutRdv() != null ? rdv.getStatutRdv().toUpperCase() : "";
+        if (!"EN_ATTENTE".equals(statut)) {
+            throw new ForbiddenException("Seule une demande en attente peut être refusée.");
+        }
+
+        repository.mettreAJourStatut(idRdv, "REFUSE");
+        RendezVous updated = obtenirParId(idRdv);
+        if (motif != null && !motif.isBlank()) {
+            log.info("Demande RDV {} refusée — motif: {}", idRdv, motif.trim());
+        }
+        publierEvenement(updated, "RDV_REFUSE");
+        return updated;
+    }
+
+    private void assertMedecinPossedeRendezVous(RendezVous rdv) {
+        if (!currentUserService.isMedecin()) {
+            return;
+        }
+        Integer medecinId = currentUserService.getCurrentMedecinId();
+        if (medecinId == null || rdv.getIdMedecin() == null || !medecinId.equals(rdv.getIdMedecin())) {
+            throw new ForbiddenException("Vous ne pouvez traiter que les demandes qui vous sont adressées.");
+        }
+    }
+
+    @Override
+    @Transactional
     public void annulerRendezVous(Integer idRdv) {
         TenantAuthorization.assertStaffRole();
         repository.annulerRendezVous(idRdv);
@@ -387,8 +448,27 @@ public class RendezVousServiceImpl implements RendezVousService {
     private void publierEvenement(RendezVous rdv, String typeEvenement) {
         log.info("Event RDV [{}] hopital={} patient={} medecin={} date={}",
                 typeEvenement, rdv.getIdHopital(), rdv.getIdPatient(), rdv.getIdMedecin(), rdv.getDateHeureRdv());
-        if ("RDV_CREE".equals(typeEvenement)) {
+        if ("RDV_CREE".equals(typeEvenement) || "RDV_CONFIRMATION_RENVOYEE".equals(typeEvenement)) {
             realtimeNotificationService.notifyRendezVousCreated(rdv);
+        } else if ("RDV_ACCEPTE".equals(typeEvenement)) {
+            realtimeNotificationService.notifyRendezVousAccepted(rdv);
+        } else if ("RDV_REFUSE".equals(typeEvenement)) {
+            realtimeNotificationService.notifyRendezVousRejected(rdv);
         }
+    }
+
+    @Override
+    @Transactional
+    public void renvoyerConfirmation(Integer idRdv) {
+        TenantAuthorization.assertStaffRole();
+        RendezVous rdv = obtenirParId(idRdv);
+        if (rdv == null) {
+            throw new RendezVousNotFoundException(idRdv);
+        }
+        String statut = rdv.getStatutRdv() != null ? rdv.getStatutRdv().toUpperCase() : "";
+        if ("ANNULE".equals(statut) || "ABSENT".equals(statut)) {
+            throw new BadRequestException("Impossible de confirmer un rendez-vous annulé ou marqué absent.");
+        }
+        publierEvenement(rdv, "RDV_CONFIRMATION_RENVOYEE");
     }
 }

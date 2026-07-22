@@ -14,6 +14,7 @@ import hospicloud.model.archive.StatutDemandeAccesArchive;
 import hospicloud.repositories.archive.ArchiveDossierRepository;
 import hospicloud.repositories.archive.DemandeAccesArchiveRepository;
 import hospicloud.security.CurrentUserService;
+import hospicloud.security.TenantAuthorization;
 import hospicloud.security.TenantContext;
 import hospicloud.security.archive.ArchivePermissionService;
 import hospicloud.services.archive.DemandeAccesArchiveService;
@@ -54,6 +55,7 @@ public class DemandeAccesArchiveServiceImpl implements DemandeAccesArchiveServic
         Integer hopitalId = TenantContext.getRequiredHopitalId();
         ArchiveDossier archive = archiveRepository.findById(hopitalId, archiveId)
                 .orElseThrow(() -> new ResourceNotFoundException("Archive introuvable."));
+        TenantAuthorization.assertSameTenant(archive.getHopitalId());
 
         if (archive.getStatutArchive() != StatutArchive.ARCHIVE) {
             throw new BadRequestException("Une demande d'accès ne concerne que les dossiers archivés.");
@@ -119,6 +121,7 @@ public class DemandeAccesArchiveServiceImpl implements DemandeAccesArchiveServic
         Integer hopitalId = TenantContext.getRequiredHopitalId();
         DemandeAccesArchive demande = demandeRepository.findById(hopitalId, demandeId)
                 .orElseThrow(() -> new ResourceNotFoundException("Demande introuvable."));
+        TenantAuthorization.assertSameTenant(demande.getHopitalId());
 
         if (demande.getStatut() != StatutDemandeAccesArchive.EN_ATTENTE) {
             throw new BadRequestException("Cette demande a déjà été traitée.");

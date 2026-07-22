@@ -7,6 +7,12 @@ import java.math.BigDecimal;
 public interface RealtimeNotificationService {
     void notifyRendezVousCreated(RendezVous rdv);
 
+    /** Notifie le patient que le médecin a accepté sa demande. */
+    void notifyRendezVousAccepted(RendezVous rdv);
+
+    /** Notifie le patient que le médecin a refusé sa demande. */
+    void notifyRendezVousRejected(RendezVous rdv);
+
     void notifyPaymentRecorded(
             Integer hopitalId,
             Integer idFacture,
@@ -42,4 +48,13 @@ public interface RealtimeNotificationService {
             Long idOrdonnance,
             String numeroOrdonnance,
             String nomMedecin);
+
+    /** Notifie le patient qu'un document clinique (labo / consultation / fichier) lui a été transmis. */
+    void notifyDocumentCliniqueEnvoyeAuPatient(
+            Integer hopitalId,
+            Integer idPatient,
+            String typeDocument,
+            String titre,
+            String nomMedecin,
+            Integer idDocument);
 }

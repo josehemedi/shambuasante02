@@ -57,7 +57,8 @@ public class ReceptionDashboardRepositoryImpl implements ReceptionDashboardRepos
                 idHopital);
 
         long enAttente = safeCount(
-                "SELECT COUNT(id_admission) FROM admission WHERE id_hopital = ? AND statut = 'EN_ATTENTE'",
+                "SELECT COUNT(id_admission) FROM admission WHERE id_hopital = ? AND DATE(temps_arrivee) = CURRENT_DATE "
+                        + "AND statut IN ('EN_ATTENTE', 'ATTENTE_TRIAGE')",
                 idHopital);
         if (enAttente == 0) {
             enAttente = safeCount(
@@ -66,7 +67,9 @@ public class ReceptionDashboardRepositoryImpl implements ReceptionDashboardRepos
         }
 
         long enAttenteHier = safeCount(
-                "SELECT COUNT(id_admission) FROM admission WHERE id_hopital = ? AND statut = 'EN_ATTENTE' AND DATE(temps_arrivee) = DATE_SUB(CURRENT_DATE, INTERVAL 1 DAY)",
+                "SELECT COUNT(id_admission) FROM admission WHERE id_hopital = ? "
+                        + "AND statut IN ('EN_ATTENTE', 'ATTENTE_TRIAGE') "
+                        + "AND DATE(temps_arrivee) = DATE_SUB(CURRENT_DATE, INTERVAL 1 DAY)",
                 idHopital);
 
         long enregistres = safeCount(
@@ -114,52 +117,95 @@ public class ReceptionDashboardRepositoryImpl implements ReceptionDashboardRepos
     private List<AdmissionDTO> listerAdmissionsEnAttente(Integer idHopital) {
         try {
             String sql =
-                    "SELECT a.id_admission, a.id_patient, a.niveau_priorite, a.temps_arrivee, a.statut, " +
+                    "SELECT a.id_admission, a.id_patient, a.id_medecin, a.id_rendez_vous, a.niveau_priorite, " +
+                    "a.temps_arrivee, a.statut, a.numero_passage, r.motif_visite, " +
                     "TRIM(CONCAT(COALESCE(p.prenom, ''), ' ', COALESCE(p.nom, ''))) AS nom_patient, " +
                     "TRIM(CONCAT(COALESCE(m.prenom, ''), ' ', COALESCE(m.nom, ''))) AS nom_medecin " +
                     "FROM admission a " +
                     "JOIN patients p ON a.id_patient = p.id_patient AND a.id_hopital = p.id_hopital " +
                     "LEFT JOIN medecin m ON a.id_medecin = m.id_medecin AND a.id_hopital = m.id_hopital " +
-                    "WHERE a.id_hopital = ? AND a.statut = 'EN_ATTENTE' " +
-                    "ORDER BY a.niveau_priorite ASC, a.temps_arrivee ASC";
+                    "LEFT JOIN rendez_vous01 r ON a.id_rendez_vous = r.id_rdv AND a.id_hopital = r.id_hopital " +
+                    "WHERE a.id_hopital = ? " +
+                    "AND DATE(a.temps_arrivee) = CURRENT_DATE " +
+                    "AND a.statut IN ('ATTENTE_TRIAGE', 'EN_ATTENTE', 'ORIENTE', 'ENREGISTRE', 'APPELE', 'ABSENT') " +
+                    "ORDER BY " +
+                    "  CASE a.statut " +
+                    "    WHEN 'ATTENTE_TRIAGE' THEN 0 WHEN 'EN_ATTENTE' THEN 1 WHEN 'ORIENTE' THEN 2 " +
+                    "    WHEN 'ENREGISTRE' THEN 3 WHEN 'APPELE' THEN 4 WHEN 'ABSENT' THEN 5 ELSE 6 END, " +
+                    "  a.niveau_priorite ASC, a.temps_arrivee ASC";
 
-            return jdbcTemplate.query(sql, (rs, rowNum) -> {
-                AdmissionDTO dto = new AdmissionDTO();
-                dto.setIdAdmission(rs.getInt("id_admission"));
-                dto.setIdPatient(rs.getInt("id_patient"));
-                dto.setNomCompletPatient(rs.getString("nom_patient"));
-                dto.setNomMedecin(rs.getString("nom_medecin"));
-                dto.setNiveauPriorite(rs.getInt("niveau_priorite"));
-                dto.setTempsArrivee(toLocalDateTime(rs.getTimestamp("temps_arrivee")));
-                dto.setStatut(rs.getString("statut"));
-                return dto;
-            }, idHopital);
+            return jdbcTemplate.query(sql, (rs, rowNum) -> mapAdmissionRow(rs), idHopital);
         } catch (Exception e) {
             return new ArrayList<>();
         }
     }
 
+    private AdmissionDTO mapAdmissionRow(java.sql.ResultSet rs) throws java.sql.SQLException {
+        AdmissionDTO dto = new AdmissionDTO();
+        dto.setIdAdmission(rs.getInt("id_admission"));
+        dto.setIdPatient(rs.getInt("id_patient"));
+        Object idMed = rs.getObject("id_medecin");
+        dto.setIdMedecin(idMed != null ? rs.getInt("id_medecin") : null);
+        Object idRdv = rs.getObject("id_rendez_vous");
+        dto.setIdRendezVous(idRdv != null ? rs.getInt("id_rendez_vous") : null);
+        dto.setNomCompletPatient(rs.getString("nom_patient"));
+        dto.setNomMedecin(rs.getString("nom_medecin"));
+        dto.setNiveauPriorite(rs.getInt("niveau_priorite"));
+        dto.setTempsArrivee(toLocalDateTime(rs.getTimestamp("temps_arrivee")));
+        String statut = rs.getString("statut");
+        dto.setStatut(statut);
+        dto.setStatutAdministratif(mapStatutAdministratif(statut));
+        Object num = rs.getObject("numero_passage");
+        dto.setNumeroPassage(num != null ? rs.getInt("numero_passage") : null);
+        try {
+            dto.setMotifVisite(rs.getString("motif_visite"));
+        } catch (Exception ignored) {
+            dto.setMotifVisite(null);
+        }
+        if (dto.getTempsArrivee() != null) {
+            dto.setTempsAttenteMinutes(java.time.Duration.between(dto.getTempsArrivee(), LocalDateTime.now()).toMinutes());
+        }
+        return dto;
+    }
+
+    private static String mapStatutAdministratif(String statut) {
+        if (statut == null) return "waiting";
+        return switch (statut.toUpperCase()) {
+            case "ATTENTE_TRIAGE" -> "waiting_triage";
+            case "ORIENTE" -> "oriented";
+            case "ENREGISTRE", "APPELE", "EN_CONSULTATION" -> "received";
+            case "ABSENT" -> "absent";
+            default -> "waiting";
+        };
+    }
+
     private List<AdmissionDTO> listerRendezVousDuJourCommeFile(Integer idHopital) {
         String sql =
-                "SELECT r.id_rdv, r.id_patient, r.date_heure_rdv, r.statut_rdv, r.motif_visite, " +
+                "SELECT r.id_rdv, r.id_patient, r.id_medecin, r.date_heure_rdv, r.statut_rdv, r.motif_visite, " +
                 "TRIM(CONCAT(COALESCE(p.prenom, ''), ' ', COALESCE(p.nom, ''))) AS nom_patient, " +
                 "TRIM(CONCAT(COALESCE(m.prenom, ''), ' ', COALESCE(m.nom, ''))) AS nom_medecin " +
                 "FROM rendez_vous01 r " +
                 "JOIN patients p ON r.id_patient = p.id_patient AND r.id_hopital = p.id_hopital " +
                 "LEFT JOIN medecin m ON r.id_medecin = m.id_medecin AND r.id_hopital = m.id_hopital " +
                 "WHERE r.id_hopital = ? AND DATE(r.date_heure_rdv) = CURRENT_DATE " +
-                "AND r.statut_rdv NOT IN ('ANNULE', 'ABSENT') " +
+                "AND r.statut_rdv NOT IN ('ANNULE') " +
                 "ORDER BY r.date_heure_rdv ASC";
 
         return jdbcTemplate.query(sql, (rs, rowNum) -> {
             AdmissionDTO dto = new AdmissionDTO();
             dto.setIdAdmission(rs.getInt("id_rdv"));
             dto.setIdPatient(rs.getInt("id_patient"));
+            Object idMed = rs.getObject("id_medecin");
+            dto.setIdMedecin(idMed != null ? rs.getInt("id_medecin") : null);
+            dto.setIdRendezVous(rs.getInt("id_rdv"));
             dto.setNomCompletPatient(rs.getString("nom_patient"));
             dto.setNomMedecin(rs.getString("nom_medecin"));
             dto.setNiveauPriorite(3);
             dto.setTempsArrivee(toLocalDateTime(rs.getTimestamp("date_heure_rdv")));
-            dto.setStatut(rs.getString("statut_rdv"));
+            String statutRdv = rs.getString("statut_rdv");
+            dto.setStatut(statutRdv);
+            dto.setStatutAdministratif("ABSENT".equalsIgnoreCase(statutRdv) ? "absent" : "scheduled");
+            dto.setMotifVisite(rs.getString("motif_visite"));
             return dto;
         }, idHopital);
     }
@@ -191,6 +237,8 @@ public class ReceptionDashboardRepositoryImpl implements ReceptionDashboardRepos
                 a.setNiveauPriorite(rs.getInt("niveau_priorite"));
                 a.setTempsArrivee(toLocalDateTime(rs.getTimestamp("temps_arrivee")));
                 a.setStatut(rs.getString("statut"));
+                Object num = rs.getObject("numero_passage");
+                a.setNumeroPassage(num != null ? rs.getInt("numero_passage") : null);
                 return a;
             }, idAdmission, idHopital);
         } catch (EmptyResultDataAccessException e) {
@@ -367,41 +415,68 @@ public class ReceptionDashboardRepositoryImpl implements ReceptionDashboardRepos
 
     @Override
     public Integer creerAdmissionRetourId(Admission a) {
-        String sql = "INSERT INTO admission (id_hopital, id_patient, id_medecin, id_rendez_vous, niveau_priorite, temps_arrivee, statut, cree_par, check_in_par) "
-                + "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
+        String sql = "INSERT INTO admission (id_hopital, id_patient, id_medecin, id_rendez_vous, niveau_priorite, "
+                + "temps_arrivee, statut, cree_par, check_in_par, type_visite, motif_general, service_demande, "
+                + "observations_admin, mode_paiement) "
+                + "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
         KeyHolder keyHolder = new GeneratedKeyHolder();
-        jdbcTemplate.update(connection -> {
-            PreparedStatement ps = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
-            ps.setInt(1, a.getIdHopital());
-            ps.setInt(2, a.getIdPatient());
-            if (a.getIdMedecin() != null) {
-                ps.setInt(3, a.getIdMedecin());
-            } else {
-                ps.setNull(3, Types.INTEGER);
-            }
-            if (a.getIdRendezVous() != null) {
-                ps.setInt(4, a.getIdRendezVous());
-            } else {
-                ps.setNull(4, Types.INTEGER);
-            }
-            ps.setInt(5, a.getNiveauPriorite() != null ? a.getNiveauPriorite() : 3);
-            ps.setTimestamp(6, Timestamp.valueOf(
-                    a.getTempsArrivee() == null ? LocalDateTime.now() : a.getTempsArrivee()));
-            ps.setString(7, a.getStatut() != null ? a.getStatut() : "EN_ATTENTE");
-            if (a.getCreePar() != null) {
-                ps.setInt(8, a.getCreePar());
-            } else {
-                ps.setNull(8, Types.INTEGER);
-            }
-            if (a.getCheckInPar() != null) {
-                ps.setInt(9, a.getCheckInPar());
-            } else {
-                ps.setNull(9, Types.INTEGER);
-            }
-            return ps;
-        }, keyHolder);
+        try {
+            jdbcTemplate.update(connection -> {
+                PreparedStatement ps = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
+                bindAdmissionInsert(ps, a, true);
+                return ps;
+            }, keyHolder);
+        } catch (Exception ex) {
+            // Schéma sans colonnes visite : fallback minimal
+            String fallback = "INSERT INTO admission (id_hopital, id_patient, id_medecin, id_rendez_vous, "
+                    + "niveau_priorite, temps_arrivee, statut, cree_par, check_in_par) "
+                    + "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
+            jdbcTemplate.update(connection -> {
+                PreparedStatement ps = connection.prepareStatement(fallback, Statement.RETURN_GENERATED_KEYS);
+                bindAdmissionInsert(ps, a, false);
+                return ps;
+            }, keyHolder);
+        }
         Number key = keyHolder.getKey();
         return key != null ? key.intValue() : null;
+    }
+
+    private void bindAdmissionInsert(PreparedStatement ps, Admission a, boolean withVisitFields)
+            throws java.sql.SQLException {
+        ps.setInt(1, a.getIdHopital());
+        ps.setInt(2, a.getIdPatient());
+        if (a.getIdMedecin() != null) {
+            ps.setInt(3, a.getIdMedecin());
+        } else {
+            ps.setNull(3, Types.INTEGER);
+        }
+        if (a.getIdRendezVous() != null) {
+            ps.setInt(4, a.getIdRendezVous());
+        } else {
+            ps.setNull(4, Types.INTEGER);
+        }
+        ps.setInt(5, a.getNiveauPriorite() != null ? a.getNiveauPriorite() : 3);
+        ps.setTimestamp(6, Timestamp.valueOf(
+                a.getTempsArrivee() == null ? LocalDateTime.now() : a.getTempsArrivee()));
+        ps.setString(7, a.getStatut() != null ? a.getStatut() : "ATTENTE_TRIAGE");
+        if (a.getCreePar() != null) {
+            ps.setInt(8, a.getCreePar());
+        } else {
+            ps.setNull(8, Types.INTEGER);
+        }
+        if (a.getCheckInPar() != null) {
+            ps.setInt(9, a.getCheckInPar());
+        } else {
+            ps.setNull(9, Types.INTEGER);
+        }
+        if (!withVisitFields) {
+            return;
+        }
+        ps.setString(10, a.getTypeVisite());
+        ps.setString(11, a.getMotifGeneral());
+        ps.setString(12, a.getServiceDemande());
+        ps.setString(13, a.getObservationsAdmin());
+        ps.setString(14, a.getModePaiement());
     }
 
     @Override
