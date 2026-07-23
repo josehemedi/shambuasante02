@@ -122,18 +122,51 @@ public class PatientPortalServiceImpl implements PatientPortalService {
         Integer previousTenant = TenantContext.getHopitalId();
         TenantContext.setHopitalId(request.getIdHopital());
         try {
-            Patient patient = new Patient();
-            patient.setNom(request.getNom().trim());
-            patient.setPrenom(request.getPrenom().trim());
-            patient.setSexe(normalizeSexe(request.getSexe()));
-            patient.setDateNaissance(parseDate(request.getDateNaissance()));
-            patient.setEmail(email);
-            patient.setTelephone(trimToNull(request.getTelephone()));
-            patient.setAdresse(trimToNull(request.getAdresse()));
-            patient.setEstActif(true);
-            patient.setStatutClinique("AMBULATOIRE");
-            patient.setDateEnregistrement(LocalDateTime.now());
-            patientService.enregisterPatient(patient);
+            Optional<Patient> existingByEmail = patientRepository.trouverPatientParEmail(email);
+            Patient patient;
+            if (existingByEmail.isPresent()) {
+                patient = existingByEmail.get();
+                // Fiche déjà rattachée à un compte patient → connexion, pas double inscription
+                if (utilisateurRepository.findUtilisateurIdByPatient(
+                        patient.getIdPatient().intValue(), request.getIdHopital()).isPresent()) {
+                    throw new BadRequestException(
+                            "Un compte patient existe déjà pour cette fiche. Connectez-vous avec votre email.");
+                }
+                // Enrichir la fiche réception avec les infos du formulaire si manquantes
+                boolean dirty = false;
+                if (!StringUtils.hasText(patient.getNom()) && StringUtils.hasText(request.getNom())) {
+                    patient.setNom(request.getNom().trim());
+                    dirty = true;
+                }
+                if (!StringUtils.hasText(patient.getPrenom()) && StringUtils.hasText(request.getPrenom())) {
+                    patient.setPrenom(request.getPrenom().trim());
+                    dirty = true;
+                }
+                if (!StringUtils.hasText(patient.getTelephone()) && StringUtils.hasText(request.getTelephone())) {
+                    patient.setTelephone(request.getTelephone().trim());
+                    dirty = true;
+                }
+                if (!StringUtils.hasText(patient.getAdresse()) && StringUtils.hasText(request.getAdresse())) {
+                    patient.setAdresse(request.getAdresse().trim());
+                    dirty = true;
+                }
+                if (dirty) {
+                    patientService.modifierPatient(patient);
+                }
+            } else {
+                patient = new Patient();
+                patient.setNom(request.getNom().trim());
+                patient.setPrenom(request.getPrenom().trim());
+                patient.setSexe(normalizeSexe(request.getSexe()));
+                patient.setDateNaissance(parseDate(request.getDateNaissance()));
+                patient.setEmail(email);
+                patient.setTelephone(trimToNull(request.getTelephone()));
+                patient.setAdresse(trimToNull(request.getAdresse()));
+                patient.setEstActif(true);
+                patient.setStatutClinique("AMBULATOIRE");
+                patient.setDateEnregistrement(LocalDateTime.now());
+                patientService.enregisterPatient(patient);
+            }
 
             if (patient.getIdPatient() == null) {
                 throw new BadRequestException("Échec de la création de la fiche patient.");

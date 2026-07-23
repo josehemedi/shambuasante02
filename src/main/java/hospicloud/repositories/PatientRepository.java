@@ -43,6 +43,9 @@ public interface PatientRepository {
 
     void mettreAJourStatutClinique(Long idPatient, String statut);
 
+    /** Recherche une fiche patient par email dans le tenant courant. */
+    Optional<Patient> trouverPatientParEmail(String email);
+
     /** Crée ou met à jour les dossiers patients démo et leurs liaisons médecin. */
     void syncDemoPatients();
 }

@@ -641,6 +641,29 @@ public class PatientRepositoryImpl implements PatientRepository {
         ensureDemoTeleconsultation(hopitalId, medecinId, patientId != null ? patientId : 1L);
     }
 
+    @Override
+    public Optional<Patient> trouverPatientParEmail(String email) {
+        Integer hopitalId = TenantContext.getRequiredHopitalId();
+        if (email == null || email.isBlank()) {
+            return Optional.empty();
+        }
+        try {
+            Patient patient = jdbcTemplate.queryForObject(
+                    """
+                    SELECT * FROM patients
+                    WHERE id_hopital = ? AND LOWER(TRIM(email)) = LOWER(TRIM(?))
+                    ORDER BY id_patient ASC
+                    LIMIT 1
+                    """,
+                    (rs, rowNum) -> mapRowToPatient(rs),
+                    hopitalId,
+                    email.trim());
+            return Optional.ofNullable(patient);
+        } catch (EmptyResultDataAccessException e) {
+            return Optional.empty();
+        }
+    }
+
     private void ensureDemoTeleconsultation(int hopitalId, int medecinId, long patientId) {
         Integer existingId = null;
         try {

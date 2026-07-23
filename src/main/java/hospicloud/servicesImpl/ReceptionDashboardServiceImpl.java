@@ -15,6 +15,7 @@ import hospicloud.model.RendezVous;
 import hospicloud.repositories.PatientRepository;
 import hospicloud.repositories.MedecinRepository;
 import hospicloud.repositories.ReceptionDashboardRepository;
+import hospicloud.repositories.UtilisateurRepository;
 import hospicloud.security.MedecinQueueTopics;
 import hospicloud.security.ReceptionLiveTopics;
 import hospicloud.security.TenantContext;
@@ -48,6 +49,7 @@ public class ReceptionDashboardServiceImpl implements ReceptionDashboardService 
     private final PatientRepository patientRepository;
     private final PatientService patientService;
     private final MedecinRepository medecinRepository;
+    private final UtilisateurRepository utilisateurRepository;
     private final SimpMessagingTemplate messagingTemplate;
     private final CurrentUserService currentUserService;
     private final RealtimeNotificationService realtimeNotificationService;
@@ -57,6 +59,7 @@ public class ReceptionDashboardServiceImpl implements ReceptionDashboardService 
                                          PatientRepository patientRepository,
                                          PatientService patientService,
                                          MedecinRepository medecinRepository,
+                                         UtilisateurRepository utilisateurRepository,
                                          SimpMessagingTemplate messagingTemplate,
                                          CurrentUserService currentUserService,
                                          RealtimeNotificationService realtimeNotificationService) {
@@ -65,6 +68,7 @@ public class ReceptionDashboardServiceImpl implements ReceptionDashboardService 
         this.patientRepository = patientRepository;
         this.patientService = patientService;
         this.medecinRepository = medecinRepository;
+        this.utilisateurRepository = utilisateurRepository;
         this.messagingTemplate = messagingTemplate;
         this.currentUserService = currentUserService;
         this.realtimeNotificationService = realtimeNotificationService;
@@ -124,6 +128,8 @@ public class ReceptionDashboardServiceImpl implements ReceptionDashboardService 
 
         patientRepository.lierPatientAMedecin(dto.getIdMedecin(), dto.getIdPatient().longValue());
 
+        boolean isTeleconsultation = "TELECONSULTATION".equalsIgnoreCase(dto.getCanal());
+
         RendezVous rdv = new RendezVous();
         rdv.setIdHopital(tenantId);
         rdv.setIdPatient(dto.getIdPatient());
@@ -132,13 +138,27 @@ public class ReceptionDashboardServiceImpl implements ReceptionDashboardService 
         rdv.setDureeEstimee(dto.getDureeEstimee() != null ? dto.getDureeEstimee() : 30);
         rdv.setMotifVisite(dto.getMotifVisite());
         rdv.setCanal(dto.getCanal() != null ? dto.getCanal() : "PHYSIQUE");
-        rdv.setStatutRdv(dto.getStatutRdv() != null ? dto.getStatutRdv() : "PROGRAMME");
+        // Téléconsultation planifiée par la réception = déjà confirmée (pas une demande patient)
+        if (isTeleconsultation && (dto.getStatutRdv() == null || dto.getStatutRdv().isBlank())) {
+            rdv.setStatutRdv("CONFIRME");
+        } else {
+            rdv.setStatutRdv(dto.getStatutRdv() != null ? dto.getStatutRdv() : "PROGRAMME");
+        }
         Integer userId = currentUserService.getCurrentUtilisateurId();
         rdv.setCreePar(userId);
 
         RendezVous saved = rendezVousService.creerEtPublier(rdv);
 
-        if (dto.isInscrireFileAttente()) {
+        // Relier le compte portail patient (même email) pour que le RDV apparaisse côté patient
+        patientRepository.trouverPatientParId(dto.getIdPatient().longValue()).ifPresent(patient -> {
+            if (patient.getEmail() != null && !patient.getEmail().isBlank()) {
+                utilisateurRepository.linkPatientAccountByEmail(
+                        dto.getIdPatient(), tenantId, patient.getEmail());
+            }
+        });
+
+        // File d'attente physique : uniquement pour les RDV présentiels
+        if (dto.isInscrireFileAttente() && !isTeleconsultation) {
             Admission admission = new Admission();
             admission.setIdHopital(tenantId);
             admission.setIdPatient(dto.getIdPatient());

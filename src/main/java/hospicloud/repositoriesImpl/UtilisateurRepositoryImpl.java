@@ -411,10 +411,44 @@ public class UtilisateurRepositoryImpl implements UtilisateurRepository {
                     Integer.class,
                     idPatient,
                     idHopital);
-            return Optional.ofNullable(id);
-        } catch (Exception e) {
-            return Optional.empty();
+            if (id != null) {
+                return Optional.of(id);
+            }
+        } catch (Exception ignored) {
+            // fallback email ci-dessous
         }
+        try {
+            Integer id = jdbcTemplate.queryForObject(
+                    """
+                    SELECT u.id_utilisateur
+                    FROM utilisateurs u
+                    INNER JOIN patients p ON p.id_hopital = u.id_hopital
+                      AND LOWER(TRIM(p.email)) = LOWER(TRIM(u.email))
+                    WHERE p.id_patient = ?
+                      AND p.id_hopital = ?
+                      AND UPPER(u.role) = 'PATIENT'
+                      AND u.est_actif = TRUE
+                    LIMIT 1
+                    """,
+                    Integer.class,
+                    idPatient,
+                    idHopital);
+            if (id != null) {
+                // Auto-répare le lien id_patient pour les prochains appels
+                jdbcTemplate.update(
+                        """
+                        UPDATE utilisateurs SET id_patient = ?
+                        WHERE id_utilisateur = ? AND (id_patient IS NULL OR id_patient = ?)
+                        """,
+                        idPatient.longValue(),
+                        id,
+                        idPatient.longValue());
+                return Optional.of(id);
+            }
+        } catch (Exception ignored) {
+            // aucun compte
+        }
+        return Optional.empty();
     }
 
     @Override
@@ -439,6 +473,28 @@ public class UtilisateurRepositoryImpl implements UtilisateurRepository {
         } catch (Exception e) {
             return Optional.empty();
         }
+    }
+
+    @Override
+    public boolean linkPatientAccountByEmail(Integer idPatient, Integer idHopital, String email) {
+        if (idPatient == null || idHopital == null || email == null || email.isBlank()) {
+            return false;
+        }
+        int updated = jdbcTemplate.update(
+                """
+                UPDATE utilisateurs
+                SET id_patient = ?
+                WHERE id_hopital = ?
+                  AND LOWER(TRIM(email)) = LOWER(TRIM(?))
+                  AND UPPER(role) = 'PATIENT'
+                  AND est_actif = TRUE
+                  AND (id_patient IS NULL OR id_patient = ?)
+                """,
+                idPatient.longValue(),
+                idHopital,
+                email.trim(),
+                idPatient.longValue());
+        return updated > 0;
     }
 
     @Override

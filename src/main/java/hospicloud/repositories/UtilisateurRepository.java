@@ -52,6 +52,12 @@ public interface UtilisateurRepository {
 
     Optional<String> findEmailByPatient(Integer idPatient, Integer idHopital);
 
+    /**
+     * Relie un compte PATIENT existant (même email / hôpital) à la fiche patient
+     * si le compte n'est pas encore lié, ou déjà lié à cette même fiche.
+     */
+    boolean linkPatientAccountByEmail(Integer idPatient, Integer idHopital, String email);
+
     Optional<Integer> findUtilisateurIdByMedecin(Integer idMedecin, Integer idHopital);
 
     List<Integer> findActiveUtilisateurIdsByRole(Integer idHopital, Role role);
