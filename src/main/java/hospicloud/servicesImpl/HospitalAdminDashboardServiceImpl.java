@@ -64,13 +64,6 @@ public class HospitalAdminDashboardServiceImpl implements HospitalAdminDashboard
                 hopitalId, previousMonth.atDay(1), currentMonth.atDay(1));
         double deltaRevenue = calculatePercentage(revenuePrevMtd, revenueMtd);
 
-        long hospitalized = dashboardRepository.countHospitalized(hopitalId);
-        long capacityBase = Math.max(10, totalPatients);
-        double occupancy = Math.min(100.0, (hospitalized * 100.0) / capacityBase);
-        long hospitalizedYesterday = dashboardRepository.countHospitalizedOnDate(hopitalId, today.minusDays(1));
-        double occupancyYesterday = Math.min(100.0, (hospitalizedYesterday * 100.0) / capacityBase);
-        double deltaOccupancy = round(occupancy - occupancyYesterday);
-
         HospitalAdminKpisDTO kpis = new HospitalAdminKpisDTO();
         kpis.setTotalPatients(totalPatients);
         kpis.setDeltaTotalPatients(deltaPatients);
@@ -78,21 +71,11 @@ public class HospitalAdminDashboardServiceImpl implements HospitalAdminDashboard
         kpis.setDeltaActiveConsultations(deltaConsultations);
         kpis.setRevenueMtd(revenueMtd);
         kpis.setDeltaRevenueMtd(deltaRevenue);
-        kpis.setOccupancy(round(occupancy));
-        kpis.setDeltaOccupancy(deltaOccupancy);
         return kpis;
     }
 
     private List<HospitalAdminInsightDTO> buildInsights(HospitalAdminKpisDTO kpis, int alertCount) {
         List<HospitalAdminInsightDTO> insights = new ArrayList<>();
-
-        if (kpis.getOccupancy() >= 85) {
-            insights.add(insight(1, "High bed occupancy",
-                    "Forte occupation des lits",
-                    "Current occupancy is " + kpis.getOccupancy() + "%. Consider prioritizing discharges.",
-                    "L'occupation actuelle est de " + kpis.getOccupancy() + " %. Priorisez les sorties.",
-                    "warning"));
-        }
 
         if (alertCount > 0) {
             insights.add(insight(2, "Priority patients in queue",
